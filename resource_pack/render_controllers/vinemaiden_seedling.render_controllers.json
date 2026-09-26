@@ -1,0 +1,37 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.pcraftrevorn.vinemaiden_seedling": {
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.skin0",
+            "Texture.skin1",
+            "Texture.skin2",
+            "Texture.skin3",
+            "Texture.skin4",
+            "Texture.skin5",
+            "Texture.skin6",
+            "Texture.skin7",
+            "Texture.skin8",
+            "Texture.skin9",
+            "Texture.skin10",
+            "Texture.skin11",
+            "Texture.skin12",
+            "Texture.skin13",
+            "Texture.skin14"
+          ]
+        }
+      },
+      "textures": [
+        "Array.skins[q.property('pcraftrevorn:skin')]"
+      ]
+    }
+  }
+}

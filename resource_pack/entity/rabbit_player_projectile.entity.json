@@ -1,0 +1,20 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:rabbit_player_projectile",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/pcraftrevorn/invisible"
+      },
+      "geometry": {
+        "default": "geometry.pcraftrevorn.invisible"
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.rabbit_player_projectile"
+      ]
+    }
+  }
+}

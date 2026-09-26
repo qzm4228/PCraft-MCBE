@@ -1,0 +1,19 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:item": {
+    "description": {
+      "identifier": "pcraftrevorn:silverfish_plate",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:icon": {
+        "textures": {
+          "default": "pcraftrevorn_silverfish_plate"
+        }
+      },
+      "minecraft:max_stack_size": 64
+    }
+  }
+}

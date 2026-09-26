@@ -1,0 +1,40 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:item": {
+    "description": {
+      "identifier": "pcraftrevorn:silverfish_plating_chestplate",
+      "menu_category": {
+        "category": "equipment"
+      }
+    },
+    "components": {
+      "minecraft:icon": {
+        "textures": {
+          "default": "pcraftrevorn_silverfish_plating_chestplate"
+        }
+      },
+      "minecraft:max_stack_size": 1,
+      "minecraft:wearable": {
+        "slot": "slot.armor.chest",
+        "protection": 6
+      },
+      "minecraft:durability": {
+        "max_durability": 240
+      },
+      "minecraft:repairable": {
+        "repair_items": [
+          {
+            "items": [
+              "pcraftrevorn:silverfish_plate"
+            ],
+            "repair_amount": 60
+          }
+        ]
+      },
+      "minecraft:enchantable": {
+        "value": 16,
+        "slot": "armor_torso"
+      }
+    }
+  }
+}

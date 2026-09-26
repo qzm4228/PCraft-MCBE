@@ -1,0 +1,46 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:piglin_royal",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/piglin_royal_female0",
+        "skin1": "textures/entity/pcraftrevorn/piglin_royal_female0_belly",
+        "skin2": "textures/entity/pcraftrevorn/piglin_royal_male0",
+        "skin3": "textures/entity/pcraftrevorn/piglin_royal_male0_belly"
+      },
+      "geometry": {
+        "default": "geometry.piglin_royalty"
+      },
+      "animations": {
+        "animation.piglin_royalty.swallow": "animation.piglin_royalty.swallow",
+        "animation.piglin_royalty.struggleup": "animation.piglin_royalty.struggleup",
+        "animation.piglin_royalty.struggledown": "animation.piglin_royalty.struggledown",
+        "animation.piglin_royalty.struggleleft": "animation.piglin_royalty.struggleleft",
+        "animation.piglin_royalty.struggleright": "animation.piglin_royalty.struggleright",
+        "animation.piglin_royalty.struggleupleft": "animation.piglin_royalty.struggleupleft",
+        "animation.piglin_royalty.struggledownleft": "animation.piglin_royalty.struggledownleft",
+        "animation.piglin_royalty.struggleupright": "animation.piglin_royalty.struggleupright",
+        "animation.piglin_royalty.struggledownright": "animation.piglin_royalty.struggledownright",
+        "animation.piglin_royalty.struggleupdown": "animation.piglin_royalty.struggleupdown",
+        "animation.piglin_royalty.struggleleftright": "animation.piglin_royalty.struggleleftright",
+        "animation.piglin_royalty.strugglefail": "animation.piglin_royalty.strugglefail",
+        "animation.piglin_royalty.idle": "animation.piglin_royalty.idle",
+        "animation.piglin_royalty.digest": "animation.piglin_royalty.digest",
+        "animation.piglin_royalty.walk": "animation.piglin_royalty.walk",
+        "animation.piglin_royalty.stomp": "animation.piglin_royalty.stomp"
+      },
+      "scripts": {
+        "animate": [
+          "controller.animation.pcraftrevorn.piglin_royal"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.piglin_royal"
+      ]
+    }
+  }
+}

@@ -1,0 +1,9 @@
+# scratch / extracted sources
+.work/
+# generated packages
+dist/
+# node
+node_modules/
+# OS
+Thumbs.db
+desktop.ini

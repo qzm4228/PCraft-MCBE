@@ -1,0 +1,56 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:silverfish",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/silverfish_female0",
+        "skin1": "textures/entity/pcraftrevorn/silverfish_female0_belly",
+        "skin2": "textures/entity/pcraftrevorn/silverfish_female0_wg",
+        "skin3": "textures/entity/pcraftrevorn/silverfish_female0_wg2",
+        "skin4": "textures/entity/pcraftrevorn/silverfish_female0_wg2_belly",
+        "skin5": "textures/entity/pcraftrevorn/silverfish_female0_wg_belly",
+        "skin6": "textures/entity/pcraftrevorn/silverfish_male0",
+        "skin7": "textures/entity/pcraftrevorn/silverfish_male0_belly",
+        "skin8": "textures/entity/pcraftrevorn/silverfish_male0_wg",
+        "skin9": "textures/entity/pcraftrevorn/silverfish_male0_wg2",
+        "skin10": "textures/entity/pcraftrevorn/silverfish_male0_wg2_belly",
+        "skin11": "textures/entity/pcraftrevorn/silverfish_male0_wg_belly"
+      },
+      "geometry": {
+        "default": "geometry.silverfish"
+      },
+      "animations": {
+        "animation.silverfish.swallow": "animation.silverfish.swallow",
+        "animation.silverfish.struggleup": "animation.silverfish.struggleup",
+        "animation.silverfish.struggledown": "animation.silverfish.struggledown",
+        "animation.silverfish.struggleleft": "animation.silverfish.struggleleft",
+        "animation.silverfish.struggleright": "animation.silverfish.struggleright",
+        "animation.silverfish.struggleupleft": "animation.silverfish.struggleupleft",
+        "animation.silverfish.struggledownleft": "animation.silverfish.struggledownleft",
+        "animation.silverfish.struggleupright": "animation.silverfish.struggleupright",
+        "animation.silverfish.struggledownright": "animation.silverfish.struggledownright",
+        "animation.silverfish.struggleupdown": "animation.silverfish.struggleupdown",
+        "animation.silverfish.struggleleftright": "animation.silverfish.struggleleftright",
+        "animation.silverfish.strugglefail": "animation.silverfish.strugglefail",
+        "animation.silverfish.idle": "animation.silverfish.idle",
+        "animation.silverfish.digest": "animation.silverfish.digest",
+        "animation.silverfish.walk": "animation.silverfish.walk",
+        "animation.silverfish.attack": "animation.silverfish.attack",
+        "animation.silverfish.eat": "animation.silverfish.eat",
+        "animation.silverfish.no": "animation.silverfish.no"
+      },
+      "scripts": {
+        "animate": [
+          "controller.animation.pcraftrevorn.silverfish"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.silverfish"
+      ]
+    }
+  }
+}

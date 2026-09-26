@@ -1,0 +1,27 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "pcraftrevorn:sjl_rec"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "a",
+      "b"
+    ],
+    "key": {
+      "a": {
+        "item": "minecraft:carved_pumpkin"
+      },
+      "b": {
+        "item": "minecraft:soul_torch"
+      }
+    },
+    "result": {
+      "item": "pcraftrevorn:soul_jack_o_lantern",
+      "count": 1
+    }
+  }
+}

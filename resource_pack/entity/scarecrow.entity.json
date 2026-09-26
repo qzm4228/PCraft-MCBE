@@ -1,0 +1,84 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:scarecrow",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/scarecrow_female0_health0",
+        "skin1": "textures/entity/pcraftrevorn/scarecrow_female0_health0_belly",
+        "skin2": "textures/entity/pcraftrevorn/scarecrow_female0_health0_wg",
+        "skin3": "textures/entity/pcraftrevorn/scarecrow_female0_health0_wg2",
+        "skin4": "textures/entity/pcraftrevorn/scarecrow_female0_health0_wg2_belly",
+        "skin5": "textures/entity/pcraftrevorn/scarecrow_female0_health0_wg_belly",
+        "skin6": "textures/entity/pcraftrevorn/scarecrow_female0_health1",
+        "skin7": "textures/entity/pcraftrevorn/scarecrow_female0_health1_belly",
+        "skin8": "textures/entity/pcraftrevorn/scarecrow_female0_health1_wg",
+        "skin9": "textures/entity/pcraftrevorn/scarecrow_female0_health1_wg2",
+        "skin10": "textures/entity/pcraftrevorn/scarecrow_female0_health1_wg2_belly",
+        "skin11": "textures/entity/pcraftrevorn/scarecrow_female0_health1_wg_belly",
+        "skin12": "textures/entity/pcraftrevorn/scarecrow_female0_health2",
+        "skin13": "textures/entity/pcraftrevorn/scarecrow_female0_health2_belly",
+        "skin14": "textures/entity/pcraftrevorn/scarecrow_female0_health2_wg",
+        "skin15": "textures/entity/pcraftrevorn/scarecrow_female0_health2_wg2",
+        "skin16": "textures/entity/pcraftrevorn/scarecrow_female0_health2_wg2_belly",
+        "skin17": "textures/entity/pcraftrevorn/scarecrow_female0_health2_wg_belly",
+        "skin18": "textures/entity/pcraftrevorn/scarecrow_male0_health0",
+        "skin19": "textures/entity/pcraftrevorn/scarecrow_male0_health0_belly",
+        "skin20": "textures/entity/pcraftrevorn/scarecrow_male0_health0_wg",
+        "skin21": "textures/entity/pcraftrevorn/scarecrow_male0_health0_wg2",
+        "skin22": "textures/entity/pcraftrevorn/scarecrow_male0_health0_wg2_belly",
+        "skin23": "textures/entity/pcraftrevorn/scarecrow_male0_health0_wg_belly",
+        "skin24": "textures/entity/pcraftrevorn/scarecrow_male0_health1",
+        "skin25": "textures/entity/pcraftrevorn/scarecrow_male0_health1_belly",
+        "skin26": "textures/entity/pcraftrevorn/scarecrow_male0_health1_wg",
+        "skin27": "textures/entity/pcraftrevorn/scarecrow_male0_health1_wg2",
+        "skin28": "textures/entity/pcraftrevorn/scarecrow_male0_health1_wg2_belly",
+        "skin29": "textures/entity/pcraftrevorn/scarecrow_male0_health1_wg_belly",
+        "skin30": "textures/entity/pcraftrevorn/scarecrow_male0_health2",
+        "skin31": "textures/entity/pcraftrevorn/scarecrow_male0_health2_belly",
+        "skin32": "textures/entity/pcraftrevorn/scarecrow_male0_health2_wg",
+        "skin33": "textures/entity/pcraftrevorn/scarecrow_male0_health2_wg2",
+        "skin34": "textures/entity/pcraftrevorn/scarecrow_male0_health2_wg2_belly",
+        "skin35": "textures/entity/pcraftrevorn/scarecrow_male0_health2_wg_belly"
+      },
+      "geometry": {
+        "default": "geometry.scarecrow"
+      },
+      "animations": {
+        "animation.scarecrow.swallow": "animation.scarecrow.swallow",
+        "animation.scarecrow.swallowWG1": "animation.scarecrow.swallowWG1",
+        "animation.scarecrow.swallowWG2": "animation.scarecrow.swallowWG2",
+        "animation.scarecrow.idle": "animation.scarecrow.idle",
+        "animation.scarecrow.idleSMOOTH": "animation.scarecrow.idleSMOOTH",
+        "animation.scarecrow.digestWG1": "animation.scarecrow.digestWG1",
+        "animation.scarecrow.digestWG2": "animation.scarecrow.digestWG2",
+        "animation.scarecrow.walk": "animation.scarecrow.walk",
+        "animation.scarecrow.attack": "animation.scarecrow.attack",
+        "animation.scarecrow.struggleup": "animation.scarecrow.struggleup",
+        "animation.scarecrow.struggledown": "animation.scarecrow.struggledown",
+        "animation.scarecrow.struggleleft": "animation.scarecrow.struggleleft",
+        "animation.scarecrow.struggleright": "animation.scarecrow.struggleright",
+        "animation.scarecrow.struggleupleft": "animation.scarecrow.struggleupleft",
+        "animation.scarecrow.struggledownleft": "animation.scarecrow.struggledownleft",
+        "animation.scarecrow.struggleupright": "animation.scarecrow.struggleupright",
+        "animation.scarecrow.struggledownright": "animation.scarecrow.struggledownright",
+        "animation.scarecrow.struggleupdown": "animation.scarecrow.struggleupdown",
+        "animation.scarecrow.struggleleftright": "animation.scarecrow.struggleleftright",
+        "animation.scarecrow.strugglefail": "animation.scarecrow.strugglefail",
+        "animation.scarecrow.wake": "animation.scarecrow.wake",
+        "animation.scarecrow.SpawnLINER": "animation.scarecrow.SpawnLINER"
+      },
+      "scripts": {
+        "animate": [
+          "controller.animation.pcraftrevorn.scarecrow"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.scarecrow"
+      ]
+    }
+  }
+}

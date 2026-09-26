@@ -1,0 +1,42 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:vinemaiden_seedling",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/vinemaiden_seedling0",
+        "skin1": "textures/entity/pcraftrevorn/vinemaiden_seedling1",
+        "skin2": "textures/entity/pcraftrevorn/vinemaiden_seedling10",
+        "skin3": "textures/entity/pcraftrevorn/vinemaiden_seedling11",
+        "skin4": "textures/entity/pcraftrevorn/vinemaiden_seedling12",
+        "skin5": "textures/entity/pcraftrevorn/vinemaiden_seedling13",
+        "skin6": "textures/entity/pcraftrevorn/vinemaiden_seedling2",
+        "skin7": "textures/entity/pcraftrevorn/vinemaiden_seedling3",
+        "skin8": "textures/entity/pcraftrevorn/vinemaiden_seedling4",
+        "skin9": "textures/entity/pcraftrevorn/vinemaiden_seedling5",
+        "skin10": "textures/entity/pcraftrevorn/vinemaiden_seedling6",
+        "skin11": "textures/entity/pcraftrevorn/vinemaiden_seedling7",
+        "skin12": "textures/entity/pcraftrevorn/vinemaiden_seedling8",
+        "skin13": "textures/entity/pcraftrevorn/vinemaiden_seedling9",
+        "skin14": "textures/entity/pcraftrevorn/vinemaiden_seedling99"
+      },
+      "geometry": {
+        "default": "geometry.vinemaiden_seedling"
+      },
+      "animations": {
+        "animation.vinemaiden_seedling.idle": "animation.vinemaiden_seedling.idle"
+      },
+      "scripts": {
+        "animate": [
+          "controller.animation.pcraftrevorn.vinemaiden_seedling"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.vinemaiden_seedling"
+      ]
+    }
+  }
+}

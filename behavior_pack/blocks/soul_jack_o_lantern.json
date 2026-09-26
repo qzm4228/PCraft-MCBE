@@ -1,0 +1,109 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:block": {
+    "description": {
+      "identifier": "pcraftrevorn:soul_jack_o_lantern",
+      "menu_category": {
+        "category": "construction"
+      },
+      "states": {
+        "minecraft:cardinal_direction": {
+          "values": [
+            "north",
+            "east",
+            "south",
+            "west"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "up": {
+          "texture": "pcraftrevorn_pumpkin_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "pcraftrevorn_pumpkin_top",
+          "render_method": "opaque"
+        },
+        "north": {
+          "texture": "pcraftrevorn_soul_jack_o_lantern",
+          "render_method": "opaque"
+        },
+        "south": {
+          "texture": "pcraftrevorn_pumpkin_side",
+          "render_method": "opaque"
+        },
+        "east": {
+          "texture": "pcraftrevorn_pumpkin_side",
+          "render_method": "opaque"
+        },
+        "west": {
+          "texture": "pcraftrevorn_pumpkin_side",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 2
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 10
+      },
+      "minecraft:loot": "loot_tables/blocks/soul_jack_o_lantern.json",
+      "minecraft:map_color": "#5c4a37",
+      "minecraft:light_emission": 10
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'east'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'south'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'west'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              270,
+              0
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

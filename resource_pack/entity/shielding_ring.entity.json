@@ -1,0 +1,28 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:shielding_ring",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/shielding_ring"
+      },
+      "geometry": {
+        "default": "geometry.shielding_ring"
+      },
+      "animations": {
+        "animation.shielding_ring.idle": "animation.shielding_ring.idle"
+      },
+      "scripts": {
+        "animate": [
+          "controller.animation.pcraftrevorn.shielding_ring"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.shielding_ring"
+      ]
+    }
+  }
+}

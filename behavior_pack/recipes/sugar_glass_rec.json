@@ -1,0 +1,13 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_furnace": {
+    "description": {
+      "identifier": "pcraftrevorn:sugar_glass_rec"
+    },
+    "tags": [
+      "furnace"
+    ],
+    "input": "minecraft:sugar",
+    "output": "pcraftrevorn:sugar_glass_bottle"
+  }
+}

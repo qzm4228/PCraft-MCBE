@@ -1,0 +1,23 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "pcraftrevorn:scale_scrap_craft"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "ingredients": [
+      {
+        "tag": "pcraftrevorn:basaltmite_scale"
+      },
+      {
+        "tag": "pcraftrevorn:basaltmite_scale"
+      }
+    ],
+    "result": {
+      "item": "minecraft:netherite_scrap",
+      "count": 1
+    }
+  }
+}

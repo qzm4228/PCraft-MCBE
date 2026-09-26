@@ -1,0 +1,46 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.pcraftrevorn.basaltmite": {
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.skin0",
+            "Texture.skin1",
+            "Texture.skin2",
+            "Texture.skin3",
+            "Texture.skin4",
+            "Texture.skin5",
+            "Texture.skin6",
+            "Texture.skin7",
+            "Texture.skin8",
+            "Texture.skin9",
+            "Texture.skin10",
+            "Texture.skin11",
+            "Texture.skin12",
+            "Texture.skin13",
+            "Texture.skin14",
+            "Texture.skin15",
+            "Texture.skin16",
+            "Texture.skin17",
+            "Texture.skin18",
+            "Texture.skin19",
+            "Texture.skin20",
+            "Texture.skin21",
+            "Texture.skin22",
+            "Texture.skin23"
+          ]
+        }
+      },
+      "textures": [
+        "Array.skins[q.property('pcraftrevorn:skin')]"
+      ]
+    }
+  }
+}

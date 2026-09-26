@@ -1,0 +1,185 @@
+{
+  "format_version": "1.14.0",
+  "sound_definitions": {
+    "pcraftrevorn.swallow": {
+      "category": "neutral",
+      "subtitle": "subtitles.swallow",
+      "sounds": [
+        {
+          "name": "sounds/pcraftrevorn/swallow1",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/swallow2",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/swallow3",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/swallow4",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/swallow5",
+          "stream": false
+        }
+      ]
+    },
+    "pcraftrevorn.large_squelch": {
+      "category": "neutral",
+      "subtitle": "subtitles.large_squelch",
+      "sounds": [
+        {
+          "name": "sounds/pcraftrevorn/largesquish1",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/largesquish2",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/largesquish3",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/largesquish4",
+          "stream": false
+        }
+      ]
+    },
+    "pcraftrevorn.slosh": {
+      "category": "neutral",
+      "subtitle": "subtitles.slosh",
+      "sounds": [
+        {
+          "name": "sounds/pcraftrevorn/slosh",
+          "stream": false
+        }
+      ]
+    },
+    "pcraftrevorn.gurgle": {
+      "category": "neutral",
+      "subtitle": "subtitles.gurgle",
+      "sounds": [
+        {
+          "name": "sounds/pcraftrevorn/gurgle1",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/gurgle2",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/gurgle3",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/gurgle4",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/gurgle5",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/gurgle6",
+          "stream": false
+        }
+      ]
+    },
+    "pcraftrevorn.large_gurgle": {
+      "category": "neutral",
+      "subtitle": "subtitles.large_gurgle",
+      "sounds": [
+        {
+          "name": "sounds/pcraftrevorn/largegurgle1",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/largegurgle2",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/largegurgle3",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/largegurgle4",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/largegurgle5",
+          "stream": false
+        }
+      ]
+    },
+    "pcraftrevorn.burp": {
+      "category": "neutral",
+      "subtitle": "subtitles.burp",
+      "sounds": [
+        {
+          "name": "sounds/pcraftrevorn/burp1",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp2",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp3",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp4",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp5",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp6",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp7",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp8",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp9",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp10",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp11",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp12",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp13",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp14",
+          "stream": false
+        },
+        {
+          "name": "sounds/pcraftrevorn/burp15",
+          "stream": false
+        }
+      ]
+    }
+  }
+}
