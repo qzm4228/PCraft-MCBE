@@ -127,6 +127,18 @@ Bedrock 附加包**不支持 jigsaw 结构**，原 `royal_castle_remnant`（jigs
   刷出 `piglin_throneroom_spawner`（避免 96 格内重复）
 - 刷怪规则（4 条）在 P2 已生成
 
+## 1.11 消化 / 体重机制对齐原版
+
+数值取自 `PCraftGeneralConfiguration` 与各 `PCraftSpecific*Configuration`（`PRED_STATS` 表在 `skin/assign.js`）：
+
+- **消化目标** = 12000（`DIGESTIONGOAL`）；酸液速率 = 各生物 `INITIALACIDSRATE`→`MAXACIDSRATE`，每刻 +`ACIDRATEINCRIMENT`
+- **消化动画按体重阶段**（`DigestAnimProcedure`）：rabbit → `digest`/`digestWG1`/`digestWG2`；
+  scarecrow → `digestWG1`/`digestWG2`（无基础 `digest`，已兜底）
+- **消化完成**：肚子贴图复位 + 恢复 30% 最大生命（`HEALTHRECOVERY`）+ 打嗝音 + 体重进度 +1 + 击杀猎物
+- **体重阈值**（`WG1`/`WG2`）：进度 ≥1 → 阶段1；≥4 → 阶段2；`gilded_basaltmite`/`piglin_royal` 不增长（原版返回 999）
+- **阶段提升**（`IncreaseStatsProcedure`）：吞食概率 ×1.25、需挣扎次数 +1、挣扎难度 ×1.1
+- **吞食概率**改用各生物自身的 `pc:swallow`（0.12–0.34），不再统一用玩家设置
+
 ⚠️ 风险：方块**状态名映射**为最佳猜测（尤其楼梯朝向 `weirdo_direction` 0=E/1=W/2=S/3=N），
 若游戏内楼梯/墙朝向错乱，改 `tools/nbt_to_data.js` 的 `STAIR_DIR`/`WALL_CONN` 即可。
 

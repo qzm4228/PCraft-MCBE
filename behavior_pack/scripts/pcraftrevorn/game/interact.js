@@ -1,6 +1,6 @@
 // Right-click interactions with predators (port of the mod's item procedures).
 import { world } from "@minecraft/server";
-import { assignSkin, getNum, setNum, localId } from "../skin/assign.js";
+import { assignSkin, getNum, setNum, localId, GENDERED } from "../skin/assign.js";
 import { isPredator } from "../vore/vore.js";
 import { openGuide } from "./guide.js";
 import { addWgProgress } from "./wg.js";
@@ -58,6 +58,17 @@ export function wireInteractEvents() {
     const item = ev.itemStack?.typeId;
 
     if (item === "pcraftrevorn:pred_guidebook_item") { void openGuide(player); return; }
+
+    if (item === "pcraftrevorn:peculiar_mirror") {
+      if (GENDERED.has(id)) {
+        setNum(target, "pc:gender", getNum(target, "pc:gender") === 1 ? 0 : 1);
+        assignSkin(target, getNum(target, "pc:full") === 1);
+        player.sendMessage("§d[奇异之镜] 性别已转换。");
+      } else {
+        player.sendMessage("§7[奇异之镜] 这个生物无法转换性别。");
+      }
+      return;
+    }
 
     if (item === "pcraftrevorn:vibrant_elixir") {
       cycleVariant(target, id);

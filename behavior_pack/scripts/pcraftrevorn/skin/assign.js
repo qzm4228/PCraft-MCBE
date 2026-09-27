@@ -16,7 +16,7 @@ const TEX_BASE = {
   vinemaiden_seedling: "vinemaiden_seedling"
 };
 // gendered preds (have _male/_female in the texture name)
-const GENDERED = new Set(["basaltmite", "gilded_basaltmite", "silverfish", "scarecrow", "piglin_royal", "piglin_royal_knight"]);
+export const GENDERED = new Set(["basaltmite", "gilded_basaltmite", "silverfish", "scarecrow", "piglin_royal", "piglin_royal_knight"]);
 // preds with an extra "_scaleN"/"_healthN"/"_armorN" segment
 const END_KIND = { basaltmite: "scale", gilded_basaltmite: "scale", scarecrow: "health", piglin_royal_knight: "armor" };
 // random variants present in the mod textures
@@ -70,6 +70,20 @@ export function assignSkin(entity, belly = false) {
 
 const randOf = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
+// Per-predator combat/digestion stats (from the mod's PCraftSpecific* configs).
+// wg1/wg2 = weight-gain progress thresholds (999 = never gains weight).
+export const PRED_STATS = {
+  basaltmite: { swallow: 0.25, struggles: 11, difficulty: 0.30, acid: 2.8, acidMax: 26.0, acidIncr: 0.008, wg1: 1, wg2: 4 },
+  gilded_basaltmite: { swallow: 0.25, struggles: 12, difficulty: 0.75, acid: 2.2, acidMax: 22.0, acidIncr: 0.005, wg1: 999, wg2: 999 },
+  silverfish: { swallow: 0.30, struggles: 7, difficulty: 0.10, acid: 2.2, acidMax: 18.8, acidIncr: 0.02, wg1: 1, wg2: 4 },
+  vinemaiden: { swallow: 0.32, struggles: 7, difficulty: 0.15, acid: 3.0, acidMax: 15.0, acidIncr: 0.03, wg1: 1, wg2: 4 },
+  zombie: { swallow: 0.12, struggles: 7, difficulty: 0.15, acid: 4.0, acidMax: 12.0, acidIncr: 0.04, wg1: 1, wg2: 4 },
+  scarecrow: { swallow: 0.34, struggles: 15, difficulty: 0.40, acid: 2.0, acidMax: 14.0, acidIncr: 0.01, wg1: 1, wg2: 4 },
+  rabbit_wizard: { swallow: 0.15, struggles: 11, difficulty: 0.30, acid: 3.2, acidMax: 13.0, acidIncr: 0.04, wg1: 1, wg2: 4 },
+  piglin_royal: { swallow: 0.30, struggles: 13, difficulty: 0.65, acid: 5.0, acidMax: 14.35, acidIncr: 0.055, wg1: 999, wg2: 999 },
+  piglin_royal_knight: { swallow: 0.28, struggles: 9, difficulty: 0.23, acid: 4.4, acidMax: 13.6, acidIncr: 0.04, wg1: 1, wg2: 4 }
+};
+
 export function initPredator(entity) {
   const id = localId(entity.typeId);
   if (!SKINS[id]) return;
@@ -79,7 +93,19 @@ export function initPredator(entity) {
   setNum(entity, "pc:variant", randOf(VARIANTS[id] ?? [0]));
   setNum(entity, "pc:counter", 0);
   setNum(entity, "pc:wg", 0);
+  setNum(entity, "pc:wg_progress", 0);
   setNum(entity, "pc:full", 0);
+  const st = PRED_STATS[id];
+  if (st) {
+    setNum(entity, "pc:swallow", st.swallow);
+    setNum(entity, "pc:struggles", st.struggles);
+    setNum(entity, "pc:difficulty", st.difficulty);
+    setNum(entity, "pc:acid", st.acid);
+    setNum(entity, "pc:acidMax", st.acidMax);
+    setNum(entity, "pc:acidIncr", st.acidIncr);
+    setNum(entity, "pc:wg1", st.wg1);
+    setNum(entity, "pc:wg2", st.wg2);
+  }
   assignSkin(entity, false);
 }
 

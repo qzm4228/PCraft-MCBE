@@ -1,0 +1,30 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:attachable": {
+    "description": {
+      "identifier": "pcraftrevorn:rabbit_staff_gold",
+      "materials": {
+        "default": "entity_alphatest",
+        "enchanted": "entity_alphatest_glint"
+      },
+      "textures": {
+        "default": "textures/items/pcraftrevorn/rabbit_staff1",
+        "enchanted": "textures/misc/enchanted_item_glint"
+      },
+      "geometry": {
+        "default": "geometry.rabbit_staff"
+      },
+      "animations": {
+        "idle": "animation.rabbit_staff.idle"
+      },
+      "scripts": {
+        "animate": [
+          "idle"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.rabbit_staff_gold"
+      ]
+    }
+  }
+}

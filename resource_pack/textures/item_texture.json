@@ -118,6 +118,21 @@
     },
     "pcraftrevorn_scarecrow_spawn_egg": {
       "textures": "textures/items/pcraftrevorn/scarecrow_spawn_egg"
+    },
+    "pcraftrevorn_fragrance_potion": {
+      "textures": "textures/items/pcraftrevorn/fragrance_potion"
+    },
+    "pcraftrevorn_stench_potion": {
+      "textures": "textures/items/pcraftrevorn/stench_potion"
+    },
+    "pcraftrevorn_fortitude_potion": {
+      "textures": "textures/items/pcraftrevorn/fortitude_potion"
+    },
+    "pcraftrevorn_pacifying_potion": {
+      "textures": "textures/items/pcraftrevorn/pacifying_potion"
+    },
+    "pcraftrevorn_rotten_stench_potion": {
+      "textures": "textures/items/pcraftrevorn/rotten_stench_potion"
     }
   }
 }

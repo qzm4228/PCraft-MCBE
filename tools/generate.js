@@ -137,6 +137,17 @@ const ITEMS = [
 ];
 const HAND_EQUIPPED = new Set(['rabbit_staff', 'rabbit_staff_bloodlust', 'rabbit_staff_gold', 'gilded_shield']);
 
+// Custom potions: Bedrock can't register new mob effects, so these are custom
+// drinkable items (bottle recoloured to a similar hue + custom name) whose
+// effect is applied by script.
+const POTIONS = [
+  { id: 'fragrance_potion', color: '#c9a0dc' },
+  { id: 'stench_potion', color: '#556b2f' },
+  { id: 'fortitude_potion', color: '#7f8fa6' },
+  { id: 'pacifying_potion', color: '#8fd0e8' },
+  { id: 'rotten_stench_potion', color: '#3b4020' }
+];
+
 // ---------------------------------------------------------------- items
 function genItems() {
   const textureData = {};
@@ -179,8 +190,7 @@ function genItems() {
     texture_data: textureData
   });
 }
-function genSpawnEgg(name, s, textureData) {
-  const texKey = 'pcraftrevorn_' + name;
+function genSpawnEgg(name, s, textureData) {  const texKey = 'pcraftrevorn_' + name;
   textureData[texKey] = { textures: 'textures/items/pcraftrevorn/' + name };
   writeJSON(path.join(BP, 'items', name + '.json'), {
     format_version: '1.21.0',
@@ -250,6 +260,41 @@ function convertJavaModel(srcFile, identifier, overrideSize) {
     }]
   };
   return geo;
+}
+
+// ---------------------------------------------------------------- potions
+function makeBottlePng(file, hex) {
+  const W = 16, H = 16, buf = Buffer.alloc(W * H * 4, 0);
+  const [r, g, b] = hexToRgb(hex);
+  const set = (x, y, cr, cg, cb, a = 255) => { const i = (y * W + x) * 4; buf[i] = cr; buf[i + 1] = cg; buf[i + 2] = cb; buf[i + 3] = a; };
+  for (let y = 6; y <= 14; y++) for (let x = 5; x <= 10; x++) set(x, y, 222, 232, 238, 200); // glass body
+  for (let y = 8; y <= 13; y++) for (let x = 6; x <= 9; x++) set(x, y, r, g, b);            // liquid
+  for (let y = 3; y <= 6; y++) for (let x = 7; x <= 8; x++) set(x, y, 222, 232, 238, 200); // neck
+  for (let y = 2; y <= 3; y++) for (let x = 6; x <= 9; x++) set(x, y, 139, 90, 43);        // cork
+  for (let y = 8; y <= 12; y++) set(6, y, 255, 255, 255, 120);                             // highlight
+  writePng(file, W, H, buf);
+}
+function genPotions() {
+  const atlasPath = path.join(RP, 'textures', 'item_texture.json');
+  const atlas = exists(atlasPath) ? readJSON(atlasPath) : { resource_pack_name: 'pcraftrevorn', texture_name: 'atlas.items', texture_data: {} };
+  for (const p of POTIONS) {
+    const key = 'pcraftrevorn_' + p.id;
+    atlas.texture_data[key] = { textures: 'textures/items/pcraftrevorn/' + p.id };
+    writeJSON(path.join(BP, 'items', p.id + '.json'), {
+      format_version: '1.21.0',
+      'minecraft:item': {
+        description: { identifier: `${NS}:${p.id}`, menu_category: { category: 'equipment' } },
+        components: {
+          'minecraft:icon': { textures: { default: key } },
+          'minecraft:max_stack_size': 1,
+          'minecraft:use_animation': 'drink',
+          'minecraft:use_modifiers': { use_duration: 1.6, movement_modifier: 0.35 }
+        }
+      }
+    });
+    makeBottlePng(path.join(RP, 'textures', 'items', 'pcraftrevorn', p.id + '.png'), p.color);
+  }
+  writeJSON(atlasPath, atlas);
 }
 
 // ---------------------------------------------------------------- blocks
@@ -505,6 +550,7 @@ function main() {
     path.join(RP, 'sounds'), path.join(RP, 'texts')
   ]) rmrf(d);
   genItems();
+  genPotions();
   genBlocks();
   genRecipes();
   genEntityLoot();

@@ -59,9 +59,35 @@ function nearestPredator(player, radius = 12) {
   } catch { return undefined; }
 }
 
+// Custom potions: vanilla-effect approximations (Bedrock has no custom effects)
+const POTION_EFFECTS = {
+  "pcraftrevorn:fragrance_potion": { effect: "speed", amp: 0, dur: 1800 },
+  "pcraftrevorn:stench_potion": { effect: "nausea", amp: 0, dur: 600 },
+  "pcraftrevorn:fortitude_potion": { effect: "resistance", amp: 1, dur: 1800 },
+  "pcraftrevorn:pacifying_potion": { effect: "slowness", amp: 0, dur: 600 },
+  "pcraftrevorn:rotten_stench_potion": { effect: "nausea", amp: 1, dur: 900 }
+};
+
+function consumeHeld(player) {
+  const inv = player.getComponent("minecraft:inventory")?.container;
+  if (!inv) return;
+  const slot = player.selectedSlotIndex ?? 0;
+  const item = inv.getItem(slot);
+  if (!item) return;
+  if (item.amount > 1) { item.amount -= 1; inv.setItem(slot, item); }
+  else inv.setItem(slot, undefined);
+}
+
 world.afterEvents.itemUse.subscribe((ev) => {
   const player = ev.source;
   if (player?.typeId !== "minecraft:player") return;
+  const potion = POTION_EFFECTS[ev.itemStack?.typeId];
+  if (potion) {
+    try { player.addEffect(potion.effect, potion.dur, { amplifier: potion.amp, showParticles: true }); } catch { /* ignore */ }
+    consumeHeld(player);
+    player.sendMessage("§b[药水] 你饮下了药水。");
+    return;
+  }
   if (ev.itemStack?.typeId === "minecraft:stick") void runFormDemo(player);
 });
 

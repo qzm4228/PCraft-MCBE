@@ -4,8 +4,8 @@
 //   Jump  = up, Sneak = down, strafe Left/Right = left/right
 // (Bedrock addons cannot register keybinds and inventory-UI buttons cannot call
 //  scripts, so native input is the only non-blocking option on stable APIs.)
-import { world, system } from "@minecraft/server";
-import { assignSkin, playAnim, getNum, setNum } from "../skin/assign.js";
+import { world, system, EntityDamageCause } from "@minecraft/server";
+import { assignSkin, playAnim, getNum, setNum, localId } from "../skin/assign.js";
 import { getCfg } from "../game/config.js";
 import { addWgProgress } from "../game/wg.js";
 import { newPrompt, pressDir, labelFor, animFor, DIRS } from "./struggle.js";
@@ -53,6 +53,21 @@ const clearEffects = (player) => {
 };
 
 const levelOf = (s) => Math.max(0, Math.min(CONFIG.maxLevel, Math.floor((s.digest / s.maxTimer) * CONFIG.maxLevel)));
+// rabbit_wizard / scarecrow have weight-gain-specific digest animations
+const digestSuffix = (pred) => {
+  const id = localId(pred.typeId);
+  if (id === "rabbit_wizard") {
+    const wg = getNum(pred, "pc:wg");
+    if (wg >= 2) return "digestWG2";
+    if (wg === 1) return "digestWG1";
+    return "digest";
+  }
+  if (id === "scarecrow") {
+    // scarecrow has no base digest animation
+    return getNum(pred, "pc:wg") >= 2 ? "digestWG2" : "digestWG1";
+  }
+  return "digest";
+};
 const dist2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2;
 
 function lockTo(player, session) {
@@ -182,10 +197,10 @@ export function startSwallow(player, predator) {
   const session = {
     predatorId: predator.id,
     digest: 0,
-    maxTimer: CONFIG.digestTicksToKill,
-    rate: CONFIG.acidRate,
-    rateMax: CONFIG.acidRateMax,
-    incr: CONFIG.acidIncr,
+    maxTimer: 12000, // PCraftGeneralConfiguration DIGESTIONGOAL
+    rate: getNum(predator, "pc:acid", 2.0),
+    rateMax: getNum(predator, "pc:acidMax", 15),
+    incr: getNum(predator, "pc:acidIncr", 0.02),
     level: 0,
     alive: true,
     slowTimer: 0,
@@ -196,9 +211,10 @@ export function startSwallow(player, predator) {
     promptTick: 0,
     promptTimer: cfg.timer ?? CONFIG.struggleTimer,
     cooldown: 20,
-    difficulty: (cfg.difficulty ?? 40) / 100,
+    difficulty: getNum(predator, "pc:difficulty", 0.3),
     struggles: 0,
-    needed: CONFIG.strugglesNeeded,
+    needed: getNum(predator, "pc:struggles", 7),
+    digestKey: "digest",
     prevJump: false,
     prevSneak: false,
     prevStrafe: 0,
@@ -245,7 +261,7 @@ function digestTick() {
     refreshBelly(session);
 
     session.animTimer = (session.animTimer + 1) % CONFIG.digestAnimInterval;
-    if (session.animTimer === 0 && !session.awaiting) playAnim(pred, "digest");
+    if (session.animTimer === 0 && !session.awaiting) playAnim(pred, digestSuffix(pred));
 
     // struggle prompt scheduling
     if (session.awaiting) {
@@ -279,7 +295,20 @@ function digestTick() {
       addWgProgress(pred, 1);
       setNum(pred, "pc:full", 0);
       assignSkin(pred, false); // after digesting, belly returns to normal (with new WG stage)
-      try { player.applyDamage(9999, { cause: "magic", damagingEntity: pred }); } catch { /* ignore */ }
+      // PCraftGeneralConfiguration: pred recovers 30% max health + belch after digesting
+      try {
+        const hp = pred.getComponent("minecraft:health");
+        if (hp) hp.setCurrentValue(Math.min(hp.effectiveMax, hp.currentValue + hp.effectiveMax * 0.3));
+      } catch { /* ignore */ }
+      try { pred.dimension.playSound("pcraftrevorn.burp", pred.location, { volume: 0.8 }); } catch { /* ignore */ }
+      try { player.applyDamage(1000000, { cause: EntityDamageCause.magic, damagingEntity: pred }); } catch { /* ignore */ }
+      // safety net: make sure the prey actually dies
+      system.runTimeout(() => {
+        try {
+          const hp = player.getComponent("minecraft:health");
+          if (hp && hp.currentValue > 0) player.kill();
+        } catch { /* ignore */ }
+      }, 5);
     }
   }
 }
@@ -316,7 +345,7 @@ export function wireVoreEvents() {
     if (victim.typeId !== "minecraft:player") return;
     if (!isPredator(predator)) return;
     if (sessions.has(victim.id)) return;
-    const chance = (getCfg(victim).swallow ?? 25) / 100;
+    const chance = getNum(predator, "pc:swallow", (getCfg(victim).swallow ?? 25) / 100);
     if (Math.random() > chance) return;
     startSwallow(victim, predator);
   });

@@ -415,6 +415,74 @@ function genSkinData() {
   fs.writeFileSync(path.join(BP, 'scripts', 'pcraftrevorn', 'data', 'skins.js'), js);
 }
 
+// ---- attachables (custom armor + held 3D items) ----
+function genAttachables() {
+  const pieces = [
+    { item: 'silverfish_plating_helmet', piece: 'helmet', layer: 1, vis: 'helmet' },
+    { item: 'silverfish_plating_chestplate', piece: 'chestplate', layer: 1, vis: 'chest' },
+    { item: 'silverfish_plating_leggings', piece: 'leggings', layer: 2, vis: 'leg' },
+    { item: 'silverfish_plating_boots', piece: 'boots', layer: 1, vis: 'boot' }
+  ];
+  for (const p of pieces) {
+    const tex = `textures/models/armor/silverfish_plating_layer_${p.layer}`;
+    writeJSON(path.join(RP, 'attachables', p.item + '.json'), {
+      format_version: '1.8.0',
+      'minecraft:attachable': {
+        description: {
+          identifier: `${NS}:${p.item}`,
+          materials: { default: 'armor', enchanted: 'armor_enchanted' },
+          textures: { default: tex, enchanted: 'textures/misc/enchanted_actor_glint' },
+          geometry: { default: `geometry.humanoid.armor.${p.piece}` },
+          scripts: { parent_setup: `variable.${p.vis}_layer_visible = 0.0;` },
+          render_controllers: ['controller.render.armor']
+        }
+      }
+    });
+    writeJSON(path.join(RP, 'attachables', p.item + '.player.json'), {
+      format_version: '1.10.0',
+      'minecraft:attachable': {
+        description: {
+          identifier: `${NS}:${p.item}.player`,
+          item: { [`${NS}:${p.item}`]: "query.owner_identifier == 'minecraft:player'" },
+          materials: { default: 'armor', enchanted: 'armor_enchanted' },
+          textures: { default: tex, enchanted: 'textures/misc/enchanted_actor_glint' },
+          geometry: { default: `geometry.player.armor.${p.piece}` },
+          scripts: { parent_setup: `variable.${p.vis}_layer_visible = 0.0;`, animate: ['offset'] },
+          animations: { offset: `animation.armor.${p.piece}.offset` },
+          render_controllers: ['controller.render.armor']
+        }
+      }
+    });
+  }
+
+  // rabbit staffs use a 3D geo model -> held-item attachables
+  const staffs = [
+    { item: 'rabbit_staff', tex: 'rabbit_staff0' },
+    { item: 'rabbit_staff_gold', tex: 'rabbit_staff1' },
+    { item: 'rabbit_staff_bloodlust', tex: 'rabbit_staff2' }
+  ];
+  const rc = {};
+  for (const s of staffs) {
+    const rcName = `controller.render.${NS}.${s.item}`;
+    rc[rcName] = { geometry: 'Geometry.default', materials: [{ '*': 'Material.default' }], textures: ['Texture.default'] };
+    writeJSON(path.join(RP, 'attachables', s.item + '.json'), {
+      format_version: '1.10.0',
+      'minecraft:attachable': {
+        description: {
+          identifier: `${NS}:${s.item}`,
+          materials: { default: 'entity_alphatest', enchanted: 'entity_alphatest_glint' },
+          textures: { default: `textures/items/pcraftrevorn/${s.tex}`, enchanted: 'textures/misc/enchanted_item_glint' },
+          geometry: { default: 'geometry.rabbit_staff' },
+          animations: { idle: 'animation.rabbit_staff.idle' },
+          scripts: { animate: ['idle'] },
+          render_controllers: [rcName]
+        }
+      }
+    });
+  }
+  writeJSON(path.join(RP, 'render_controllers', 'staffs.render_controllers.json'), { format_version: '1.10.0', render_controllers: rc });
+}
+
 function main() {
   if (!exists(MOD)) { console.error('Missing .work/mod. Run tools/extract.ps1 first.'); process.exit(1); }
   for (const d of [
@@ -422,7 +490,7 @@ function main() {
     path.join(BP, 'scripts', 'pcraftrevorn', 'data'),
     path.join(RP, 'entity'), path.join(RP, 'models', 'entity'),
     path.join(RP, 'animations'), path.join(RP, 'animation_controllers'),
-    path.join(RP, 'render_controllers'),
+    path.join(RP, 'render_controllers'), path.join(RP, 'attachables'),
     path.join(RP, 'textures', 'entity', 'pcraftrevorn')
   ]) rmrf(d);
   genTextureAndGeometry();
@@ -430,6 +498,7 @@ function main() {
   genSpecial();
   genSpawnRules();
   genSkinData();
+  genAttachables();
   console.log('Phase 2 entities generated.');
 }
 main();
