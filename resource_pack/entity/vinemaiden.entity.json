@@ -3,6 +3,7 @@
   "minecraft:client_entity": {
     "description": {
       "identifier": "pcraftrevorn:vinemaiden",
+      "min_engine_version": "1.8.0",
       "materials": {
         "default": "entity_alphatest"
       },
@@ -117,35 +118,43 @@
         "default": "geometry.vinemaiden"
       },
       "animations": {
-        "animation.vinemaiden.swallow": "animation.vinemaiden.swallow",
-        "animation.vinemaiden.struggleup": "animation.vinemaiden.struggleup",
-        "animation.vinemaiden.struggledown": "animation.vinemaiden.struggledown",
-        "animation.vinemaiden.struggleleft": "animation.vinemaiden.struggleleft",
-        "animation.vinemaiden.struggleright": "animation.vinemaiden.struggleright",
-        "animation.vinemaiden.struggleupleft": "animation.vinemaiden.struggleupleft",
-        "animation.vinemaiden.struggledownleft": "animation.vinemaiden.struggledownleft",
-        "animation.vinemaiden.struggleupright": "animation.vinemaiden.struggleupright",
-        "animation.vinemaiden.struggledownright": "animation.vinemaiden.struggledownright",
-        "animation.vinemaiden.struggleupdown": "animation.vinemaiden.struggleupdown",
-        "animation.vinemaiden.struggleleftright": "animation.vinemaiden.struggleleftright",
-        "animation.vinemaiden.strugglefail": "animation.vinemaiden.strugglefail",
-        "animation.vinemaiden.idle": "animation.vinemaiden.idle",
-        "animation.vinemaiden.digest": "animation.vinemaiden.digest",
-        "animation.vinemaiden.walk": "animation.vinemaiden.walk",
-        "animation.vinemaiden.bury": "animation.vinemaiden.bury",
-        "animation.vinemaiden.burrow": "animation.vinemaiden.burrow",
-        "animation.vinemaiden.popup": "animation.vinemaiden.popup",
-        "animation.vinemaiden.hidden": "animation.vinemaiden.hidden",
-        "animation.vinemaiden.witherstun": "animation.vinemaiden.witherstun"
+        "swallow": "animation.vinemaiden.swallow",
+        "struggleup": "animation.vinemaiden.struggleup",
+        "struggledown": "animation.vinemaiden.struggledown",
+        "struggleleft": "animation.vinemaiden.struggleleft",
+        "struggleright": "animation.vinemaiden.struggleright",
+        "struggleupleft": "animation.vinemaiden.struggleupleft",
+        "struggledownleft": "animation.vinemaiden.struggledownleft",
+        "struggleupright": "animation.vinemaiden.struggleupright",
+        "struggledownright": "animation.vinemaiden.struggledownright",
+        "struggleupdown": "animation.vinemaiden.struggleupdown",
+        "struggleleftright": "animation.vinemaiden.struggleleftright",
+        "strugglefail": "animation.vinemaiden.strugglefail",
+        "idle": "animation.vinemaiden.idle",
+        "digest": "animation.vinemaiden.digest",
+        "walk": "animation.vinemaiden.walk",
+        "bury": "animation.vinemaiden.bury",
+        "burrow": "animation.vinemaiden.burrow",
+        "popup": "animation.vinemaiden.popup",
+        "hidden": "animation.vinemaiden.hidden",
+        "witherstun": "animation.vinemaiden.witherstun"
       },
       "scripts": {
         "animate": [
-          "controller.animation.pcraftrevorn.vinemaiden"
+          {
+            "idle": "1.0 - math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walk": "math.min(1.0, query.modified_move_speed * 4.0)"
+          }
         ]
       },
       "render_controllers": [
         "controller.render.pcraftrevorn.vinemaiden"
-      ]
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_vinemaiden_spawn_egg"
+      }
     }
   }
 }

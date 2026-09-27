@@ -1,17 +1,21 @@
 import { system, world } from "@minecraft/server";
 import { showPcForm } from "./pcraftrevorn/ui/forms.js";
 import { initPredator, localId } from "./pcraftrevorn/skin/assign.js";
-import { wireVoreEvents, isPredator, startSwallow } from "./pcraftrevorn/vore/vore.js";
+import { wireVoreEvents, isPredator, startSwallow, release } from "./pcraftrevorn/vore/vore.js";
 import { wireInteractEvents } from "./pcraftrevorn/game/interact.js";
 import { wireFermentEvents } from "./pcraftrevorn/game/ferment.js";
 import { wireBaubles } from "./pcraftrevorn/game/baubles.js";
 import { openSettings } from "./pcraftrevorn/game/config.js";
 import { openGuide } from "./pcraftrevorn/game/guide.js";
+import { wireStructure } from "./pcraftrevorn/game/structure.js";
+import { wireWorldgen } from "./pcraftrevorn/game/worldgen.js";
 
 wireVoreEvents();
 wireInteractEvents();
 wireFermentEvents();
 wireBaubles();
+wireStructure();
+wireWorldgen();
 
 // Assign skins to predators when they spawn / are summoned.
 world.afterEvents.entitySpawn.subscribe((ev) => {
@@ -74,6 +78,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
       else player.sendMessage("§7[PCraftRevorn] 附近没有掠食者。");
       break;
     }
+    case "pcraftrevorn:release": release(player, true); break;
     default: break;
   }
 }, { namespaces: ["pcraftrevorn"] });

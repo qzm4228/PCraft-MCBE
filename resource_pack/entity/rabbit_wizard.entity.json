@@ -3,6 +3,7 @@
   "minecraft:client_entity": {
     "description": {
       "identifier": "pcraftrevorn:rabbit_wizard",
+      "min_engine_version": "1.8.0",
       "materials": {
         "default": "entity_alphatest"
       },
@@ -30,37 +31,45 @@
         "default": "geometry.rabbit"
       },
       "animations": {
-        "animation.rabbit.swallow": "animation.rabbit.swallow",
-        "animation.rabbit.struggleup": "animation.rabbit.struggleup",
-        "animation.rabbit.struggledown": "animation.rabbit.struggledown",
-        "animation.rabbit.struggleleft": "animation.rabbit.struggleleft",
-        "animation.rabbit.struggleright": "animation.rabbit.struggleright",
-        "animation.rabbit.struggleupleft": "animation.rabbit.struggleupleft",
-        "animation.rabbit.struggledownleft": "animation.rabbit.struggledownleft",
-        "animation.rabbit.struggleupright": "animation.rabbit.struggleupright",
-        "animation.rabbit.struggledownright": "animation.rabbit.struggledownright",
-        "animation.rabbit.struggleupdown": "animation.rabbit.struggleupdown",
-        "animation.rabbit.struggleleftright": "animation.rabbit.struggleleftright",
-        "animation.rabbit.strugglefail": "animation.rabbit.strugglefail",
-        "animation.rabbit.digest": "animation.rabbit.digest",
-        "animation.rabbit.digestWG1": "animation.rabbit.digestWG1",
-        "animation.rabbit.digestWG2": "animation.rabbit.digestWG2",
-        "animation.rabbit.walk": "animation.rabbit.walk",
-        "animation.rabbit.warp": "animation.rabbit.warp",
-        "animation.rabbit.attack": "animation.rabbit.attack",
-        "animation.rabbit.idle": "animation.rabbit.idle",
-        "animation.rabbit.swallowWG1": "animation.rabbit.swallowWG1",
-        "animation.rabbit.swallowWG2": "animation.rabbit.swallowWG2",
-        "animation.rabbit.new": "animation.rabbit.new"
+        "swallow": "animation.rabbit.swallow",
+        "struggleup": "animation.rabbit.struggleup",
+        "struggledown": "animation.rabbit.struggledown",
+        "struggleleft": "animation.rabbit.struggleleft",
+        "struggleright": "animation.rabbit.struggleright",
+        "struggleupleft": "animation.rabbit.struggleupleft",
+        "struggledownleft": "animation.rabbit.struggledownleft",
+        "struggleupright": "animation.rabbit.struggleupright",
+        "struggledownright": "animation.rabbit.struggledownright",
+        "struggleupdown": "animation.rabbit.struggleupdown",
+        "struggleleftright": "animation.rabbit.struggleleftright",
+        "strugglefail": "animation.rabbit.strugglefail",
+        "digest": "animation.rabbit.digest",
+        "digestWG1": "animation.rabbit.digestWG1",
+        "digestWG2": "animation.rabbit.digestWG2",
+        "walk": "animation.rabbit.walk",
+        "warp": "animation.rabbit.warp",
+        "attack": "animation.rabbit.attack",
+        "idle": "animation.rabbit.idle",
+        "swallowWG1": "animation.rabbit.swallowWG1",
+        "swallowWG2": "animation.rabbit.swallowWG2",
+        "new": "animation.rabbit.new"
       },
       "scripts": {
         "animate": [
-          "controller.animation.pcraftrevorn.rabbit_wizard"
+          {
+            "idle": "1.0 - math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walk": "math.min(1.0, query.modified_move_speed * 4.0)"
+          }
         ]
       },
       "render_controllers": [
         "controller.render.pcraftrevorn.rabbit_wizard"
-      ]
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_rabbit_wizard_spawn_egg"
+      }
     }
   }
 }

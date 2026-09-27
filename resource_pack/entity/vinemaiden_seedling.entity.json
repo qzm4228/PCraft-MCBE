@@ -3,6 +3,7 @@
   "minecraft:client_entity": {
     "description": {
       "identifier": "pcraftrevorn:vinemaiden_seedling",
+      "min_engine_version": "1.8.0",
       "materials": {
         "default": "entity_alphatest"
       },
@@ -27,11 +28,13 @@
         "default": "geometry.vinemaiden_seedling"
       },
       "animations": {
-        "animation.vinemaiden_seedling.idle": "animation.vinemaiden_seedling.idle"
+        "idle": "animation.vinemaiden_seedling.idle"
       },
       "scripts": {
         "animate": [
-          "controller.animation.pcraftrevorn.vinemaiden_seedling"
+          {
+            "idle": "1.0 - math.min(1.0, query.modified_move_speed * 4.0)"
+          }
         ]
       },
       "render_controllers": [

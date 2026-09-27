@@ -57,7 +57,7 @@ const ENTITIES = [
   { id: 'vinemaiden_seedling', geo: 'vinemaiden_seedling', anim: 'vinemaiden_seedling', skins: /^vinemaiden_seedling/, kind: 'creature', hp: 8, speed: 0.3, dmg: 3, follow: 16, kbr: 0, size: [0.6, 1.8], hostile: false, families: ['vinemaiden', 'monster'], pop: 'monster' },
   { id: 'zombie', geo: 'zombiegirl', anim: 'zombiegirl', skins: /^zombie(\d|_girl)/, kind: 'monster', hp: 20, speed: 0.23, dmg: 3, follow: 35, kbr: 0, size: [0.6, 1.8], hostile: true, families: ['zombie', 'predator', 'undead', 'monster'], pop: 'monster', loot: 'zombie' },
   { id: 'scarecrow', geo: 'scarecrow', anim: 'scarecrow', skins: /^scarecrow_(?!glow)/, kind: 'monster', hp: 50, speed: 0.3, dmg: 3, follow: 64, kbr: 0, size: [0.8, 2.4], hostile: true, families: ['scarecrow', 'predator', 'monster'], pop: 'monster' },
-  { id: 'rabbit_wizard', geo: 'rabbit', anim: 'rabbit', skins: /^rabbit\d/, kind: 'creature', hp: 24, speed: 0.25, dmg: 3, follow: 16, kbr: 0, size: [0.6, 1.8], hostile: false, families: ['rabbit_wizard', 'predator', 'village_protector'], pop: 'animal' },
+  { id: 'rabbit_wizard', geo: 'rabbit', anim: 'rabbit', skins: /^rabbit\d/, kind: 'creature', hp: 24, speed: 0.25, dmg: 3, follow: 16, kbr: 0, size: [0.6, 1.8], hostile: true, families: ['rabbit_wizard', 'predator', 'village_protector'], pop: 'animal' },
   { id: 'piglin_royal', geo: 'piglin_royalty', anim: 'piglin_royalty', skins: /^piglin_royal_(?!knight)/, kind: 'monster', hp: 150, speed: 0.3, dmg: 3, follow: 16, kbr: 1, size: [1.5, 3.4], hostile: false, families: ['piglin', 'piglin_royal', 'monster'], pop: 'monster', loot: 'piglin_royal' },
   { id: 'piglin_royal_knight', geo: 'piglin_royal_knight', anim: 'piglin_royal_knight', skins: /^piglin_royal_knight_/, kind: 'monster', hp: 32, speed: 0.32, dmg: 5, follow: 16, kbr: 0, size: [0.6, 1.8], hostile: true, families: ['piglin', 'piglin_royal_knight', 'predator', 'monster'], pop: 'monster' },
   { id: 'binding_ring', geo: 'binding_ring', anim: 'shielding_ring', skins: /^binding_ring$/, kind: 'monster', hp: 10, speed: 0.6, dmg: 3, follow: 16, kbr: 0.35, size: [0.6, 1.8], hostile: false, families: ['binding_ring', 'accessory'], pop: 'monster' },
@@ -67,12 +67,19 @@ const SPECIAL = [
   { id: 'piglin_royal_spawner', hp: 10, size: [0, 0], families: ['piglin_royal_spawner', 'spawner'] },
   { id: 'piglin_throneroom_spawner', hp: 10, size: [0, 0], families: ['piglin_throneroom_spawner', 'spawner'] },
   { id: 'rabbit_player_projectile', projectile: true, families: ['projectile'] },
-  { id: 'rabbit_projectile_bloodlust', projectile: true, families: ['projectile'] }
+  { id: 'rabbit_projectile_bloodlust', projectile: true, families: ['projectile'] },
+  { id: 'digestion_bar', boss: true, hp: 100, size: [0, 0], families: ['digestion_bar'] }
 ];
 const INVISIBLE_GEO = 'geometry.pcraftrevorn.invisible';
 const INVISIBLE_TEX = 'textures/entity/pcraftrevorn/invisible';
 // preds that can be tamed (pcraftrevorn:tameable_preds tag)
 const TAMEABLE = new Set(['gilded_basaltmite', 'piglin_royal_knight', 'rabbit_wizard', 'scarecrow', 'vinemaiden']);
+// entities that ship a spawn egg item
+const SPAWN_EGG = new Set(['zombie', 'piglin_royal', 'vinemaiden', 'piglin_royal_knight', 'silverfish', 'basaltmite', 'rabbit_wizard', 'gilded_basaltmite', 'scarecrow']);
+// entities with a separate emissive glow texture (drawn as a 2nd render controller)
+const GLOW = { binding_ring: 'binding_ring_glow', shielding_ring: 'shielding_ring_glow', scarecrow: 'scarecrow_glow' };
+// temporary/loop animations (short name): only these loop, the rest play once
+const LOOP_ANIMS = new Set(['idle', 'walk', 'sprint', 'hidden']);
 
 // ---- helpers ----
 const texFiles = () => fs.readdirSync(SRC_TEX).filter(f => f.endsWith('.png')).map(f => f.slice(0, -4));
@@ -98,10 +105,41 @@ function genTextureAndGeometry() {
     if (f === 'vinemaiden_seedling.geo.json') j['minecraft:geometry'][0].description.identifier = 'geometry.vinemaiden_seedling';
     writeJSON(path.join(RP, 'models', 'entity', f), j);
   }
-  // animations
+  // animations: GeckoLib keyframes are {"vector":[...],"easing":...} which Bedrock
+  // does NOT understand (Bedrock uses plain arrays / molang / {pre,post}). Convert.
+  const unwrap = (v) => {
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      if (Array.isArray(v.vector)) return v.vector;
+      if (v.pre !== undefined || v.post !== undefined || v.lerp_mode !== undefined) {
+        const o = {};
+        if (v.pre !== undefined) o.pre = (v.pre && Array.isArray(v.pre.vector)) ? v.pre.vector : v.pre;
+        if (v.post !== undefined) o.post = (v.post && Array.isArray(v.post.vector)) ? v.post.vector : v.post;
+        if (v.lerp_mode !== undefined) o.lerp_mode = v.lerp_mode;
+        return o;
+      }
+    }
+    return v;
+  };
+  const convertChannel = (ch) => {
+    if (ch === null || typeof ch !== 'object' || Array.isArray(ch)) return ch; // constant or molang
+    if (Array.isArray(ch.vector)) return ch.vector; // constant channel written as {"vector":[...]}
+    const out = {};
+    for (const [t, v] of Object.entries(ch)) out[t] = unwrap(v);
+    return out;
+  };
   for (const f of fs.readdirSync(SRC_ANIM)) {
     if (!f.endsWith('.animation.json')) continue;
-    copy(path.join(SRC_ANIM, f), path.join(RP, 'animations', f));
+    const j = readJSON(path.join(SRC_ANIM, f));
+    delete j.geckolib_format_version; // GeckoLib-only root field
+    for (const [name, anim] of Object.entries(j.animations || {})) {
+      anim.loop = LOOP_ANIMS.has(name.split('.').pop());
+      for (const bd of Object.values(anim.bones || {})) {
+        for (const ch of ['rotation', 'position', 'scale']) {
+          if (bd[ch] !== undefined) bd[ch] = convertChannel(bd[ch]);
+        }
+      }
+    }
+    writeJSON(path.join(RP, 'animations', f), j);
   }
   // textures
   for (const f of fs.readdirSync(SRC_TEX)) {
@@ -117,11 +155,18 @@ function genTextureAndGeometry() {
       bones: [{ name: 'root', pivot: [0, 0, 0], cubes: [{ origin: [-0.01, 0, -0.01], size: [0.02, 0.02, 0.02], uv: [0, 0] }] }]
     }]
   });
+  // simple projectile model (rabbit staff projectiles)
+  writeJSON(path.join(RP, 'models', 'entity', 'projectile.geo.json'), {
+    format_version: '1.12.0',
+    'minecraft:geometry': [{
+      description: { identifier: 'geometry.pcraftrevorn.projectile', texture_width: 16, texture_height: 16, visible_bounds_width: 0.6, visible_bounds_height: 0.6, visible_bounds_offset: [0, 0.3, 0] },
+      bones: [{ name: 'root', pivot: [0, 0, 0], cubes: [{ origin: [-2, 2, -7], size: [4, 4, 14], uv: [0, 0] }] }]
+    }]
+  });
 }
 
 // ---- entities ----
 function genMobs() {
-  const controllers = { format_version: '1.10.0', animation_controllers: {} };
   for (const e of ENTITIES) {
     const skins = allTex.filter(n => e.skins.test(n)).sort();
     const n = skins.length;
@@ -129,48 +174,65 @@ function genMobs() {
     skins.forEach((s, i) => { textureMap['skin' + i] = 'textures/entity/pcraftrevorn/' + s; arrayEntries.push('Texture.skin' + i); });
 
     const anims = animNames(e.anim);
+    const short = (a) => a.split('.').pop();
     const animMap = {};
-    for (const a of anims) animMap[a] = a;
+    for (const a of anims) animMap[short(a)] = a;
+    const animKeys = anims.map(short);
+    const idleKey = animKeys.includes('idle') ? 'idle' : animKeys[0];
+    const walkKey = animKeys.includes('walk') ? 'walk' : idleKey;
+    // vanilla-style direct animate (no animation controller -> fewer failure points)
+    const animate = [{ [idleKey]: '1.0 - math.min(1.0, query.modified_move_speed * 4.0)' }];
+    if (walkKey !== idleKey) animate.push({ [walkKey]: 'math.min(1.0, query.modified_move_speed * 4.0)' });
 
     // client entity
+    const materials = { default: 'entity_alphatest' };
+    const textures = { ...textureMap };
+    const renderControllers = [`controller.render.${NS}.${e.id}`];
+    const glowTex = GLOW[e.id];
+    if (glowTex) {
+      materials.glow = 'entity_emissive_alpha';
+      textures.glow = 'textures/entity/pcraftrevorn/' + glowTex;
+      renderControllers.push(`controller.render.${NS}.${e.id}.glow`);
+    }
+    const desc = {
+      identifier: `${NS}:${e.id}`,
+      min_engine_version: '1.8.0',
+      materials,
+      textures,
+      geometry: { default: geoIdent(e.geo) },
+      animations: animMap,
+      scripts: { animate },
+      render_controllers: renderControllers
+    };
+    // modern per-entity spawn egg texture (1.21+ format)
+    if (SPAWN_EGG.has(e.id)) desc.spawn_egg = { texture: `${NS}_${e.id}_spawn_egg` };
     writeJSON(path.join(RP, 'entity', e.id + '.entity.json'), {
       format_version: '1.10.0',
-      'minecraft:client_entity': {
-        description: {
-          identifier: `${NS}:${e.id}`,
-          materials: { default: 'entity_alphatest' },
-          textures: textureMap,
-          geometry: { default: geoIdent(e.geo) },
-          animations: animMap,
-          scripts: { animate: [`controller.animation.${NS}.${e.id}`] },
-          render_controllers: [`controller.render.${NS}.${e.id}`]
-        }
-      }
+      'minecraft:client_entity': { description: desc }
     });
-    // render controller
-    writeJSON(path.join(RP, 'render_controllers', e.id + '.render_controllers.json'), {
-      format_version: '1.10.0',
-      render_controllers: {
-        [`controller.render.${NS}.${e.id}`]: {
-          geometry: 'Geometry.default',
-          materials: [{ '*': 'Material.default' }],
-          arrays: { textures: { 'Array.skins': arrayEntries } },
-          textures: [`Array.skins[q.property('${NS}:skin')]`]
-        }
-      }
-    });
-    // animation controller idle/walk
-    controllers.animation_controllers[`controller.animation.${NS}.${e.id}`] = {
-      initial_state: 'idle',
-      states: {
-        idle: { animations: [anims.find(a => a.endsWith('.idle')) || anims[0]], transitions: [{ walk: 'q.modified_move_speed > 0.05' }] },
-        walk: { animations: [anims.find(a => a.endsWith('.walk')) || anims[0]], transitions: [{ idle: 'q.modified_move_speed <= 0.05' }] }
+    // render controller(s)
+    const rc = {
+      [`controller.render.${NS}.${e.id}`]: {
+        geometry: 'Geometry.default',
+        materials: [{ '*': 'Material.default' }],
+        arrays: { textures: { 'Array.skins': arrayEntries } },
+        textures: [`Array.skins[q.property('${NS}:skin')]`]
       }
     };
+    if (glowTex) {
+      rc[`controller.render.${NS}.${e.id}.glow`] = {
+        geometry: 'Geometry.default',
+        materials: [{ '*': 'Material.glow' }],
+        textures: ['Texture.glow']
+      };
+    }
+    writeJSON(path.join(RP, 'render_controllers', e.id + '.render_controllers.json'), {
+      format_version: '1.10.0',
+      render_controllers: rc
+    });
     // behavior
     genBehavior(e, n - 1);
   }
-  writeJSON(path.join(RP, 'animation_controllers', 'pcraftrevorn.animation_controllers.json'), controllers);
 }
 
 function genBehavior(e, skinMax) {
@@ -192,23 +254,38 @@ function genBehavior(e, skinMax) {
   if (e.follow) components['minecraft:follow_range'] = { value: e.follow, max: e.follow };
   if (e.kbr) components['minecraft:knockback_resistance'] = { value: e.kbr };
   components['minecraft:behavior.float'] = { priority: 0 };
-  if (e.hostile) {
-    components['minecraft:behavior.melee_attack'] = { priority: 1, speed_multiplier: 1.2 };
-    components['minecraft:behavior.nearest_attackable_target'] = {
-      priority: 3, must_see: true, reselect_targets: true, within_radius: e.follow || 16,
-      entity_types: [
-        { filters: { test: 'is_family', subject: 'other', value: 'player' }, max_dist: e.follow || 16 },
-        { filters: { test: 'is_family', subject: 'other', value: 'villager' }, max_dist: e.follow || 16 }
-      ]
-    };
-    components['minecraft:behavior.hurt_by_target'] = { priority: 2 };
-  }
   components['minecraft:behavior.random_stroll'] = { priority: 4, speed_multiplier: 1 };
   components['minecraft:behavior.random_look_around'] = { priority: 5 };
   if (e.loot) components['minecraft:loot'] = { table: `loot_tables/entities/${e.loot}.json` };
 
   const componentGroups = {};
   const events = {};
+  // aggressive behaviors live in a group so the script can disable them while the
+  // predator is swallowing (fixes "the mob keeps hitting me after being eaten")
+  if (e.hostile) {
+    componentGroups[`${NS}:aggressive`] = {
+      'minecraft:behavior.melee_attack': { priority: 1, speed_multiplier: 1.2 },
+      'minecraft:behavior.nearest_attackable_target': {
+        priority: 3, must_see: true, reselect_targets: true, within_radius: e.follow || 16,
+        entity_types: [
+          { filters: { test: 'is_family', subject: 'other', value: 'player' }, max_dist: e.follow || 16 },
+          { filters: { test: 'is_family', subject: 'other', value: 'villager' }, max_dist: e.follow || 16 }
+        ]
+      },
+      'minecraft:behavior.hurt_by_target': { priority: 2 }
+    };
+    // during swallow the prey rides the predator (free look, position follows)
+    componentGroups[`${NS}:prey_holder`] = {
+      'minecraft:rideable': {
+        seat_count: 1,
+        family_types: ['player'],
+        seats: [{ position: [0, 0, 0] }]
+      }
+    };
+    events['minecraft:entity_spawned'] = { add: { component_groups: [`${NS}:aggressive`] } };
+    events[`${NS}:on_swallow`] = { remove: { component_groups: [`${NS}:aggressive`] }, add: { component_groups: [`${NS}:prey_holder`] } };
+    events[`${NS}:on_release`] = { add: { component_groups: [`${NS}:aggressive`] }, remove: { component_groups: [`${NS}:prey_holder`] } };
+  }
   if (TAMEABLE.has(e.id)) {
     components['minecraft:tameable'] = {
       probability: 1.0,
@@ -240,6 +317,8 @@ function genBehavior(e, skinMax) {
 
 function genSpecial() {
   for (const s of SPECIAL) {
+    const geometry = s.projectile ? 'geometry.pcraftrevorn.projectile' : INVISIBLE_GEO;
+    const texture = s.projectile ? 'textures/items/pcraftrevorn/cupid_arrow' : INVISIBLE_TEX;
     // client entity
     writeJSON(path.join(RP, 'entity', s.id + '.entity.json'), {
       format_version: '1.10.0',
@@ -247,8 +326,8 @@ function genSpecial() {
         description: {
           identifier: `${NS}:${s.id}`,
           materials: { default: 'entity_alphatest' },
-          textures: { default: INVISIBLE_TEX },
-          geometry: { default: INVISIBLE_GEO },
+          textures: { default: texture },
+          geometry: { default: geometry },
           render_controllers: [`controller.render.${NS}.${s.id}`]
         }
       }
@@ -264,6 +343,16 @@ function genSpecial() {
       'minecraft:collision_box': { width: 0.25, height: 0.25 },
       'minecraft:physics': {},
       'minecraft:pushable': { is_pushable: false, is_pushable_by_piston: false }
+    } : s.boss ? {
+      'minecraft:type_family': { family: s.families },
+      'minecraft:boss': { hud_range: 100, should_darken_sky: false },
+      'minecraft:health': { value: s.hp, max: s.hp },
+      'minecraft:collision_box': { width: 0, height: 0 },
+      'minecraft:physics': { has_gravity: false, has_collision: false },
+      'minecraft:pushable': { is_pushable: false, is_pushable_by_piston: false },
+      'minecraft:fire_immune': {},
+      'minecraft:persistent': {},
+      'minecraft:damage_sensor': { triggers: [{ on_damage: { filters: { test: 'always', value: true } }, deals_damage: false }] }
     } : {
       'minecraft:type_family': { family: s.families },
       'minecraft:health': { value: s.hp, max: s.hp },

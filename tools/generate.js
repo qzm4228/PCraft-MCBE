@@ -468,23 +468,23 @@ const UUID = {
 function genManifests() {
   writeJSON(path.join(BP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn BP', description: 'PCraftRevorn content (Bedrock port). Original mod by MysticSummoner.', uuid: UUID.bpHeader, version: [0, 2, 0], min_engine_version: [1, 21, 100] },
+    header: { name: 'PCraftRevorn (砂墨SandMo)', description: '掠食工艺 Bedrock 移植 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner', uuid: UUID.bpHeader, version: [0, 3, 0], min_engine_version: [1, 21, 100] },
     modules: [
-      { type: 'data', uuid: UUID.bpData, version: [0, 2, 0] },
-      { type: 'script', language: 'javascript', uuid: UUID.bpScript, entry: 'scripts/main.js', version: [0, 2, 0] }
+      { type: 'data', uuid: UUID.bpData, version: [0, 3, 0] },
+      { type: 'script', language: 'javascript', uuid: UUID.bpScript, entry: 'scripts/main.js', version: [0, 3, 0] }
     ],
     dependencies: [
-      { uuid: UUID.rpHeader, version: [0, 1, 0] },
+      { uuid: UUID.rpHeader, version: [0, 2, 0] },
       { module_name: '@minecraft/server', version: '2.0.0' },
       { module_name: '@minecraft/server-ui', version: '2.0.0' }
     ],
-    metadata: { authors: ['MysticSummoner (original)', 'Advoreture port'], license: 'AFL-3.0' }
+    metadata: { authors: ['砂墨SandMo', 'Bilibili: 砂墨', '原创: MysticSummoner'], license: 'AFL-3.0' }
   });
   writeJSON(path.join(RP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn RP', description: 'PCraftRevorn resources (Bedrock port). Original mod by MysticSummoner.', uuid: UUID.rpHeader, version: [0, 1, 0], min_engine_version: [1, 21, 100] },
-    modules: [{ type: 'resources', uuid: UUID.rpRes, version: [0, 1, 0] }],
-    metadata: { authors: ['MysticSummoner (original)', 'Advoreture port'], license: 'AFL-3.0' }
+    header: { name: 'PCraftRevorn 资源 (砂墨SandMo)', description: '掠食工艺 Bedrock 移植 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner', uuid: UUID.rpHeader, version: [0, 2, 0], min_engine_version: [1, 21, 100] },
+    modules: [{ type: 'resources', uuid: UUID.rpRes, version: [0, 2, 0] }],
+    metadata: { authors: ['砂墨SandMo', 'Bilibili: 砂墨', '原创: MysticSummoner'], license: 'AFL-3.0' }
   });
   // pack icons
   const icon = path.join(SRC_ASSETS, 'textures', 'item', 'pred_guidebook.png');

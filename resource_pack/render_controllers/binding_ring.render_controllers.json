@@ -18,6 +18,17 @@
       "textures": [
         "Array.skins[q.property('pcraftrevorn:skin')]"
       ]
+    },
+    "controller.render.pcraftrevorn.binding_ring.glow": {
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.glow"
+        }
+      ],
+      "textures": [
+        "Texture.glow"
+      ]
     }
   }
 }

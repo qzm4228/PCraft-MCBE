@@ -15,12 +15,12 @@
 | P0 | BP/RP 骨架、manifest（`min_engine_version 1.21.100`）、打包脚本 | ✅ 已完成 |
 | P1 | 4 方块、40 物品、16 配方、方块掉落、贴图/音效/语言/图集 | ✅ 已完成 |
 | P1 | 猪灵王座几何体自动转换（需游戏内目视校验） | ⚠️ 待验证 |
-| P2 | 16 生物定义 + GeckoLib geo/animation + 变体贴图 | 🟡 首批完成（16 实体 + 13 geo + 12 动画 + 332 贴图 + 刷怪；⚠️ 需游戏内校验，精修项见下） |
+| P2 | 16 生物定义 + GeckoLib geo/animation + 变体贴图 | ✅ 完成（生成蛋新格式 `spawn_egg.texture`、发光层、弹射物模型；胃部骨骼显隐待办） |
 | P2.5 | UI 基座（server_form 覆盖 + 状态总线） | 🟡 完成（待游戏内验证） |
 | P3 | vore 核心（吞入/消化/反刍，不含挣扎） | 🟡 首版完成（待游戏内验证/调平衡） |
-| P4 | 挣扎（正确方向组合，表单方向按钮） | 🟡 首版完成（待游戏内验证/调平衡） |
+| P4 | 挣扎（原生输入：跳/潜/横移） | 🟡 已改为原生输入（待实机验证） |
 | P5 | WG / 驯养 / AI / 物品交互 / 护符 | 🟡 首版（WG、驯养组件、物品右键、护符被动） |
-| P6 | 世界生成（结构转换） | ⏳ 刷怪已完成；结构未转 |
+| P6 | 世界生成（结构） | ✅ 脚本实现（jigsaw 无法移植，改为脚本近似：数据表放置 + 脚本刷出） |
 | P7 | 指南书 / 发酵桶 UI（form）+ 配置 | 🟡 首版（指南书表单、发酵桶交互、设置表单） |
 
 生成的包：`dist/PCraftRevorn.mcaddon`（需 `build.ps1`）。
@@ -80,6 +80,16 @@ scripts 模块已写入 manifest，依赖 `@minecraft/server 2.0.0` + `@minecraf
 - 按错 / 超时（`struggleTimer=60` 刻）→ 播放 `strugglefail`，消化进度回涨
 - 成功 `strugglesNeeded` 次且进度归零 → 反刍脱身
 
+> 实机反馈后**弃用表单挣扎**。Bedrock 无法注册按键，物品栏/HUD 的 JSON-UI 按钮也**无法回调脚本**
+> （TLM/Ponder 的按钮是**表单屏幕**的 `form_buttons` 集合，只在表单里有效）。
+> 现改为**原生输入**当按键（零 UI、不锁视角、触屏可用）：**跳跃=上、潜行=下、左右横移=左右**
+> （`Player.inputInfo` + `InputButton.Jump/Sneak`）。被吞流程：第三人称 + 松散锁位（漂移>4格才拉回）
+> + 每 60 刻自动 `digest` 动画 + actionbar 提示所需方向；`/scriptevent pcraftrevorn:release` 脱身。
+>
+> 实机修复（第二轮）：① 动画文件缺 `"loop": true`（GeckoLib 靠代码循环）→ 生成器对 idle/walk/sprint/hidden 设 true；
+> ② 掠食者攻击行为移入组件组 `pcraftrevorn:aggressive`，被吞时 `on_swallow` 移除、放出时 `on_release` 恢复，
+> 解决"被吞后还在打我"；③ `isPredator` 改按 `typeId` 判定（原 `matches({family})` 字段名错误）。
+
 ## 1.8 工程自检
 
 `node tools/audit.js` 会交叉校验：物品图标/方块贴图图集、实体↔客户端实体↔几何/控制器/动画、
@@ -102,6 +112,23 @@ scripts 模块已写入 manifest，依赖 `@minecraft/server 2.0.0` + `@minecraf
 调试命令：`/scriptevent pcraftrevorn:form|guide|settings|swallow`
 
 打包：`build.ps1`（已修正为 **正斜杠 zip 条目**，否则 Bedrock 无法导入）。
+
+## 1.10 P6 世界生成（脚本实现）
+
+Bedrock 附加包**不支持 jigsaw 结构**，原 `royal_castle_remnant`（jigsaw + template pool + 两个 `.nbt`）改为等价脚本实现：
+
+- `tools/nbt_to_data.js`：把 Java `.nbt` 结构（大端 NBT）解析、**状态名映射**（stairs→`weirdo_direction`/`upside_down_bit`、
+  wall→`wall_connection_type_*`/`wall_post_bit`、basalt/chain→`pillar_axis`、chest/throne→`minecraft:cardinal_direction`、
+  lava→`liquid_depth`），生成 `scripts/pcraftrevorn/data/structures.js`
+  - `remnant_throne_room`：3382 方块 + 7 实体（30×16×21）
+- `game/structure.js`：`piglin_throneroom_spawner` 生成后延迟 2 秒，分批（300/刻）用
+  `BlockPermutation.resolve` 放置整个城堡并刷出实体，然后移除自身
+- `game/worldgen.js`：近似原 structure_set（spacing 16/separation 11）——每 20 秒有概率在主世界玩家的下界附近
+  刷出 `piglin_throneroom_spawner`（避免 96 格内重复）
+- 刷怪规则（4 条）在 P2 已生成
+
+⚠️ 风险：方块**状态名映射**为最佳猜测（尤其楼梯朝向 `weirdo_direction` 0=E/1=W/2=S/3=N），
+若游戏内楼梯/墙朝向错乱，改 `tools/nbt_to_data.js` 的 `STAIR_DIR`/`WALL_CONN` 即可。
 
 
 ---
@@ -163,15 +190,18 @@ scripts 模块已写入 manifest，依赖 `@minecraft/server 2.0.0` + `@minecraf
 `Array.skins[q.property('pcraftrevorn:skin')]` 选贴图；脚本（P3）按原 `TextureAssignerGenderedProcedure`
 的命名规则算出贴图名，再查索引表 `setProperty`。生成器：
 - `tools/generate_entities.js`
-- geo/动画为 GeckoLib 格式，**与 Bedrock 原生格式一致，直接复用**（仅修正 `vinemaiden_seedling` 的错误 identifier）
+- geo 为 GeckoLib 格式，**与 Bedrock 原生格式一致可直接复用**（仅修正 `vinemaiden_seedling` 的 identifier）
+- **动画必须转换关键帧**：GeckoLib 用 `{"vector":[...]}` / `{"post":{"vector":[...]},"lerp_mode":...}` / 常量 `{"vector":[...]}`，Bedrock 只认
+  普通数组 / molang / `{"pre":…,"post":…,"lerp_mode":…}`。生成器递归解包 `vector`，并给动画补 `"loop"`
+  （GeckoLib 靠代码循环，JSON 无 loop → Bedrock 播一次即停）。这是"模型在但完全不动"的真正原因。
 - 动画控制器：`idle`/`walk` 由 `q.modified_move_speed` 切换；`swallow/strugle*/digest` 等过程动画由脚本 `playAnimation` 触发
 
-P2 精修待办：
-- [ ] glow 层（`binding_ring_glow`/`shielding_ring_glow`/`scarecrow_glow`）→ 第二 render controller（emissive）
-- [ ] 胃部骨骼显隐（`VoreStomach*`/`WGStomach*` 等）→ `part_visibility` + 属性
-- [ ] `_belly` 满腹贴图已并入 skin 数组，待脚本联动
-- [ ] 弹射物（rabbit_staff 子弹）当前用占位不可见模型，待专用 geometry
-- [ ] 生成蛋图标/实体 `spawn_egg` 颜色
+P2 精修：
+- [x] glow 层（`binding_ring_glow`/`shielding_ring_glow`/`scarecrow_glow`）→ 第二 render controller（`entity_emissive_alpha`）
+- [x] `_belly` 满腹贴图并入 skin 数组，脚本 `assignSkin(pred, true)` 联动
+- [x] 弹射物专用 `geometry.pcraftrevorn.projectile` + `cupid_arrow` 贴图
+- [x] 生成蛋改用**新版 `spawn_egg.texture`**（每实体独立纹理，非 base/overlay 颜色）
+- [ ] 胃部骨骼显隐（`UpperStomach2..6`/`LowerStomach2..6`/`WGStomach*` 等）→ `part_visibility` + 属性（需逐状态核对，暂缓）
 
 ### 2.4 自定义状态效果（18）— ❌ 不可注册
 

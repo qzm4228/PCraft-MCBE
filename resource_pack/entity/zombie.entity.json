@@ -3,6 +3,7 @@
   "minecraft:client_entity": {
     "description": {
       "identifier": "pcraftrevorn:zombie",
+      "min_engine_version": "1.8.0",
       "materials": {
         "default": "entity_alphatest"
       },
@@ -43,30 +44,38 @@
         "default": "geometry.zombiegirl"
       },
       "animations": {
-        "animation.zombiegirl.swallow": "animation.zombiegirl.swallow",
-        "animation.zombiegirl.struggleup": "animation.zombiegirl.struggleup",
-        "animation.zombiegirl.struggledown": "animation.zombiegirl.struggledown",
-        "animation.zombiegirl.struggleleft": "animation.zombiegirl.struggleleft",
-        "animation.zombiegirl.struggleright": "animation.zombiegirl.struggleright",
-        "animation.zombiegirl.struggleupleft": "animation.zombiegirl.struggleupleft",
-        "animation.zombiegirl.struggledownleft": "animation.zombiegirl.struggledownleft",
-        "animation.zombiegirl.struggleupright": "animation.zombiegirl.struggleupright",
-        "animation.zombiegirl.struggledownright": "animation.zombiegirl.struggledownright",
-        "animation.zombiegirl.struggleupdown": "animation.zombiegirl.struggleupdown",
-        "animation.zombiegirl.struggleleftright": "animation.zombiegirl.struggleleftright",
-        "animation.zombiegirl.strugglefail": "animation.zombiegirl.strugglefail",
-        "animation.zombiegirl.idle": "animation.zombiegirl.idle",
-        "animation.zombiegirl.digest": "animation.zombiegirl.digest",
-        "animation.zombiegirl.walk": "animation.zombiegirl.walk"
+        "swallow": "animation.zombiegirl.swallow",
+        "struggleup": "animation.zombiegirl.struggleup",
+        "struggledown": "animation.zombiegirl.struggledown",
+        "struggleleft": "animation.zombiegirl.struggleleft",
+        "struggleright": "animation.zombiegirl.struggleright",
+        "struggleupleft": "animation.zombiegirl.struggleupleft",
+        "struggledownleft": "animation.zombiegirl.struggledownleft",
+        "struggleupright": "animation.zombiegirl.struggleupright",
+        "struggledownright": "animation.zombiegirl.struggledownright",
+        "struggleupdown": "animation.zombiegirl.struggleupdown",
+        "struggleleftright": "animation.zombiegirl.struggleleftright",
+        "strugglefail": "animation.zombiegirl.strugglefail",
+        "idle": "animation.zombiegirl.idle",
+        "digest": "animation.zombiegirl.digest",
+        "walk": "animation.zombiegirl.walk"
       },
       "scripts": {
         "animate": [
-          "controller.animation.pcraftrevorn.zombie"
+          {
+            "idle": "1.0 - math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walk": "math.min(1.0, query.modified_move_speed * 4.0)"
+          }
         ]
       },
       "render_controllers": [
         "controller.render.pcraftrevorn.zombie"
-      ]
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_zombie_spawn_egg"
+      }
     }
   }
 }

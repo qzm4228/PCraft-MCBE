@@ -1,12 +1,12 @@
 {
   "format_version": 2,
   "header": {
-    "name": "PCraftRevorn RP",
-    "description": "PCraftRevorn resources (Bedrock port). Original mod by MysticSummoner.",
+    "name": "PCraftRevorn 资源 (砂墨SandMo)",
+    "description": "掠食工艺 Bedrock 移植 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner",
     "uuid": "e9a8f5d4-a061-4dc4-af50-4d5e6f708192",
     "version": [
       0,
-      1,
+      2,
       0
     ],
     "min_engine_version": [
@@ -21,15 +21,16 @@
       "uuid": "fab9a6e5-b172-4ed5-b061-5e6f70819203",
       "version": [
         0,
-        1,
+        2,
         0
       ]
     }
   ],
   "metadata": {
     "authors": [
-      "MysticSummoner (original)",
-      "Advoreture port"
+      "砂墨SandMo",
+      "Bilibili: 砂墨",
+      "原创: MysticSummoner"
     ],
     "license": "AFL-3.0"
   }

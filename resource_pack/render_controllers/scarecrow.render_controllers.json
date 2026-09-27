@@ -53,6 +53,17 @@
       "textures": [
         "Array.skins[q.property('pcraftrevorn:skin')]"
       ]
+    },
+    "controller.render.pcraftrevorn.scarecrow.glow": {
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.glow"
+        }
+      ],
+      "textures": [
+        "Texture.glow"
+      ]
     }
   }
 }

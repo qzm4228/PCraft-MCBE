@@ -50,9 +50,10 @@ for (const f of list(path.join(RP, 'render_controllers'), '.json')) {
   for (const k of Object.keys(j.render_controllers || {})) renderControllers.add(k);
 }
 const animControllers = new Set();
+const animControllerDefs = new Map();
 for (const f of list(path.join(RP, 'animation_controllers'), '.json')) {
   const j = readJSON(path.join(RP, 'animation_controllers', f));
-  for (const k of Object.keys(j.animation_controllers || {})) animControllers.add(k);
+  for (const [k, v] of Object.entries(j.animation_controllers || {})) { animControllers.add(k); animControllerDefs.set(k, v); }
 }
 const animations = new Set();
 for (const f of list(path.join(RP, 'animations'), '.json')) {
@@ -122,8 +123,23 @@ for (const [id, f] of rpClient) {
   if (!bpEntities.has(id)) warn(`client entity ${id}: no matching BP entity`);
   for (const g of Object.values(d.geometry || {})) if (!geoms.has(g)) err(`client ${id}: missing geometry ${g}`);
   for (const rc of d.render_controllers || []) if (!renderControllers.has(rc)) err(`client ${id}: missing render controller ${rc}`);
-  for (const anim of (d.scripts?.animate || [])) if (!animControllers.has(anim)) err(`client ${id}: missing animation controller ${anim}`);
-  for (const a of Object.values(d.animations || {})) if (!animations.has(a)) err(`client ${id}: missing animation ${a}`);
+  // scripts.animate entries reference the animations map, which may point to a controller
+  const resolveCtrl = (entry) => {
+    const v = (d.animations || {})[entry];
+    return typeof v === 'string' && v.startsWith('controller.') ? v : entry;
+  };
+  for (const entry of (d.scripts?.animate || [])) {
+    if (typeof entry !== 'string' && !Array.isArray(entry)) continue; // {animKey: weight} blend object
+    const ctrl = resolveCtrl(entry);
+    if (!animControllers.has(ctrl)) { err(`client ${id}: animate entry '${entry}' -> controller '${ctrl}' not found`); continue; }
+    const def = animControllerDefs.get(ctrl);
+    for (const st of Object.values(def.states || {})) {
+      for (const a of st.animations || []) {
+        if (!(a in (d.animations || {}))) err(`client ${id}: controller ${ctrl} state animation key '${a}' not in animations map`);
+      }
+    }
+  }
+  for (const a of Object.values(d.animations || {})) if (!a.startsWith('controller.') && !animations.has(a)) err(`client ${id}: missing animation ${a}`);
   // texture skins
   for (const [k, p] of Object.entries(d.textures || {})) {
     if (typeof p === 'string' && p.startsWith('textures/') && !exists(path.join(RP, p + '.png'))) err(`client ${id}: missing texture ${p}.png`);
@@ -137,18 +153,6 @@ for (const [id, f] of rpClient) {
       for (const t of arr) {
         const key = t.replace(/^Texture\./, '');
         if (!(key in (d.textures || {}))) err(`client ${id}/${rc}: array texture '${t}' not in textures map`);
-      }
-    }
-  }
-}
-
-// ---- animation controllers reference existing animations via client map ----
-for (const f of list(path.join(RP, 'animation_controllers'), '.json')) {
-  const j = readJSON(path.join(RP, 'animation_controllers', f)).animation_controllers || {};
-  for (const [name, ctrl] of Object.entries(j)) {
-    for (const st of Object.values(ctrl.states || {})) {
-      for (const a of st.animations || []) {
-        if (!animations.has(a)) warn(`anim controller ${name}: state animation '${a}' not found (must be a client animation map key)`);
       }
     }
   }
@@ -190,7 +194,7 @@ for (const dep of bpMan.dependencies.filter((d) => d.module_name)) info.push(`sc
 for (const f of ['manifest.json', 'blocks', 'items', 'entities', 'recipes', 'loot_tables', 'texts', 'scripts', 'spawn_rules']) {
   if (!exists(path.join(BP, f))) warn(`BP missing ${f}`);
 }
-for (const f of ['manifest.json', 'entity', 'models', 'animations', 'animation_controllers', 'render_controllers', 'textures', 'sounds', 'ui', 'texts']) {
+for (const f of ['manifest.json', 'entity', 'models', 'animations', 'render_controllers', 'textures', 'sounds', 'ui', 'texts']) {
   if (!exists(path.join(RP, f))) warn(`RP missing ${f}`);
 }
 // ui defs

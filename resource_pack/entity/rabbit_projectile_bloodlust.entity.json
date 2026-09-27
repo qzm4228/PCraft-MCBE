@@ -7,10 +7,10 @@
         "default": "entity_alphatest"
       },
       "textures": {
-        "default": "textures/entity/pcraftrevorn/invisible"
+        "default": "textures/items/pcraftrevorn/cupid_arrow"
       },
       "geometry": {
-        "default": "geometry.pcraftrevorn.invisible"
+        "default": "geometry.pcraftrevorn.projectile"
       },
       "render_controllers": [
         "controller.render.pcraftrevorn.rabbit_projectile_bloodlust"

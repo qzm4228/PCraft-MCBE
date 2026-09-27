@@ -3,8 +3,10 @@
   "minecraft:client_entity": {
     "description": {
       "identifier": "pcraftrevorn:scarecrow",
+      "min_engine_version": "1.8.0",
       "materials": {
-        "default": "entity_alphatest"
+        "default": "entity_alphatest",
+        "glow": "entity_emissive_alpha"
       },
       "textures": {
         "skin0": "textures/entity/pcraftrevorn/scarecrow_female0_health0",
@@ -42,43 +44,53 @@
         "skin32": "textures/entity/pcraftrevorn/scarecrow_male0_health2_wg",
         "skin33": "textures/entity/pcraftrevorn/scarecrow_male0_health2_wg2",
         "skin34": "textures/entity/pcraftrevorn/scarecrow_male0_health2_wg2_belly",
-        "skin35": "textures/entity/pcraftrevorn/scarecrow_male0_health2_wg_belly"
+        "skin35": "textures/entity/pcraftrevorn/scarecrow_male0_health2_wg_belly",
+        "glow": "textures/entity/pcraftrevorn/scarecrow_glow"
       },
       "geometry": {
         "default": "geometry.scarecrow"
       },
       "animations": {
-        "animation.scarecrow.swallow": "animation.scarecrow.swallow",
-        "animation.scarecrow.swallowWG1": "animation.scarecrow.swallowWG1",
-        "animation.scarecrow.swallowWG2": "animation.scarecrow.swallowWG2",
-        "animation.scarecrow.idle": "animation.scarecrow.idle",
-        "animation.scarecrow.idleSMOOTH": "animation.scarecrow.idleSMOOTH",
-        "animation.scarecrow.digestWG1": "animation.scarecrow.digestWG1",
-        "animation.scarecrow.digestWG2": "animation.scarecrow.digestWG2",
-        "animation.scarecrow.walk": "animation.scarecrow.walk",
-        "animation.scarecrow.attack": "animation.scarecrow.attack",
-        "animation.scarecrow.struggleup": "animation.scarecrow.struggleup",
-        "animation.scarecrow.struggledown": "animation.scarecrow.struggledown",
-        "animation.scarecrow.struggleleft": "animation.scarecrow.struggleleft",
-        "animation.scarecrow.struggleright": "animation.scarecrow.struggleright",
-        "animation.scarecrow.struggleupleft": "animation.scarecrow.struggleupleft",
-        "animation.scarecrow.struggledownleft": "animation.scarecrow.struggledownleft",
-        "animation.scarecrow.struggleupright": "animation.scarecrow.struggleupright",
-        "animation.scarecrow.struggledownright": "animation.scarecrow.struggledownright",
-        "animation.scarecrow.struggleupdown": "animation.scarecrow.struggleupdown",
-        "animation.scarecrow.struggleleftright": "animation.scarecrow.struggleleftright",
-        "animation.scarecrow.strugglefail": "animation.scarecrow.strugglefail",
-        "animation.scarecrow.wake": "animation.scarecrow.wake",
-        "animation.scarecrow.SpawnLINER": "animation.scarecrow.SpawnLINER"
+        "swallow": "animation.scarecrow.swallow",
+        "swallowWG1": "animation.scarecrow.swallowWG1",
+        "swallowWG2": "animation.scarecrow.swallowWG2",
+        "idle": "animation.scarecrow.idle",
+        "idleSMOOTH": "animation.scarecrow.idleSMOOTH",
+        "digestWG1": "animation.scarecrow.digestWG1",
+        "digestWG2": "animation.scarecrow.digestWG2",
+        "walk": "animation.scarecrow.walk",
+        "attack": "animation.scarecrow.attack",
+        "struggleup": "animation.scarecrow.struggleup",
+        "struggledown": "animation.scarecrow.struggledown",
+        "struggleleft": "animation.scarecrow.struggleleft",
+        "struggleright": "animation.scarecrow.struggleright",
+        "struggleupleft": "animation.scarecrow.struggleupleft",
+        "struggledownleft": "animation.scarecrow.struggledownleft",
+        "struggleupright": "animation.scarecrow.struggleupright",
+        "struggledownright": "animation.scarecrow.struggledownright",
+        "struggleupdown": "animation.scarecrow.struggleupdown",
+        "struggleleftright": "animation.scarecrow.struggleleftright",
+        "strugglefail": "animation.scarecrow.strugglefail",
+        "wake": "animation.scarecrow.wake",
+        "SpawnLINER": "animation.scarecrow.SpawnLINER"
       },
       "scripts": {
         "animate": [
-          "controller.animation.pcraftrevorn.scarecrow"
+          {
+            "idle": "1.0 - math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walk": "math.min(1.0, query.modified_move_speed * 4.0)"
+          }
         ]
       },
       "render_controllers": [
-        "controller.render.pcraftrevorn.scarecrow"
-      ]
+        "controller.render.pcraftrevorn.scarecrow",
+        "controller.render.pcraftrevorn.scarecrow.glow"
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_scarecrow_spawn_egg"
+      }
     }
   }
 }

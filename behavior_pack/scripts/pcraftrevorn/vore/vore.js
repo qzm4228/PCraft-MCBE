@@ -1,37 +1,42 @@
-// P3/P4 vore core: swallow -> struggle -> digest -> regurgitate/death.
-// Ported from MobEatPlayerProcedure / EntitySwallowHandlerProcedure /
-// Struggle*Procedure (keybinds replaced by form buttons).
-import { world, system, EntityDamageCause } from "@minecraft/server";
-import { showPcForm } from "../ui/forms.js";
+// P3/P4 vore core: swallow -> struggle (native input) -> digest -> release/death.
+//
+// Struggle input uses native controls (no UI, view stays free):
+//   Jump  = up, Sneak = down, strafe Left/Right = left/right
+// (Bedrock addons cannot register keybinds and inventory-UI buttons cannot call
+//  scripts, so native input is the only non-blocking option on stable APIs.)
+import { world, system } from "@minecraft/server";
 import { assignSkin, playAnim, getNum, setNum } from "../skin/assign.js";
-import { newPrompt, pressDir, labelFor, DIRS } from "./struggle.js";
 import { getCfg } from "../game/config.js";
 import { addWgProgress } from "../game/wg.js";
+import { newPrompt, pressDir, labelFor, animFor, DIRS } from "./struggle.js";
 
 export const CONFIG = {
-  swallowChance: 0.35,
-  digestTicksToKill: 1600,
+  digestTicksToKill: 3000,
   acidRate: 0.5,
   acidRateMax: 4,
   acidIncr: 0.01,
-  struggleReduction: 25,
-  strugglesNeeded: 6,
   maxLevel: 15,
   bellyFraction: 0.35,
-  struggleDifficulty: 0.4,   // chance a prompt needs a 2-direction combo
-  struggleTimer: 60,         // ticks allowed per prompt
+  lockDistance: 4,
+  digestAnimInterval: 60,
+  slowRefresh: 40,
+  struggleDifficulty: 0.4,
+  struggleTimer: 90,
   promptCooldownMin: 30,
-  promptCooldownMax: 80
+  promptCooldownMax: 80,
+  struggleReduction: 25,
+  strugglesNeeded: 6,
+  failPenalty: 15
 };
 
 const sessions = new Map(); // playerId -> session
 
-const wait = (ticks) =>
-  new Promise((resolve) => (ticks > 0 ? system.runTimeout(resolve, ticks) : resolve()));
-
-const isPredator = (entity) => {
-  try { return entity?.matches({ family: "predator" }) ?? false; } catch { return false; }
-};
+const PREDATORS = new Set([
+  "pcraftrevorn:basaltmite", "pcraftrevorn:gilded_basaltmite", "pcraftrevorn:silverfish",
+  "pcraftrevorn:vinemaiden", "pcraftrevorn:zombie", "pcraftrevorn:scarecrow",
+  "pcraftrevorn:rabbit_wizard", "pcraftrevorn:piglin_royal_knight"
+]);
+const isPredator = (entity) => !!entity && PREDATORS.has(entity.typeId);
 export { isPredator };
 
 const resolvePredator = (session) => {
@@ -42,40 +47,138 @@ const safeEffect = (player, id, ticks, amp = 0, particles = false) => {
   try { player.addEffect(id, ticks, { amplifier: amp, showParticles: particles }); } catch { /* ignore */ }
 };
 const clearEffects = (player) => {
-  for (const id of ["slowness", "weakness", "nausea", "blindness"]) {
+  for (const id of ["slowness", "weakness", "nausea", "blindness", "invisibility"]) {
     try { player.removeEffect(id); } catch { /* ignore */ }
   }
 };
 
 const levelOf = (s) => Math.max(0, Math.min(CONFIG.maxLevel, Math.floor((s.digest / s.maxTimer) * CONFIG.maxLevel)));
+const dist2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2;
 
 function lockTo(player, session) {
   const pred = resolvePredator(session);
   if (!pred) return false;
   try {
-    player.teleport(pred.location, { dimension: pred.dimension, rotation: player.getRotation() });
-  } catch { /* chunk not loaded */ }
+    // teleport onto the predator every tick; do NOT pass rotation so the player
+    // can still look around freely (passing rotation snapped/locked the camera)
+    player.teleport(pred.location, { dimension: pred.dimension });
+  } catch { /* ignore */ }
   return true;
+}
+
+const BAR_ID = "pcraftrevorn:digestion_bar";
+function spawnBar(player, session) {
+  try {
+    const bar = player.dimension.spawnEntity(BAR_ID, player.location);
+    bar.nameTag = "§c消化进度";
+    const hp = bar.getComponent("minecraft:health");
+    if (hp) hp.setCurrentValue(1);
+    session.barId = bar.id;
+  } catch { /* ignore */ }
+}
+function updateBar(player, session) {
+  if (!session.barId) return;
+  let bar;
+  try { bar = world.getEntity(session.barId); } catch { bar = undefined; }
+  if (!bar) { session.barId = undefined; return; }
+  try {
+    bar.teleport(player.location, { dimension: player.dimension });
+    const pct = Math.max(1, Math.min(100, Math.round((session.digest / session.maxTimer) * 100)));
+    const hp = bar.getComponent("minecraft:health");
+    if (hp) hp.setCurrentValue(pct);
+  } catch { /* ignore */ }
+}
+function removeBar(session) {
+  if (!session?.barId) return;
+  try { world.getEntity(session.barId)?.remove(); } catch { /* ignore */ }
+  session.barId = undefined;
+}
+
+// Tag the predator once; the actual ride is attempted every tick (see digestTick)
+// because component-group changes apply one tick later.
+function prepareRide(player, predator, session) {
+  try {
+    session.rideTag = "pc_ride_" + player.id.replace(/[^a-zA-Z0-9_]/g, "");
+    predator.addTag(session.rideTag);
+  } catch { session.rideTag = undefined; }
+}
+function tryRide(player, session) {
+  if (!session.rideTag) return;
+  try { player.runCommand(`ride @s start_riding @e[tag=${session.rideTag},c=1]`); } catch { /* already riding / not yet rideable */ }
+}
+function dismount(player, session) {
+  try { player.runCommand("ride @s stop_riding"); } catch { /* ignore */ }
+  if (session?.rideTag) {
+    const pred = resolvePredator(session);
+    try { pred?.removeTag(session.rideTag); } catch { /* ignore */ }
+    session.rideTag = undefined;
+  }
+}
+
+function setThirdPerson(player, on) {
+  try { if (on) player.camera.setCamera("minecraft:third_person"); else player.camera.clear(); } catch { /* ignore */ }
 }
 
 function refreshBelly(session) {
   const pred = resolvePredator(session);
   if (!pred) return;
-  const belly = session.digest / session.maxTimer >= CONFIG.bellyFraction;
-  const want = belly ? 1 : 0;
-  if (getNum(pred, "pc:full") !== want) {
-    setNum(pred, "pc:full", want);
-    assignSkin(pred, belly);
-  }
+  // show the prey bulge for the whole swallowed state (no delay)
+  if (getNum(pred, "pc:full") !== 1) { setNum(pred, "pc:full", 1); assignSkin(pred, true); }
 }
 
-function rollCooldown() {
-  return CONFIG.promptCooldownMin + Math.floor(Math.random() * (CONFIG.promptCooldownMax - CONFIG.promptCooldownMin));
+const pressed = (state) => String(state) === "Pressed";
+
+/** Returns a direction if the player just pressed a native input this tick. */
+function readInput(player, session) {
+  let info;
+  try { info = player.inputInfo; } catch { return undefined; }
+  if (!info) return undefined;
+  let jump = false, sneak = false, strafe = 0;
+  try {
+    jump = pressed(info.getButtonState("Jump"));
+    sneak = pressed(info.getButtonState("Sneak"));
+    const mv = info.getMovementVector();
+    strafe = mv.x;
+  } catch { return undefined; }
+
+  let dir;
+  if (jump && !session.prevJump) dir = "up";
+  else if (sneak && !session.prevSneak) dir = "down";
+  else if (strafe > 0.5 && !(session.prevStrafe > 0.5)) dir = "right";
+  else if (strafe < -0.5 && !(session.prevStrafe < -0.5)) dir = "left";
+
+  session.prevJump = jump;
+  session.prevSneak = sneak;
+  session.prevStrafe = strafe;
+  return dir;
+}
+
+function promptBar(session) {
+  const left = Math.max(0, Math.ceil((session.promptTick + session.promptTimer - system.currentTick) / 20));
+  return `§e按要求按键：§f${labelFor(session.required)} §7(${left}s)  §8[跳=↑ 潜=↓ 左右移=←→]`;
+}
+
+function handlePress(player, session, dir, pred, now) {
+  const outcome = pressDir(session, dir, now);
+  if (outcome.result === "success") {
+    session.struggles += 1;
+    session.digest = Math.max(0, session.digest - CONFIG.struggleReduction);
+    session.level = levelOf(session);
+    playAnim(pred, outcome.anim ?? "struggleup");
+    if (session.struggles >= session.needed && session.digest <= 0) { release(player, true); return true; }
+  } else if (outcome.result === "partial") {
+    playAnim(pred, outcome.anim ?? animFor([dir]));
+  } else if (outcome.result === "fail") {
+    playAnim(pred, "strugglefail");
+    session.digest += CONFIG.failPenalty;
+  }
+  return false;
 }
 
 export function startSwallow(player, predator) {
   const pid = player.id;
   if (sessions.has(pid)) return;
+  const cfg = getCfg(player);
   const session = {
     predatorId: predator.id,
     digest: 0,
@@ -83,114 +186,39 @@ export function startSwallow(player, predator) {
     rate: CONFIG.acidRate,
     rateMax: CONFIG.acidRateMax,
     incr: CONFIG.acidIncr,
-    struggles: 0,
-    needed: CONFIG.strugglesNeeded,
     level: 0,
     alive: true,
+    slowTimer: 0,
+    animTimer: 0,
     awaiting: false,
     required: [],
     pressed: new Set(),
     promptTick: 0,
-    promptTimer: CONFIG.struggleTimer,
-    cooldown: 30,
-    difficulty: CONFIG.struggleDifficulty,
-    anim: "struggleup"
+    promptTimer: cfg.timer ?? CONFIG.struggleTimer,
+    cooldown: 20,
+    difficulty: (cfg.difficulty ?? 40) / 100,
+    struggles: 0,
+    needed: CONFIG.strugglesNeeded,
+    prevJump: false,
+    prevSneak: false,
+    prevStrafe: 0,
+    msgTimer: 0
   };
   sessions.set(pid, session);
-  const cfg = getCfg(player);
-  session.difficulty = (cfg.difficulty ?? 40) / 100;
-  session.promptTimer = cfg.timer ?? CONFIG.struggleTimer;
-  assignSkin(predator, false);
-  setNum(predator, "pc:full", 0);
+  assignSkin(predator, true);
+  setNum(predator, "pc:full", 1);
+  try { predator.triggerEvent("pcraftrevorn:on_swallow"); } catch { /* ignore */ }
   try { player.setDynamicProperty("pc:pred", predator.id); } catch { /* ignore */ }
 
-  safeEffect(player, "slowness", CONFIG.digestTicksToKill, 3);
-  safeEffect(player, "weakness", CONFIG.digestTicksToKill, 1);
-  safeEffect(player, "nausea", 200, 0);
+  setThirdPerson(player, true);
+  safeEffect(player, "invisibility", 40, 0, false);
+  safeEffect(player, "resistance", 60, 4);
   try { player.onScreenDisplay.setTitle("§4被吞入", { fadeInDuration: 5, stayDuration: 40, fadeOutDuration: 10 }); } catch { /* ignore */ }
-  player.sendMessage("§4[掠食者] §c你被吞入腹中！按提示选择正确方向挣扎。");
+  player.sendMessage("§4[掠食者] §c你被吞入腹中！§7按提示用 §f跳跃/潜行/左右移动 §7方向挣扎。§8(/scriptevent pcraftrevorn:release 脱身)");
 
-  lockTo(player, session);
+  spawnBar(player, session);
+  prepareRide(player, predator, session);
   playAnim(predator, "swallow");
-  void runStomachLoop(player, session);
-}
-
-function stomachBody(s) {
-  const pct = Math.round((s.digest / s.maxTimer) * 100);
-  const bars = Math.min(CONFIG.maxLevel, Math.floor(pct / (100 / CONFIG.maxLevel)));
-  const lines = [
-    `§7消化进度：§c${pct}%`,
-    `§7挣扎成功：§f${s.struggles}/${s.needed}`,
-    `§8${"█".repeat(bars)}${"░".repeat(Math.max(0, CONFIG.maxLevel - bars))}`
-  ];
-  if (s.awaiting) {
-    const left = Math.max(0, Math.ceil((s.promptTick + s.promptTimer - system.currentTick) / 20));
-    lines.push("", `§e要按方向：§f${labelFor(s.required)}§7  （§c剩余 ${left}s§7）`);
-  } else {
-    lines.push("", "§8等待下一次挣扎时机……");
-  }
-  return lines.join("\n");
-}
-
-async function runStomachLoop(player, session) {
-  while (session.alive && sessions.get(player.id) === session) {
-    const res = await showPcForm(player, {
-      title: "被吞入",
-      body: stomachBody(session),
-      level: session.level,
-      buttons: [
-        { id: "up", label: "§f↑ §7向上挣扎" },
-        { id: "down", label: "§f↓ §7向下挣扎" },
-        { id: "left", label: "§f← §7向左挣扎" },
-        { id: "right", label: "§f→ §7向右挣扎" }
-      ]
-    });
-
-    if (!session.alive || sessions.get(player.id) !== session) break;
-    if (res.canceled) { await wait(10); continue; }
-    if (!res.id || !DIRS.includes(res.id)) continue;
-
-    const pred = resolvePredator(session);
-    const outcome = pressDir(session, res.id, system.currentTick);
-
-    if (outcome.result === "success") {
-      session.struggles += 1;
-      session.digest = Math.max(0, session.digest - CONFIG.struggleReduction);
-      session.level = levelOf(session);
-      playAnim(pred, outcome.anim ?? "struggleup");
-      player.sendMessage(`§a[挣扎] §f成功！§7(${session.struggles}/${session.needed})`);
-      if (session.struggles >= session.needed && session.digest <= 0) { release(player, true); break; }
-    } else if (outcome.result === "partial") {
-      playAnim(pred, outcome.anim ?? `struggle${res.id}`);
-      player.sendMessage(`§7[挣扎] 已按 §f${res.id}§7，继续！`);
-    } else if (outcome.result === "fail") {
-      playAnim(pred, "strugglefail");
-      session.digest += 15;
-      player.sendMessage("§c[挣扎] 方向错误或太慢，失败！");
-    }
-  }
-}
-
-export function release(player, regurgitate) {
-  const pid = player.id;
-  const session = sessions.get(pid);
-  if (session) session.alive = false;
-  sessions.delete(pid);
-  try { player.setDynamicProperty("pc:pred", ""); } catch { /* ignore */ }
-  clearEffects(player);
-
-  const pred = session ? resolvePredator(session) : undefined;
-  if (pred) {
-    setNum(pred, "pc:full", 0);
-    assignSkin(pred, false);
-  }
-
-  if (regurgitate) {
-    safeEffect(player, "regeneration", 80, 1);
-    player.sendMessage("§a你挣脱了，从胃袋里滑了出来。");
-  } else {
-    player.sendMessage("§7[掠食者] §e你被放了出来。");
-  }
 }
 
 function digestTick() {
@@ -203,35 +231,79 @@ function digestTick() {
     const pred = resolvePredator(session);
     if (!pred) { release(player, false); continue; }
 
-    lockTo(player, session);
+    tryRide(player, session); // retry every tick (component-group change applies one tick later)
+    if (dist2(player.location, pred.location) > 24 * 24) lockTo(player, session); // fallback if riding fails
+    updateBar(player, session);
+
+    session.slowTimer = (session.slowTimer + 1) % 20;
+    if (session.slowTimer === 0) { safeEffect(player, "invisibility", 40, 0, false); safeEffect(player, "resistance", 60, 4); }
+
+    // digestion
     session.digest += session.rate;
     if (session.rate < session.rateMax) session.rate += session.incr;
     session.level = levelOf(session);
     refreshBelly(session);
+
+    session.animTimer = (session.animTimer + 1) % CONFIG.digestAnimInterval;
+    if (session.animTimer === 0 && !session.awaiting) playAnim(pred, "digest");
 
     // struggle prompt scheduling
     if (session.awaiting) {
       if (now - session.promptTick > session.promptTimer) {
         session.awaiting = false;
         playAnim(pred, "strugglefail");
+      } else {
+        const dir = readInput(player, session);
+        if (dir && handlePress(player, session, dir, pred, now)) continue;
       }
-    } else if (session.cooldown > 0) {
-      session.cooldown -= 1;
+      session.msgTimer = (session.msgTimer + 1) % 10;
+      if (session.msgTimer === 0) { try { player.onScreenDisplay.setActionBar(promptBar(session)); } catch { /* ignore */ } }
     } else {
-      const anim = newPrompt(session, now, session.difficulty, session.promptTimer);
-      playAnim(pred, anim);
-      session.cooldown = rollCooldown();
+      readInput(player, session); // keep edge state fresh
+      if (session.cooldown > 0) {
+        session.cooldown -= 1;
+      } else {
+        playAnim(pred, newPrompt(session, now, session.difficulty, session.promptTimer));
+        session.cooldown = CONFIG.promptCooldownMin + Math.floor(Math.random() * (CONFIG.promptCooldownMax - CONFIG.promptCooldownMin));
+      }
     }
 
     if (session.digest >= session.maxTimer) {
       session.alive = false;
       sessions.delete(pid);
+      dismount(player, session);
+      removeBar(session);
       try { player.setDynamicProperty("pc:pred", ""); } catch { /* ignore */ }
       clearEffects(player);
+      setThirdPerson(player, false);
       addWgProgress(pred, 1);
-      try { player.applyDamage(9999, { cause: EntityDamageCause.magic, damagingEntity: pred }); } catch { /* ignore */ }
+      setNum(pred, "pc:full", 0);
+      assignSkin(pred, false); // after digesting, belly returns to normal (with new WG stage)
+      try { player.applyDamage(9999, { cause: "magic", damagingEntity: pred }); } catch { /* ignore */ }
     }
   }
+}
+
+export function release(player, regurgitate) {
+  const pid = player.id;
+  const session = sessions.get(pid);
+  if (session) session.alive = false;
+  sessions.delete(pid);
+  dismount(player, session);
+  removeBar(session);
+  try { player.setDynamicProperty("pc:pred", ""); } catch { /* ignore */ }
+  clearEffects(player);
+  setThirdPerson(player, false);
+  try { player.onScreenDisplay.setActionBar(" "); } catch { /* ignore */ }
+
+  const pred = session ? resolvePredator(session) : undefined;
+  if (pred) {
+    setNum(pred, "pc:full", 0);
+    assignSkin(pred, false);
+    try { pred.triggerEvent("pcraftrevorn:on_release"); } catch { /* ignore */ }
+  }
+  if (regurgitate) safeEffect(player, "regeneration", 80, 1);
+  player.sendMessage(regurgitate ? "§a你挣脱了，从胃袋里滑了出来。" : "§7[掠食者] §e你被放了出来。");
 }
 
 export function wireVoreEvents() {
@@ -253,8 +325,9 @@ export function wireVoreEvents() {
     const dead = ev.deadEntity;
     if (dead?.typeId === "minecraft:player" && sessions.has(dead.id)) {
       const s = sessions.get(dead.id);
-      if (s) s.alive = false;
+      if (s) { s.alive = false; removeBar(s); }
       sessions.delete(dead.id);
+      try { dead.camera?.clear?.(); } catch { /* ignore */ }
     }
   });
 }
