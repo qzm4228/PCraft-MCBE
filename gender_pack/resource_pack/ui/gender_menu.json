@@ -1,8 +1,6 @@
 {
   "namespace": "server_form",
 
-  // Rebuild the form screen content: native form (hidden for gender forms) + our
-  // WFC layer as a sibling of the form factory.
   "main_screen_content": {
     "type": "panel",
     "size": [ "100%", "100%" ],
@@ -20,8 +18,6 @@
     ]
   },
 
-  // Hide the native ActionForm panel while our gender menu is open
-  // (title contains the §3§r marker).
   "long_form@common_dialogs.main_panel_no_buttons": {
     "$title_panel": "common_dialogs.standard_title_label",
     "$title_size": [ "100% - 15px", 10 ],
@@ -44,8 +40,6 @@
   "gender_root": {
     "type": "panel",
     "size": [ "100%", "100%" ],
-    "anchor_from": "center",
-    "anchor_to": "center",
     "layer": 5,
     "bindings": [
       { "binding_name": "#title_text" },
@@ -65,10 +59,23 @@
         }
       },
       {
-        "panel_female": {
-          "type": "image",
+        "panel@server_form.gender_panel": {
           "anchor_from": "center",
-          "anchor_to": "center",
+          "anchor_to": "center"
+        }
+      }
+    ]
+  },
+
+  "gender_panel": {
+    "type": "panel",
+    "size": [ 248, 156 ],
+    "controls": [
+      {
+        "bg_female": {
+          "type": "image",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
           "size": [ 248, 156 ],
           "texture": "textures/pcraftrevorn_gender/gui/wardrobe_female",
           "bindings": [
@@ -82,10 +89,10 @@
         }
       },
       {
-        "panel_male": {
+        "bg_male": {
           "type": "image",
-          "anchor_from": "center",
-          "anchor_to": "center",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
           "size": [ 248, 156 ],
           "texture": "textures/pcraftrevorn_gender/gui/wardrobe_male",
           "bindings": [
@@ -99,36 +106,36 @@
         }
       },
       {
+        "title": {
+          "type": "label",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 10, 8 ],
+          "size": [ "default", "default" ],
+          "color": [ 0.85, 0.85, 0.9 ],
+          "text": "Female Gender Mod",
+          "shadow": true
+        }
+      },
+      {
         "player_preview": {
           "type": "custom",
           "renderer": "paper_doll_renderer",
           "layer": 1,
-          "anchor_from": "center",
-          "anchor_to": "center",
-          "offset": [ -82, 6 ],
-          "size": [ 64, 96 ],
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 10, 30 ],
+          "size": [ 64, 110 ],
           "use_selected_skin": false,
           "use_player_paperdoll": true,
           "use_skin_gui_scale": true
         }
       },
       {
-        "title": {
-          "type": "label",
-          "anchor_from": "center",
-          "anchor_to": "center",
-          "offset": [ -118, -60 ],
-          "size": [ "default", "default" ],
-          "color": [ 0.27, 0.27, 0.27 ],
-          "text": "Female Gender Mod",
-          "shadow": false
-        }
-      },
-      {
         "buttons@server_form.gender_buttons_panel": {
-          "anchor_from": "center",
-          "anchor_to": "center",
-          "offset": [ 37, 12 ]
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 86, 22 ]
         }
       }
     ]
@@ -137,7 +144,7 @@
   "gender_buttons_panel": {
     "type": "stack_panel",
     "orientation": "vertical",
-    "size": [ "100%c", "100%c" ],
+    "size": [ 158, "100%c" ],
     "factory": {
       "name": "buttons",
       "control_ids": {
@@ -159,7 +166,7 @@
   "gender_dynamic_button": {
     "type": "stack_panel",
     "orientation": "vertical",
-    "size": [ "100%c", "100%c" ],
+    "size": [ 158, "100%c" ],
     "controls": [
       {
         "btn@common_buttons.light_text_button": {

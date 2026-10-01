@@ -16,7 +16,7 @@
 // Mod look (ui/gender_menu.json). The form title carries an invisible marker so
 // the UI knows it is a gender menu.
 import { world, system, CommandPermissionLevel, CustomCommandStatus, DisplaySlotId } from "@minecraft/server";
-import { ActionFormData } from "@minecraft/server-ui";
+import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 
 const OBJECTIVE = "pc_state";
 const SEX_MAX = 5;
@@ -90,18 +90,15 @@ function openSizeMenu(player) {
 function openSkinMenu(player) {
   const st = getState(player);
   const cur = skinOf(st);
-  const form = new ActionFormData().title(title(sexOf(st) > 0));
-  form.button(`原版皮肤${cur === 0 ? " §a✔" : ""}`);
-  for (let i = 1; i <= PRESET_COUNT; i++) form.button(`预设 ${i}${cur === i ? " §a✔" : ""}`);
-  form.button("§7返回");
+  // No marker in the title: the custom overlay stays hidden so the native
+  // slider form is visible and draggable.
+  const form = new ModalFormData().title("性别 / 皮肤预设");
+  form.slider("皮肤预设", 0, PRESET_COUNT, { valueStep: 1, defaultValue: cur, tooltip: "0 = 原版皮肤，1-12 = 预设" });
   form.show(player).then((r) => {
     if (r.canceled) return;
-    if (r.selection >= 0 && r.selection <= PRESET_COUNT) {
-      setState(player, encode(r.selection, sexOf(st)));
-      system.run(() => openSkinMenu(player));
-    } else {
-      system.run(() => openGenderMenu(player));
-    }
+    const sel = Math.max(0, Math.min(PRESET_COUNT, Number(r.formValues?.[0] ?? cur)));
+    setState(player, encode(sel, sexOf(st)));
+    system.run(() => openGenderMenu(player));
   }).catch(() => { /* ignore */ });
 }
 
@@ -114,26 +111,29 @@ function openGenderMenu(player) {
   const soundsOn = !player.hasTag(SOUNDS_OFF_TAG);
 
   const form = new ActionFormData().title(title(female));
-  form.button(`性别 - ${female ? "§b女性" : "§7男性"}`);
-  form.button(`体型 - ${female ? `§b${size} / 4` : "§8无"}`);
-  form.button(`皮肤预设 - ${skin === 0 ? "§7原版" : `§b预设 ${skin}`}`);
-  form.button(`女性受伤音效 - ${soundsOn ? "§a开" : "§c关"}`);
-  form.button("§7关闭");
+  const actions = [];
+  form.button(`性别 - ${female ? "§b女性" : "§7男性"}`); actions.push("gender");
+  if (female) {
+    form.button(`体型 - §b${size} / 4`); actions.push("size");
+    form.button(`皮肤预设 - ${skin === 0 ? "§7原版" : `§b预设 ${skin}`}`); actions.push("skin");
+    form.button(`女性受伤音效 - ${soundsOn ? "§a开" : "§c关"}`); actions.push("sounds");
+  }
+  form.button("§7关闭"); actions.push("close");
 
   form.show(player).then((r) => {
     if (r.canceled) return;
-    switch (r.selection) {
-      case 0:
+    switch (actions[r.selection]) {
+      case "gender":
         setState(player, encode(skin, female ? 0 : (size > 0 ? size + 1 : 1)));
         system.run(() => openGenderMenu(player));
         break;
-      case 1:
+      case "size":
         system.run(() => openSizeMenu(player));
         break;
-      case 2:
+      case "skin":
         system.run(() => openSkinMenu(player));
         break;
-      case 3:
+      case "sounds":
         try { soundsOn ? player.addTag(SOUNDS_OFF_TAG) : player.removeTag(SOUNDS_OFF_TAG); } catch { /* ignore */ }
         system.run(() => openGenderMenu(player));
         break;
