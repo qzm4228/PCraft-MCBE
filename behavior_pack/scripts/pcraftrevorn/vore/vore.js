@@ -4,7 +4,7 @@
 //   Jump  = up, Sneak = down, strafe Left/Right = left/right
 // (Bedrock addons cannot register keybinds and inventory-UI buttons cannot call
 //  scripts, so native input is the only non-blocking option on stable APIs.)
-import { world, system, EntityDamageCause } from "@minecraft/server";
+import { world, system, EntityDamageCause, EquipmentSlot } from "@minecraft/server";
 import { assignSkin, playAnim, getNum, setNum, localId } from "../skin/assign.js";
 import { getCfg } from "../game/config.js";
 import { addWgProgress } from "../game/wg.js";
@@ -53,7 +53,12 @@ const clearEffects = (player) => {
 };
 
 const levelOf = (s) => Math.max(0, Math.min(CONFIG.maxLevel, Math.floor((s.digest / s.maxTimer) * CONFIG.maxLevel)));
-// rabbit_wizard / scarecrow have weight-gain-specific digest animations
+// belly texture is only applied after the swallow AND the first digest animation
+const SWALLOW_TICKS = { rabbit_wizard: 108, scarecrow: 105 };
+const DIGEST_TICKS = { rabbit_wizard: 133, scarecrow: 147 };
+const swallowTicks = (pred) => SWALLOW_TICKS[localId(pred.typeId)] ?? 80;
+const digestTicks = (pred) => DIGEST_TICKS[localId(pred.typeId)] ?? 140;
+// rabbit_wizard / scarecrow have weight-gain-specific swallow/digest animations
 const digestSuffix = (pred) => {
   const id = localId(pred.typeId);
   if (id === "rabbit_wizard") {
@@ -67,6 +72,15 @@ const digestSuffix = (pred) => {
     return getNum(pred, "pc:wg") >= 2 ? "digestWG2" : "digestWG1";
   }
   return "digest";
+};
+const swallowSuffix = (pred) => {
+  const id = localId(pred.typeId);
+  if (id === "rabbit_wizard" || id === "scarecrow") {
+    const wg = getNum(pred, "pc:wg");
+    if (wg >= 2) return "swallowWG2";
+    if (wg === 1) return "swallowWG1";
+  }
+  return "swallow";
 };
 const dist2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2;
 
@@ -137,7 +151,11 @@ function setThirdPerson(player, on) {
 function refreshBelly(session) {
   const pred = resolvePredator(session);
   if (!pred) return;
-  // show the prey bulge for the whole swallowed state (no delay)
+  // wait for the swallow animation to finish before showing the prey bulge
+  if (system.currentTick < session.bellyAt) {
+    if (getNum(pred, "pc:full") !== 0) { setNum(pred, "pc:full", 0); assignSkin(pred, false); }
+    return;
+  }
   if (getNum(pred, "pc:full") !== 1) { setNum(pred, "pc:full", 1); assignSkin(pred, true); }
 }
 
@@ -218,11 +236,18 @@ export function startSwallow(player, predator) {
     prevJump: false,
     prevSneak: false,
     prevStrafe: 0,
-    msgTimer: 0
+    msgTimer: 0,
+    bellyAt: 0,
+    swallowEndAt: 0,
+    digestPlayed: false
   };
   sessions.set(pid, session);
-  assignSkin(predator, true);
-  setNum(predator, "pc:full", 1);
+  assignSkin(predator, false);
+  setNum(predator, "pc:full", 0);
+  const now0 = system.currentTick;
+  session.swallowEndAt = now0 + swallowTicks(predator);
+  // belly bulge shows 1 second (20 ticks) after the swallow starts
+  session.bellyAt = now0 + 20;
   try { predator.triggerEvent("pcraftrevorn:on_swallow"); } catch { /* ignore */ }
   try { player.setDynamicProperty("pc:pred", predator.id); } catch { /* ignore */ }
 
@@ -234,7 +259,7 @@ export function startSwallow(player, predator) {
 
   spawnBar(player, session);
   prepareRide(player, predator, session);
-  playAnim(predator, "swallow");
+  playAnim(predator, swallowSuffix(predator));
 }
 
 function digestTick() {
@@ -260,27 +285,34 @@ function digestTick() {
     session.level = levelOf(session);
     refreshBelly(session);
 
+    // swallow animation -> one digest animation -> then belly texture appears
+    if (!session.digestPlayed && now >= session.swallowEndAt) {
+      playAnim(pred, digestSuffix(pred));
+      session.digestPlayed = true;
+    }
     session.animTimer = (session.animTimer + 1) % CONFIG.digestAnimInterval;
-    if (session.animTimer === 0 && !session.awaiting) playAnim(pred, digestSuffix(pred));
+    if (session.digestPlayed && session.animTimer === 0 && !session.awaiting && now >= session.bellyAt) playAnim(pred, digestSuffix(pred));
 
-    // struggle prompt scheduling
-    if (session.awaiting) {
-      if (now - session.promptTick > session.promptTimer) {
-        session.awaiting = false;
-        playAnim(pred, "strugglefail");
+    // struggle only starts after the swallow animation has finished
+    if (now >= session.swallowEndAt) {
+      if (session.awaiting) {
+        if (now - session.promptTick > session.promptTimer) {
+          session.awaiting = false;
+          playAnim(pred, "strugglefail");
+        } else {
+          const dir = readInput(player, session);
+          if (dir && handlePress(player, session, dir, pred, now)) continue;
+        }
+        session.msgTimer = (session.msgTimer + 1) % 10;
+        if (session.msgTimer === 0) { try { player.onScreenDisplay.setActionBar(promptBar(session)); } catch { /* ignore */ } }
       } else {
-        const dir = readInput(player, session);
-        if (dir && handlePress(player, session, dir, pred, now)) continue;
-      }
-      session.msgTimer = (session.msgTimer + 1) % 10;
-      if (session.msgTimer === 0) { try { player.onScreenDisplay.setActionBar(promptBar(session)); } catch { /* ignore */ } }
-    } else {
-      readInput(player, session); // keep edge state fresh
-      if (session.cooldown > 0) {
-        session.cooldown -= 1;
-      } else {
-        playAnim(pred, newPrompt(session, now, session.difficulty, session.promptTimer));
-        session.cooldown = CONFIG.promptCooldownMin + Math.floor(Math.random() * (CONFIG.promptCooldownMax - CONFIG.promptCooldownMin));
+        readInput(player, session); // keep edge state fresh
+        if (session.cooldown > 0) {
+          session.cooldown -= 1;
+        } else {
+          playAnim(pred, newPrompt(session, now, session.difficulty, session.promptTimer));
+          session.cooldown = CONFIG.promptCooldownMin + Math.floor(Math.random() * (CONFIG.promptCooldownMax - CONFIG.promptCooldownMin));
+        }
       }
     }
 
@@ -301,6 +333,7 @@ function digestTick() {
         if (hp) hp.setCurrentValue(Math.min(hp.effectiveMax, hp.currentValue + hp.effectiveMax * 0.3));
       } catch { /* ignore */ }
       try { pred.dimension.playSound("pcraftrevorn.burp", pred.location, { volume: 0.8 }); } catch { /* ignore */ }
+      try { collectBelly(pred, player); } catch { /* ignore */ }
       try { player.applyDamage(1000000, { cause: EntityDamageCause.magic, damagingEntity: pred }); } catch { /* ignore */ }
       // safety net: make sure the prey actually dies
       system.runTimeout(() => {
@@ -335,23 +368,249 @@ export function release(player, regurgitate) {
   player.sendMessage(regurgitate ? "§a你挣脱了，从胃袋里滑了出来。" : "§7[掠食者] §e你被放了出来。");
 }
 
+// ---- belly loot ----
+// A digested player's belongings are moved into an invisible container entity
+// (pcraftrevorn:belly_storage) instead of dropping on death; food is digested
+// (discarded). The stash follows the predator and spills out when it dies.
+const BELLY_ENTITY = "pcraftrevorn:belly_storage";
+const BELLY_KEY = "pc:belly";   // predator dynamic property -> container entity id
+const OWNER_KEY = "pc:owner";   // container dynamic property -> predator entity id
+const EQUIP_SLOTS = [EquipmentSlot.Head, EquipmentSlot.Chest, EquipmentSlot.Legs, EquipmentSlot.Feet, EquipmentSlot.Offhand];
+const DIMENSIONS = ["overworld", "nether", "the_end"];
+
+function validEntity(id) {
+  try { return typeof id === "string" && id ? world.getEntity(id) : undefined; } catch { return undefined; }
+}
+function isFood(item) {
+  try { return !!item.getComponent("minecraft:food"); } catch { return false; }
+}
+
+/** Gets (or spawns) the predator's belly container. */
+function bellyContainer(pred) {
+  const existing = validEntity(pred.getDynamicProperty(BELLY_KEY));
+  if (existing && existing.typeId === BELLY_ENTITY) return existing;
+  let c;
+  try { c = pred.dimension.spawnEntity(BELLY_ENTITY, pred.location); } catch { return undefined; }
+  try { c.setDynamicProperty(OWNER_KEY, pred.id); } catch { /* ignore */ }
+  try { pred.setDynamicProperty(BELLY_KEY, c.id); } catch { /* ignore */ }
+  return c;
+}
+
+/** Moves the digested player's items into the predator's belly (food is destroyed). */
+function collectBelly(pred, player) {
+  const inv = bellyContainer(pred)?.getComponent("minecraft:inventory")?.container;
+  if (!inv) return; // storage unavailable -> leave items to drop normally
+  const pInv = player.getComponent("minecraft:inventory")?.container;
+  if (pInv) {
+    for (let i = 0; i < pInv.size; i++) {
+      let item;
+      try { item = pInv.getItem(i); } catch { item = undefined; }
+      if (!item) continue;
+      if (!isFood(item)) { try { inv.addItem(item); } catch { /* ignore */ } }
+      try { pInv.setItem(i, undefined); } catch { /* ignore */ }
+    }
+  }
+  const eq = player.getComponent("minecraft:equippable");
+  if (eq) {
+    for (const slot of EQUIP_SLOTS) {
+      let item;
+      try { item = eq.getEquipment(slot); } catch { item = undefined; }
+      if (!item) continue;
+      if (!isFood(item)) { try { inv.addItem(item); } catch { /* ignore */ } }
+      try { eq.setEquipment(slot, undefined); } catch { /* ignore */ }
+    }
+  }
+}
+
+/** Spills a container's contents into the world and removes it. */
+function spillBelly(container) {
+  const inv = container.getComponent("minecraft:inventory")?.container;
+  if (inv) {
+    for (let i = 0; i < inv.size; i++) {
+      let item;
+      try { item = inv.getItem(i); } catch { item = undefined; }
+      if (!item) continue;
+      try { container.dimension.spawnItem(item, container.location); } catch { /* ignore */ }
+      try { inv.setItem(i, undefined); } catch { /* ignore */ }
+    }
+  }
+  try { container.remove(); } catch { /* ignore */ }
+}
+
+/** Drops (and clears) the predator's stored belly loot. */
+function dropBelly(pred) {
+  const c = validEntity(pred.getDynamicProperty(BELLY_KEY));
+  if (c && c.typeId === BELLY_ENTITY) spillBelly(c);
+  try { pred.setDynamicProperty(BELLY_KEY, ""); } catch { /* ignore */ }
+}
+
+/** Keeps each belly container on its predator; spills orphans (owner gone). */
+function followBelly() {
+  for (const dimId of DIMENSIONS) {
+    let list;
+    try { list = world.getDimension(dimId).getEntities({ families: ["belly_storage"] }); } catch { continue; }
+    for (const c of list) {
+      const owner = validEntity(c.getDynamicProperty(OWNER_KEY));
+      if (owner) { try { c.teleport(owner.location, { dimension: owner.dimension }); } catch { /* ignore */ } }
+      else spillBelly(c);
+    }
+  }
+}
+
+// ---- mob vore mob ----
+// Predators can also swallow non-player mobs (simplified port of MobEatMob):
+// the prey is tethered inside the predator, digested over time, then killed and
+// the predator gains weight + recovers health. State is kept per predator.
+const mobSessions = new Map(); // predatorId -> session
+const MOB_PREY_TAG = "pc_mobprey";
+
+function isPreyMob(e) {
+  if (!e) return false;
+  const t = e.typeId;
+  if (t === "minecraft:player" || t === BELLY_ENTITY || t === "pcraftrevorn:digestion_bar") return false;
+  if (isPredator(e)) return false;
+  try { return !!e.getComponent("minecraft:health"); } catch { return false; }
+}
+function predatorBusy(predId) {
+  if (mobSessions.has(predId)) return true;
+  for (const s of sessions.values()) if (s.predatorId === predId) return true;
+  return false;
+}
+
+function startMobSwallow(pred, prey) {
+  const pid = pred.id;
+  if (mobSessions.has(pid) || predatorBusy(pid)) return;
+  const now = system.currentTick;
+  mobSessions.set(pid, {
+    predatorId: pid,
+    preyId: prey.id,
+    digest: 0,
+    maxTimer: 12000,
+    rate: getNum(pred, "pc:acid", 2.0),
+    rateMax: getNum(pred, "pc:acidMax", 15),
+    incr: getNum(pred, "pc:acidIncr", 0.02),
+    swallowEndAt: now + swallowTicks(pred),
+    bellyAt: now + 20,
+    digestPlayed: false,
+    animTimer: 0
+  });
+  try { prey.addTag(MOB_PREY_TAG); } catch { /* ignore */ }
+  assignSkin(pred, false);
+  setNum(pred, "pc:full", 0);
+  playAnim(pred, swallowSuffix(pred));
+  try { pred.triggerEvent("pcraftrevorn:on_swallow"); } catch { /* ignore */ }
+}
+
+function endMobSession(pid) { mobSessions.delete(pid); }
+
+function mobDigestTick() {
+  if (mobSessions.size === 0) return;
+  const now = system.currentTick;
+  for (const [pid, s] of mobSessions) {
+    const pred = validEntity(pid);
+    const prey = validEntity(s.preyId);
+    if (!pred || !prey) {
+      endMobSession(pid, false);
+      if (prey) { try { prey.removeTag(MOB_PREY_TAG); } catch { /* ignore */ } try { prey.removeEffect("invisibility"); } catch { /* ignore */ } }
+      if (pred) { setNum(pred, "pc:full", 0); assignSkin(pred, false); }
+      continue;
+    }
+
+    // keep the prey tucked inside the predator (invisible + protected)
+    try { prey.teleport(pred.location, { dimension: pred.dimension }); } catch { /* ignore */ }
+    safeEffect(prey, "invisibility", 20, 0, false);
+    safeEffect(prey, "resistance", 20, 4, false);
+
+    s.digest += s.rate;
+    if (s.rate < s.rateMax) s.rate += s.incr;
+
+    if (now >= s.bellyAt && getNum(pred, "pc:full") !== 1) { setNum(pred, "pc:full", 1); assignSkin(pred, true); }
+    if (!s.digestPlayed && now >= s.swallowEndAt) { playAnim(pred, digestSuffix(pred)); s.digestPlayed = true; }
+    s.animTimer = (s.animTimer + 1) % CONFIG.digestAnimInterval;
+    if (s.digestPlayed && s.animTimer === 0) playAnim(pred, digestSuffix(pred));
+
+    if (s.digest >= s.maxTimer) {
+      endMobSession(pid, true);
+      try { prey.removeTag(MOB_PREY_TAG); } catch { /* ignore */ }
+      addWgProgress(pred, 1);
+      setNum(pred, "pc:full", 0);
+      assignSkin(pred, false);
+      try {
+        const hp = pred.getComponent("minecraft:health");
+        if (hp) hp.setCurrentValue(Math.min(hp.effectiveMax, hp.currentValue + hp.effectiveMax * 0.3));
+      } catch { /* ignore */ }
+      try { pred.dimension.playSound("pcraftrevorn.burp", pred.location, { volume: 0.8 }); } catch { /* ignore */ }
+      try { prey.kill(); } catch { try { prey.remove(); } catch { /* ignore */ } }
+    }
+  }
+}
+
+// Occasional passive hunt so predators actually eat nearby mobs.
+function mobHuntTick() {
+  for (const dimId of DIMENSIONS) {
+    let preds;
+    try { preds = world.getDimension(dimId).getEntities({ families: ["predator"] }); } catch { continue; }
+    for (const pred of preds) {
+      if (predatorBusy(pred.id)) continue;
+      let prey;
+      try {
+        prey = pred.dimension.getEntities({
+          location: pred.location,
+          maxDistance: 3.5,
+          closest: 1,
+          excludeFamilies: ["predator"],
+          excludeTypes: ["minecraft:player", BELLY_ENTITY, "pcraftrevorn:digestion_bar"]
+        })[0];
+      } catch { prey = undefined; }
+      if (!prey || !isPreyMob(prey) || prey.hasTag(MOB_PREY_TAG)) continue;
+      if (Math.random() > getNum(pred, "pc:swallow", 0.25) * 0.1) continue;
+      startMobSwallow(pred, prey);
+    }
+  }
+}
+
 export function wireVoreEvents() {
   system.runInterval(digestTick, 1);
+  system.runInterval(mobDigestTick, 1);
+  system.runInterval(followBelly, 5);
+  system.runInterval(mobHuntTick, 40);
 
   world.afterEvents.entityHurt.subscribe((ev) => {
     const predator = ev.damageSource?.damagingEntity;
     const victim = ev.hurtEntity;
     if (!predator || !victim) return;
-    if (victim.typeId !== "minecraft:player") return;
     if (!isPredator(predator)) return;
-    if (sessions.has(victim.id)) return;
-    const chance = getNum(predator, "pc:swallow", (getCfg(victim).swallow ?? 25) / 100);
-    if (Math.random() > chance) return;
-    startSwallow(victim, predator);
+    // don't (re)swallow something already dying from digestion
+    try { if ((victim.getComponent("minecraft:health")?.currentValue ?? 1) <= 0) return; } catch { /* ignore */ }
+
+    if (victim.typeId === "minecraft:player") {
+      if (sessions.has(victim.id)) return;
+      const chance = getNum(predator, "pc:swallow", (getCfg(victim).swallow ?? 25) / 100);
+      if (Math.random() > chance) return;
+      startSwallow(victim, predator);
+      return;
+    }
+
+    // mob prey
+    if (!isPreyMob(victim) || predatorBusy(predator.id) || victim.hasTag(MOB_PREY_TAG)) return;
+    if (Math.random() > getNum(predator, "pc:swallow", 0.25)) return;
+    startMobSwallow(predator, victim);
   });
 
   world.afterEvents.entityDie.subscribe((ev) => {
     const dead = ev.deadEntity;
+    if (dead && isPredator(dead)) {
+      try { dropBelly(dead); } catch { /* ignore */ }
+      if (mobSessions.has(dead.id)) {
+        const ms = mobSessions.get(dead.id);
+        const prey = validEntity(ms.preyId);
+        endMobSession(dead.id);
+        if (prey) {
+          try { prey.removeTag(MOB_PREY_TAG); } catch { /* ignore */ }
+          try { prey.removeEffect("invisibility"); } catch { /* ignore */ }
+        }
+      }
+    }
     if (dead?.typeId === "minecraft:player" && sessions.has(dead.id)) {
       const s = sessions.get(dead.id);
       if (s) { s.alive = false; removeBar(s); }

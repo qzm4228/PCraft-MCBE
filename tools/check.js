@@ -16,7 +16,7 @@ const BP = path.join(ROOT, 'behavior_pack');
 const RP = path.join(ROOT, 'resource_pack');
 const problems = [];
 const warnings = [];
-const readJSON = (f) => JSON.parse(fs.readFileSync(f, 'utf8'));
+const readJSON = (f) => JSON.parse(fs.readFileSync(f, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1'));
 const list = (d, ext) => fs.readdirSync(d).filter((f) => f.endsWith(ext));
 
 // ---- geometry bones ----
@@ -54,6 +54,7 @@ for (const f of list(path.join(RP, 'animations'), '.json')) {
 const clientAnimNames = new Set();
 for (const f of list(path.join(RP, 'entity'), '.json')) {
   const d = readJSON(path.join(RP, 'entity', f))['minecraft:client_entity'].description;
+  if (d.identifier === 'minecraft:player') continue;
   const geoId = d.geometry?.default;
   const bones = geoBones.get(geoId);
   if (!bones) { problems.push(`client ${d.identifier}: geometry ${geoId} not found`); continue; }

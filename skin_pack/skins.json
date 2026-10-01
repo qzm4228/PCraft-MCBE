@@ -1,0 +1,12 @@
+{
+  "serialize_name": "SandmoSkin",
+  "localization_name": "sandmo_skin",
+  "skins": [
+    {
+      "localization_name": "sandmo_female",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "sandmo_female.png",
+      "type": "free"
+    }
+  ]
+}

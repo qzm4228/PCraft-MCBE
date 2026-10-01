@@ -23,30 +23,6 @@
           "priority": 1,
           "speed_multiplier": 1.2
         },
-        "minecraft:behavior.nearest_attackable_target": {
-          "priority": 3,
-          "must_see": true,
-          "reselect_targets": true,
-          "within_radius": 16,
-          "entity_types": [
-            {
-              "filters": {
-                "test": "is_family",
-                "subject": "other",
-                "value": "player"
-              },
-              "max_dist": 16
-            },
-            {
-              "filters": {
-                "test": "is_family",
-                "subject": "other",
-                "value": "villager"
-              },
-              "max_dist": 16
-            }
-          ]
-        },
         "minecraft:behavior.hurt_by_target": {
           "priority": 2
         }

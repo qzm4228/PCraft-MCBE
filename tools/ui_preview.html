@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>Bedrock JSON-UI Preview</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; font: 13px/1.5 system-ui, sans-serif; background: #16181d; color: #e8e8ea; }
+  header { padding: 10px 14px; background: #1e2128; border-bottom: 1px solid #2c303a; position: sticky; top: 0; z-index: 5; }
+  h1 { font-size: 15px; margin: 0 0 8px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  label { color: #9aa2b1; }
+  input[type=text] { background: #12141a; color: #e8e8ea; border: 1px solid #333846; border-radius: 6px; padding: 5px 8px; }
+  select { background: #12141a; color: #e8e8ea; border: 1px solid #333846; border-radius: 6px; padding: 5px 8px; max-width: 340px; }
+  button { background: #2a6df4; color: #fff; border: 0; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+  button.ghost { background: #2c303a; }
+  main { display: flex; gap: 14px; padding: 14px; }
+  canvas { background: #000; border: 1px solid #2c303a; border-radius: 8px; image-rendering: pixelated; }
+  .side { min-width: 260px; max-width: 380px; }
+  .log { white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 12px; color: #b7bdc9; background: #12141a; border: 1px solid #2c303a; border-radius: 8px; padding: 8px; max-height: 62vh; overflow: auto; }
+  .hint { color: #78808f; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Bedrock JSON-UI Preview</h1>
+  <div class="row">
+    <label>载入：<input type="file" id="files" multiple accept=".mcpack,.mcaddon,.zip,.json,.txt"></label>
+    <label>或目录：<input type="file" id="dir" webkitdirectory directory multiple></label>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <label>根控件：<select id="root"></select></label>
+    <label>标题文本：<input type="text" id="title" size="32" value="§3§r1Female Gender Mod"></label>
+    <label>缩放：<select id="zoom"><option>1.4</option><option selected>1.8</option><option>2.2</option><option>3</option><option>4</option></select></label>
+    <button id="reload" class="ghost">重绘</button>
+  </div>
+  <div class="hint">可直接选 <code>.mcpack / .mcaddon / .json</code>（mcaddon 里多个包会一起读）。虚拟屏 400×240，`custom` 渲染器画虚线占位框。</div>
+</header>
+<main>
+  <canvas id="cv" width="720" height="432"></canvas>
+  <div class="side"><div class="log" id="log"></div></div>
+</main>
+
+<script>
+"use strict";
+const VW = 400, VH = 240;
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const logEl = document.getElementById('log');
+const rootSel = document.getElementById('root');
+const titleEl = document.getElementById('title');
+const zoomEl = document.getElementById('zoom');
+
+let defs = {};      // "ns.name" -> def
+let textures = {};  // "textures/..." -> Image
+const logLines = [];
+function log(s){ logLines.push(s); if (logLines.length>200) logLines.shift(); logEl.textContent = logLines.join('\n'); }
+function clearLog(){ logLines.length=0; logEl.textContent=''; }
+
+function parseJSONC(text){
+  const noBlock = text.replace(/\/\*[\s\S]*?\*\//g, '');
+  const noLine = noBlock.replace(/(^|[^:])\/\/.*$/gm, '$1');
+  return JSON.parse(noLine);
+}
+
+// ---------------- zip ----------------
+async function unzip(buf){
+  const u8 = new Uint8Array(buf);
+  const dv = new DataView(buf);
+  let eocd = -1;
+  const min = Math.max(0, u8.length - 22 - 65536);
+  for (let i = u8.length - 22; i >= min; i--){
+    if (dv.getUint32(i, true) === 0x06054b50){ eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error('不是有效的 zip');
+  const count = dv.getUint16(eocd + 10, true);
+  let off = dv.getUint32(eocd + 16, true);
+  const entries = [];
+  for (let n = 0; n < count; n++){
+    if (dv.getUint32(off, true) !== 0x02014b50) break;
+    const method = dv.getUint16(off + 10, true);
+    const csize = dv.getUint32(off + 20, true);
+    const usize = dv.getUint32(off + 24, true);
+    const fnLen = dv.getUint16(off + 28, true);
+    const exLen = dv.getUint16(off + 30, true);
+    const cmLen = dv.getUint16(off + 32, true);
+    const lho = dv.getUint32(off + 42, true);
+    const name = new TextDecoder().decode(u8.subarray(off + 46, off + 46 + fnLen));
+    const lfnLen = dv.getUint16(lho + 26, true);
+    const lexLen = dv.getUint16(lho + 28, true);
+    const dataStart = lho + 30 + lfnLen + lexLen;
+    entries.push({ name, method, comp: u8.subarray(dataStart, dataStart + csize), usize });
+    off += 46 + fnLen + exLen + cmLen;
+  }
+  return entries;
+}
+async function inflateRaw(u8){
+  if (typeof DecompressionStream === 'undefined') throw new Error('浏览器不支持 DecompressionStream');
+  const ds = new DecompressionStream('deflate-raw');
+  const stream = new Blob([u8]).stream().pipeThrough(ds);
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+async function entryBytes(e){ return e.method === 0 ? e.comp : inflateRaw(e.comp); }
+
+// ---------------- ingest ----------------
+function isUIPath(p){ p = p.toLowerCase(); return p.endsWith('.json') && (/(^|\/)ui\//.test(p) || p.endsWith('/_ui_defs.json') || /(^|\/)_ui_defs\.json$/.test(p) || true); }
+function texKeyFromPath(p){
+  const i = p.toLowerCase().indexOf('textures/');
+  return i >= 0 ? p.slice(i).replace(/\.png$/i,'').toLowerCase() : null;
+}
+function addTexture(p, blob){
+  const key = texKeyFromPath(p);
+  if (!key) return;
+  const img = new Image();
+  img.src = URL.createObjectURL(blob);
+  textures[key] = img;
+}
+function registerUI(text, path){
+  let j;
+  try { j = parseJSONC(text); } catch(e){ log('skip '+path+': '+e.message); return; }
+  if (!j || typeof j !== 'object') return;
+  const ns = j.namespace;
+  if (!ns) return;
+  for (const [key, val] of Object.entries(j)){
+    if (key === 'namespace' || typeof val !== 'object') continue;
+    const [name, ref] = key.split('@');
+    defs[ns + '.' + name] = ref ? Object.assign({ _ref: ref }, val) : val;
+  }
+}
+
+async function handleFile(file){
+  const lower = file.name.toLowerCase();
+  if (lower.endsWith('.json')){
+    registerUI(await file.text(), file.name);
+    return;
+  }
+  if (lower.endsWith('.mcpack') || lower.endsWith('.mcaddon') || lower.endsWith('.zip')){
+    let entries;
+    try { entries = await unzip(await file.arrayBuffer()); }
+    catch(e){ log('unzip fail '+file.name+': '+e.message); return; }
+    for (const e of entries){
+      if (e.name.endsWith('/')) continue;
+      const n = e.name.toLowerCase();
+      if (n.endsWith('.json') && /\/(ui)\//.test(n)){
+        try { registerUI(await new TextDecoder().decode(await entryBytes(e)), e.name); }
+        catch(err){ log('skip '+e.name+': '+err.message); }
+      } else if (n.endsWith('.png') && /\/textures\//.test(n)){
+        try { addTexture(e.name, new Blob([await entryBytes(e)], {type:'image/png'})); } catch(err){}
+      }
+    }
+    return;
+  }
+  if (lower.endsWith('.png')){
+    addTexture(file.name, file);
+  }
+}
+
+async function handleFiles(fileList){
+  const files = [...fileList];
+  if (!files.length) return;
+  for (const f of files){
+    const path = f.webkitRelativePath || f.name;
+    const n = path.toLowerCase();
+    if (n.endsWith('.json')){
+      registerUI(await f.text(), path); continue;
+    }
+    if (n.endsWith('.png')){
+      addTexture(path, f); continue;
+    }
+    await handleFile(f);
+  }
+}
+
+document.getElementById('files').addEventListener('change', async (e)=>{ clearLog(); await handleFiles(e.target.files); reloadAll(); });
+document.getElementById('dir').addEventListener('change', async (e)=>{ clearLog(); await handleFiles(e.target.files); reloadAll(); });
+
+let lastLoaded = '';
+function reloadAll(){
+  defs = defs; // keep
+  fillRoots();
+  log('loaded controls: ' + Object.keys(defs).length + ', textures: ' + Object.keys(textures).length);
+  render();
+}
+
+function fillRoots(){
+  const names = Object.keys(defs).sort();
+  const prefer = names.filter(n => n === 'server_form.gender_root' || (n.startsWith('server_form.') && !n.includes(' ')));
+  const opts = prefer.length ? prefer : names;
+  const prev = rootSel.value;
+  rootSel.innerHTML = opts.map(n => `<option>${n}</option>`).join('') || '<option>(无)</option>';
+  if (defs[prev]) rootSel.value = prev;
+  else if (defs['server_form.gender_root']) rootSel.value = 'server_form.gender_root';
+}
+
+// ---------------- resolve ----------------
+function origResolve(name, depth){
+  if (!name || depth > 25) return {};
+  name = name.replace(/^@/, '');
+  if (name.startsWith('$inline:')) return defs[name] || {};
+  const d = defs[name];
+  if (!d) return { _missing: name };
+  if (d._ref && d._ref !== name){
+    const base = origResolve(d._ref, depth + 1);
+    return mergeDef(base, d);
+  }
+  return d;
+}
+let resolveDef = (n, d=0) => origResolve(n, d);
+
+function mergeDef(base, over){
+  const o = Object.assign({}, base);
+  for (const [k,v] of Object.entries(over)) o[k] = v;
+  return o;
+}
+function unwrapBase([k, v]){
+  const [name, ref] = k.split('@');
+  const c = { name, ref: ref || ('$inline:' + name), over: v };
+  if (!ref) defs['$inline:' + name] = v;
+  return c;
+}
+let unwrap = unwrapBase;
+
+// ---------------- bindings ----------------
+function evalMolangBool(expr, st){
+  const title = st.title || '';
+  let m = expr.match(/\(not \(\(#title_text - '([^']*)'\) = #title_text\)\)/);
+  if (m) return title.includes(m[1]);
+  m = expr.match(/\(\(#title_text - '([^']*)'\) = #title_text\)/);
+  if (m) return !title.includes(m[1]);
+  if (expr === 'true') return true;
+  if (expr === 'false') return false;
+  return true;
+}
+function visible(def, st){
+  if (typeof def.ignored === 'string' && evalMolangBool(def.ignored, st)) return false;
+  if (!def.bindings) return true;
+  for (const b of def.bindings){
+    const target = b.target_property_name || b.binding_name_override;
+    if (target === '#visible' && b.source_property_name) return evalMolangBool(b.source_property_name, st);
+  }
+  return true;
+}
+
+// ---------------- layout ----------------
+const ANCH = { top_left:[0,0], top_middle:[.5,0], top_right:[1,0], left_middle:[0,.5], center:[.5,.5], right_middle:[1,.5], bottom_left:[0,1], bottom_middle:[.5,1], bottom_right:[1,1] };
+function pt(rect, key){ const a = ANCH[key||'top_left']||[0,0]; return [rect.x + a[0]*rect.w, rect.y + a[1]*rect.h]; }
+function resolveAxis(v, parent, cross){
+  if (typeof v === 'number') return v;
+  if (typeof v !== 'string') return -1;
+  v = v.trim();
+  if (v === 'fill' || v === '100%') return parent;
+  if (v === '100%c') return cross;
+  if (v === 'default') return -1;
+  let m;
+  if ((m = v.match(/^100%\s*-\s*(\d+(?:\.\d+)?)\s*px$/))) return parent - Number(m[1]);
+  if ((m = v.match(/^100%\s*\+\s*(\d+(?:\.\d+)?)\s*px$/))) return parent + Number(m[1]);
+  if ((m = v.match(/^-?\d+(?:\.\d+)?$/))) return Number(v);
+  return -1;
+}
+function stackSize(children, def){
+  const horizontal = def.orientation === 'horizontal';
+  let main = 0, cross = 0;
+  for (const c of children){
+    const m = mergeDef(resolveDef(c.ref), c.over);
+    const w = resolveAxis(m.size && m.size[0], 0, 0), h = resolveAxis(m.size && m.size[1], 0, 0);
+    if (horizontal){ main += Math.max(0,w); cross = Math.max(cross, Math.max(0,h)); }
+    else { main += Math.max(0,h); cross = Math.max(cross, Math.max(0,w)); }
+  }
+  return horizontal ? { w:main, h:cross } : { w:cross, h:main };
+}
+
+// ---------------- render ----------------
+function render(){
+  const zoom = Number(zoomEl.value);
+  cv.width = VW*zoom; cv.height = VH*zoom;
+  ctx.setTransform(zoom,0,0,zoom,0,0);
+  ctx.fillStyle = '#3a3f4b'; ctx.fillRect(0,0,VW,VH);
+  const rootName = rootSel.value;
+  if (!rootName || !defs[rootName]){ log('请选择根控件'); return; }
+  const st = { title: titleEl.value };
+  try { drawControl(resolveDef(rootName), { x:0,y:0,w:VW,h:VH }, st, rootName, rootName); }
+  catch(e){ log('render error: '+e.message); }
+}
+
+function drawControl(def, parentRect, st, name, ref){
+  if (!def || !visible(def, st)) return;
+  let children = (def.controls || []).map(unwrap);
+  if (children.length === 0 && def.factory && def.factory.control_ids && def.factory.control_ids.button){
+    const btn = String(def.factory.control_ids.button).replace(/^@/,'');
+    children = [];
+    for (let i=0;i<5;i++) children.push({ name:'btn'+i, ref: btn, over:{} });
+  }
+  const type = def.type || 'panel';
+
+  let w = resolveAxis(def.size && def.size[0], parentRect.w, 0);
+  let h = resolveAxis(def.size && def.size[1], parentRect.h, 0);
+  if (type === 'stack_panel'){
+    const s = stackSize(children, def);
+    if (w < 0 || (def.size && String(def.size[0]).includes('%c'))) w = s.w;
+    if (h < 0 || (def.size && String(def.size[1]).includes('%c'))) h = s.h;
+  }
+  if (w < 0) w = 20;
+  if (h < 0) h = 20;
+
+  const af = def.anchor_from || 'top_left', at = def.anchor_to || 'top_left', off = def.offset || [0,0];
+  const ap = pt(parentRect, at);
+  const rect = { x: ap[0] + off[0] - ANCH[af][0]*w, y: ap[1] + off[1] - ANCH[af][1]*h, w, h };
+
+  if (type === 'image'){
+    const tex = def.texture;
+    const key = typeof tex === 'string' ? tex.toLowerCase() : '';
+    const img = key ? (textures[key] || textures[key.replace(/\.png$/,'')]) : null;
+    if (img && img.complete && img.width){
+      ctx.globalAlpha = def.alpha != null ? def.alpha : 1;
+      ctx.drawImage(img, rect.x, rect.y, rect.w, rect.h);
+      ctx.globalAlpha = 1;
+    } else {
+      const c = def.color;
+      if (Array.isArray(c)){ ctx.fillStyle = `rgba(${255*c[0]|0},${255*c[1]|0},${255*c[2]|0},${c[3]!=null?c[3]:1})`; ctx.fillRect(rect.x,rect.y,rect.w,rect.h); }
+      else if (typeof c === 'string'){ ctx.fillStyle = c; ctx.fillRect(rect.x,rect.y,rect.w,rect.h); }
+    }
+  } else if (type === 'label'){
+    const t = (typeof def.text === 'string' && !def.text.startsWith('#')) ? def.text : '';
+    ctx.fillStyle = '#fff'; ctx.font = '8px monospace'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(t).replace(/§./g,''), rect.x + 2, rect.y + rect.h/2);
+  } else if (type === 'button' || /button/i.test(ref||'') || /button/i.test(name||'')){
+    ctx.fillStyle = '#4a4f5b'; ctx.fillRect(rect.x,rect.y,rect.w,rect.h);
+    ctx.strokeStyle = '#2b2f38'; ctx.strokeRect(rect.x+0.5,rect.y+0.5,rect.w-1,rect.h-1);
+    const t = def.$button_text;
+    if (typeof t === 'string' && !t.startsWith('#')){ ctx.fillStyle='#fff'; ctx.font='8px monospace'; ctx.textBaseline='middle'; ctx.fillText(t.replace(/§./g,''), rect.x+3, rect.y+rect.h/2); }
+  } else if (type === 'custom'){
+    ctx.strokeStyle = '#ffd166'; ctx.setLineDash([3,3]); ctx.strokeRect(rect.x+0.5,rect.y+0.5,rect.w-1,rect.h-1); ctx.setLineDash([]);
+    ctx.fillStyle = '#ffd166'; ctx.font='7px monospace'; ctx.textBaseline='top'; ctx.fillText(def.renderer||'custom', rect.x+2, rect.y+2);
+  }
+
+  if (type === 'stack_panel'){
+    const horizontal = def.orientation === 'horizontal';
+    let cx = rect.x, cy = rect.y;
+    for (const c of children){
+      const m = mergeDef(resolveDef(c.ref), c.over);
+      let cw = resolveAxis(m.size && m.size[0], rect.w, 0), ch = resolveAxis(m.size && m.size[1], rect.h, 0);
+      if (cw < 0) cw = rect.w; if (ch < 0) ch = rect.h;
+      drawControlAt(m, { x:cx, y:cy, w:cw, h:ch }, st, c.name, c.ref);
+      if (horizontal) cx += cw; else cy += ch;
+    }
+  } else {
+    for (const c of children){
+      const m = mergeDef(resolveDef(c.ref), c.over);
+      drawControl(m, rect, st, c.name, c.ref);
+    }
+  }
+}
+function drawControlAt(def, rect, st, name, ref){
+  const saved = { af: def.anchor_from, at: def.anchor_to, off: def.offset };
+  def.anchor_from = 'top_left'; def.anchor_to = 'top_left'; def.offset = [0,0];
+  drawControl(def, rect, st, name, ref);
+  def.anchor_from = saved.af; def.anchor_to = saved.at; def.offset = saved.off;
+}
+
+rootSel.addEventListener('change', render);
+document.getElementById('reload').addEventListener('click', render);
+titleEl.addEventListener('input', render);
+</script>
+</body>
+</html>

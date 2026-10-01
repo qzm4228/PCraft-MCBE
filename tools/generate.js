@@ -65,24 +65,23 @@ function hexToRgb(hex) { const n = parseInt(hex.slice(1), 16); return [(n >> 16)
 function makeEggPng(file, base, overlay) {
   const W = 16, H = 16, buf = Buffer.alloc(W * H * 4, 0);
   const [br, bg, bb] = hexToRgb(base), [or, og, ob] = hexToRgb(overlay);
-  const set = (x, y, r, g, b, a = 255) => { const i = (y * W + x) * 4; buf[i] = r; buf[i + 1] = g; buf[i + 2] = b; buf[i + 3] = a; };
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const nx = (x - 7.5) / 6.0, ny = (y - 8.5) / 7.2;
-    if (nx * nx + ny * ny <= 1.0) set(x, y, br, bg, bb);
+  const set = (x, y, r, g, b, a = 255) => { if (x < 0 || y < 0 || x >= W || y >= H) return; const i = (y * W + x) * 4; buf[i] = r; buf[i + 1] = g; buf[i + 2] = b; buf[i + 3] = a; };
+  // egg silhouette rows [y, xStart, xEnd]
+  const rows = [[2, 7, 8], [3, 6, 9], [4, 5, 10], [5, 5, 10], [6, 4, 11], [7, 4, 11], [8, 4, 11], [9, 4, 11], [10, 4, 11], [11, 5, 10], [12, 5, 10], [13, 6, 9]];
+  for (const [y, x0, x1] of rows) {
+    const shade = y <= 7 ? 1.0 : y <= 10 ? 0.85 : 0.7;
+    for (let x = x0; x <= x1; x++) set(x, y, Math.round(br * shade), Math.round(bg * shade), Math.round(bb * shade));
   }
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const nx = (x - 7.5) / 6.0, ny = (y - 8.5) / 7.2;
-    if (nx * nx + ny * ny > 1.0) continue;
-    if (((x * 3 + y * 5) % 11) < 3 && x > 3 && x < 12 && y > 4 && y < 13) set(x, y, or, og, ob);
-  }
+  // speckles in the overlay colour
+  for (const [x, y] of [[6, 4], [9, 5], [6, 7], [10, 8], [5, 9], [8, 10], [11, 7], [7, 12]]) set(x, y, or, og, ob);
   writePng(file, W, H, buf);
 }
 
 // ---------------------------------------------------------------- item data
 // kind: item | food | armor | spawn_egg
 const FOOD = {
-  glowberry_juice_bottle: { nutrition: 12, saturation: 'low', alwaysEat: true, effect: 'pcraftrevorn:glowberry_high' },
-  fermented_glowberry_juice_bottle: { nutrition: 12, saturation: 'normal', alwaysEat: true, effect: 'pcraftrevorn:glowberry_high' }
+  glowberry_juice_bottle: { nutrition: 12, saturation: 0.3, alwaysEat: true },
+  fermented_glowberry_juice_bottle: { nutrition: 12, saturation: 0.5, alwaysEat: true }
 };
 const ARMOR = {
   silverfish_plating_helmet: { slot: 'slot.armor.head', protection: 2, durability: 165 },
@@ -160,8 +159,10 @@ function genItems() {
     if (tags) components['minecraft:tags'] = { tags };
     if (FOOD[name]) {
       const f = FOOD[name];
-      components['minecraft:food'] = { nutrition: f.nutrition, saturation_modifier: f.saturation, can_always_eat: f.alwaysEat };
-      components['minecraft:use_modifiers'] = { use_duration: 1.6, movement_modifier: 0.35 };
+      components['minecraft:food'] = { nutrition: f.nutrition, saturation_modifier: f.saturation };
+      if (f.alwaysEat) components['minecraft:food'].can_always_eat = true;
+      components['minecraft:use_animation'] = { value: 'eat' };
+      components['minecraft:use_modifiers'] = { start_using: 'always', use_duration: 1.6, movement_modifier: 0.35 };
     }
     if (ARMOR[name]) {
       const a = ARMOR[name];
@@ -287,8 +288,9 @@ function genPotions() {
         components: {
           'minecraft:icon': { textures: { default: key } },
           'minecraft:max_stack_size': 1,
-          'minecraft:use_animation': 'drink',
-          'minecraft:use_modifiers': { use_duration: 1.6, movement_modifier: 0.35 }
+          'minecraft:food': { nutrition: 0, saturation_modifier: 0, can_always_eat: true },
+          'minecraft:use_animation': { value: 'drink' },
+          'minecraft:use_modifiers': { start_using: 'always', use_duration: 1.6, movement_modifier: 0.35 }
         }
       }
     });
@@ -513,7 +515,7 @@ const UUID = {
 function genManifests() {
   writeJSON(path.join(BP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn (砂墨SandMo)', description: '掠食工艺 Bedrock 移植 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner', uuid: UUID.bpHeader, version: [0, 3, 0], min_engine_version: [1, 21, 100] },
+    header: { name: 'PCraftRevorn §2砂墨§r', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.bpHeader, version: [0, 3, 0], min_engine_version: [1, 21, 100] },
     modules: [
       { type: 'data', uuid: UUID.bpData, version: [0, 3, 0] },
       { type: 'script', language: 'javascript', uuid: UUID.bpScript, entry: 'scripts/main.js', version: [0, 3, 0] }
@@ -527,7 +529,7 @@ function genManifests() {
   });
   writeJSON(path.join(RP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn 资源 (砂墨SandMo)', description: '掠食工艺 Bedrock 移植 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner', uuid: UUID.rpHeader, version: [0, 2, 0], min_engine_version: [1, 21, 100] },
+    header: { name: 'PCraftRevorn 资源 §2砂墨§r', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.rpHeader, version: [0, 2, 0], min_engine_version: [1, 21, 100] },
     modules: [{ type: 'resources', uuid: UUID.rpRes, version: [0, 2, 0] }],
     metadata: { authors: ['砂墨SandMo', 'Bilibili: 砂墨', '原创: MysticSummoner'], license: 'AFL-3.0' }
   });

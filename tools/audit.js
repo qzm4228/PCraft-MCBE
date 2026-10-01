@@ -17,7 +17,7 @@ const info = [];
 const err = (m) => errors.push(m);
 const warn = (m) => warns.push(m);
 
-const readJSON = (f) => JSON.parse(fs.readFileSync(f, 'utf8'));
+const readJSON = (f) => JSON.parse(fs.readFileSync(f, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1'));
 const exists = (f) => fs.existsSync(f);
 const list = (d, ext) => (exists(d) ? fs.readdirSync(d).filter((f) => f.endsWith(ext)) : []);
 const base = (f) => f.replace(/\.[^.]+$/, '');
@@ -119,6 +119,7 @@ for (const [id, f] of bpEntities) {
   if (!rpClient.has(id)) err(`entity ${id}: no matching client entity`);
 }
 for (const [id, f] of rpClient) {
+  if (id === 'minecraft:player') continue; // overrides the vanilla player entity (gender model)
   const d = readJSON(path.join(RP, 'entity', f))['minecraft:client_entity'].description;
   if (!bpEntities.has(id)) warn(`client entity ${id}: no matching BP entity`);
   for (const g of Object.values(d.geometry || {})) if (!geoms.has(g)) err(`client ${id}: missing geometry ${g}`);

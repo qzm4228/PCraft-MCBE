@@ -23,6 +23,9 @@
           "priority": 1,
           "speed_multiplier": 1.2
         },
+        "minecraft:behavior.hurt_by_target": {
+          "priority": 2
+        },
         "minecraft:behavior.nearest_attackable_target": {
           "priority": 3,
           "must_see": true,
@@ -46,9 +49,6 @@
               "max_dist": 12
             }
           ]
-        },
-        "minecraft:behavior.hurt_by_target": {
-          "priority": 2
         }
       },
       "pcraftrevorn:prey_holder": {

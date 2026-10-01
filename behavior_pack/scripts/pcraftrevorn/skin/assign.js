@@ -106,6 +106,11 @@ export function initPredator(entity) {
     setNum(entity, "pc:wg1", st.wg1);
     setNum(entity, "pc:wg2", st.wg2);
   }
+  if (id === "vinemaiden") {
+    setNum(entity, "pc:buried", 0);
+    setNum(entity, "pc:lost", 0);
+    setNum(entity, "pc:burrowCd", 40 + Math.floor(Math.random() * 80));
+  }
   assignSkin(entity, false);
 }
 

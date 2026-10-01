@@ -15,11 +15,13 @@
         "default": "geometry.rabbit_staff"
       },
       "animations": {
-        "idle": "animation.rabbit_staff.idle"
+        "idle": "animation.rabbit_staff.idle",
+        "wield": "animation.pcraftrevorn.held.wield"
       },
       "scripts": {
         "animate": [
-          "idle"
+          "idle",
+          "wield"
         ]
       },
       "render_controllers": [

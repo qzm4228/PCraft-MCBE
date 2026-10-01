@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title data-id="th-modified">Player Genders Addon Skin Converter</title>
+
+<!-- Font Awesome for trash icon -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+
+/* Center title & subtitle with more space from top */
+.title {
+  text-align: center;
+  margin-top: 60px; /* moved down */
+}
+
+.subtitle {
+  text-align: center;
+  margin-top: 15px; /* small gap below title */
+}
+
+/* Body */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #121212; /* solid background */
+  color: #e5e5e5;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Panel */
+.panel {
+  width: 380px;
+  margin-top: 100px;
+  background: #14141a;
+  padding: 25px;
+  border-radius: 10px;
+  border: 1px solid #2a2a35;
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+}
+
+/* Buttons and UI styles */
+.selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.btn {
+  flex: 1;
+  padding: 12px;
+  background: #1e1e26;
+  border: 1px solid #333;
+  color: #aaa;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn:hover {
+  border-color: #6c7bff;
+  color: white;
+}
+
+.btn.active {
+  background: linear-gradient(135deg, #6c7bff, #9f6cff);
+  border: none;
+  color: white;
+  box-shadow: 0 0 8px rgba(108,123,255,0.5);
+}
+
+.btn.disabled {
+  background: #2a2a35;
+  color: #555;
+  border-color: #444;
+  cursor: not-allowed;
+}
+
+/* Upload box */
+.upload {
+  border: 2px dashed #333;
+  border-radius: 10px;
+  padding: 35px;
+  cursor: pointer;
+  transition: 0.2s;
+  color: #e5e5e5;
+}
+.upload.disabled {
+  border-color: #444;
+  background: #1c1c22;
+  color: #555;
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.upload.drag {
+  border-color: #9f6cff;
+  background: rgba(108,123,255,0.08);
+}
+
+/* Preview */
+.preview-container {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.preview-img {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #20202b;
+  border: 1px solid #2a2a35;
+  margin-bottom: 12px;
+  pointer-events: none; /* disables all mouse interactions */
+  user-select: none;    /* prevents selection */
+}
+
+/* Warnings */
+#sizeWarning,
+#blockWarning {
+  display: none;
+  color: #ff4d4d;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+/* Reset/Delete button */
+.delete-btn {
+  background: #9f1a1a;
+  border: 1px solid #800000;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+.delete-btn:hover {
+  background: #b53131;
+  transform: scale(1.03);
+}
+
+/* Download container centers the button */
+.download-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+</style>
+
+<meta property="og:title" content="Player Genders Addon Skin Converter" data-id="th-modified" ><meta property="og:image" content="https://tiiny.host/assets/logo-purple-bg.png" data-id="th-modified" ><meta property="og:url" content="https://playergendersaddonskinconverter.tiiny.site/" data-id="th-modified" ><meta property="og:type" content="website" data-id="th-modified" ><script defer data-domain="playergendersaddonskinconverter.tiiny.site" src="https://analytics.tiiny.site/js/plausible.js"></script><script type="text/javascript" src="https://tiiny.host/ad-script.js"></script></head>
+<body>
+
+<!-- Title + Subtitle -->
+<h1 class="title">Player Genders Addon Skin Converter</h1>
+<div class="subtitle">Made by Jun Channel</div>
+
+<div class="panel">
+
+  <!-- 64× / 128× Selector -->
+  <div class="selector">
+    <button class="btn active" data-scale="1" id="btn64">64×</button>
+    <button class="btn" data-scale="2" id="btn128">128×</button>
+  </div>
+
+  <!-- Upload Zone -->
+  <div class="upload" id="drop">
+    <div class="text">Drop the PNG here or click here to import your skin</div>
+  </div>
+  <input type="file" id="file" accept="image/png">
+
+  <!-- Warnings -->
+  <div id="blockWarning"></div>
+  <div id="sizeWarning"></div>
+
+  <!-- Centered Preview -->
+  <div id="imagePreview" class="preview-container" style="display:none;">
+    <h3>Imported Skin</h3>
+    <img id="uploadedImage" class="preview-img" draggable="false" oncontextmenu="return false;" onmousedown="return false;">
+    <button class="delete-btn" id="deleteUpload">
+      <i class="fa-solid fa-trash"></i> Remove Skin
+    </button>
+  </div>
+
+  <!-- Download Button (centered) -->
+  <div class="download-container">
+    <a id="downloadLink" style="display:none;" download="converted_skin.png">
+      <button class="btn download-btn">Download the converted version!</button>
+    </a>
+  </div>
+
+</div>
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+
+  const btn64 = document.getElementById("btn64");
+  const btn128 = document.getElementById("btn128");
+  const drop = document.getElementById("drop");
+  const input = document.getElementById("file");
+  const blockWarning = document.getElementById("blockWarning");
+  const sizeWarning = document.getElementById("sizeWarning");
+  const imagePreview = document.getElementById("imagePreview");
+  const uploadedImage = document.getElementById("uploadedImage");
+  const deleteUpload = document.getElementById("deleteUpload");
+  const downloadLink = document.getElementById("downloadLink");
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+
+  let currentScale = 1;
+  let uploaded = false;
+
+  function setUploadEnabled(enabled) {
+    if (enabled) drop.classList.remove("disabled");
+    else drop.classList.add("disabled");
+  }
+
+  function resetAll() {
+    uploaded = false;
+    imagePreview.style.display = "none";
+    downloadLink.style.display = "none";
+    sizeWarning.style.display = "none";
+    blockWarning.style.display = "none";
+    btn64.classList.remove("disabled");
+    btn128.classList.remove("disabled");
+    setUploadEnabled(true);
+  }
+
+  document.querySelectorAll(".selector .btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (uploaded) {
+        blockWarning.style.display = "block";
+        blockWarning.textContent = "❗ Image already uploaded — you can’t change the option now!";
+        return;
+      }
+      document.querySelectorAll(".selector .btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentScale = parseInt(btn.dataset.scale);
+    });
+  });
+
+  drop.addEventListener("click", () => { if (!uploaded) input.click(); });
+  drop.addEventListener("dragover", e => { if (!uploaded) { e.preventDefault(); drop.classList.add("drag"); } });
+  drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
+  drop.addEventListener("drop", e => {
+    if (!uploaded) {
+      e.preventDefault();
+      drop.classList.remove("drag");
+      handleFile(e.dataTransfer.files[0]);
+    }
+  });
+
+  input.addEventListener("change", e => handleFile(e.target.files[0]));
+
+  function handleFile(file) {
+    if (!file || !file.type.includes("png")) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+
+      if (currentScale === 1 && (w !== 64 || h !== 64)) {
+        sizeWarning.style.display = "block";
+        sizeWarning.textContent = "❗ Uploaded texture is " + w + "×" + h + ". Please use 64×64 PNG for this option.";
+        return;
+      }
+      if (currentScale === 2 && (w !== 128 || h !== 128)) {
+        sizeWarning.style.display = "block";
+        sizeWarning.textContent = "❗ Uploaded texture is " + w + "×" + h + ". Please use 128×128 PNG for this option.";
+        return;
+      }
+
+      sizeWarning.style.display = "none";
+      blockWarning.style.display = "none";
+      uploaded = true;
+      setUploadEnabled(false);
+
+      uploadedImage.src = img.src;
+      imagePreview.style.display = "flex";
+
+      if (currentScale === 1) btn128.classList.add("disabled");
+      if (currentScale === 2) btn64.classList.add("disabled");
+
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, 0);
+
+      convertBedrock(currentScale);
+
+      downloadLink.style.display = "block";
+      downloadLink.href = canvas.toDataURL();
+    };
+    img.src = URL.createObjectURL(file);
+  }
+
+  deleteUpload.addEventListener("click", resetAll);
+
+  function convertBedrock(scale) {
+    const cp = (sx, sy, w, h, dx, dy) => {
+      const data = ctx.getImageData(sx, sy, w, h);
+      ctx.putImageData(data, dx, dy);
+    };
+    const factor = scale;
+    cp(20*factor,16*factor,8*factor,8*factor,0,0);
+    cp(16*factor,20*factor,4*factor,4*factor,24*factor,0);
+    cp(28*factor,20*factor,4*factor,4*factor,28*factor,0);
+    cp(32*factor,20*factor,8*factor,4*factor,24*factor,4*factor);
+    cp(20*factor,32*factor,8*factor,8*factor,32*factor,0);
+    cp(20*factor,24*factor,8*factor,4*factor,56*factor,16*factor);
+    cp(16*factor,36*factor,4*factor,4*factor,56*factor,0);
+    cp(28*factor,36*factor,4*factor,4*factor,60*factor,0);
+    cp(20*factor,40*factor,8*factor,4*factor,56*factor,20*factor);
+  }
+
+});
+</script>
+
+</body>
+</html>

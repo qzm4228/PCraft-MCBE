@@ -1,0 +1,6 @@
+{
+  "ui_defs": [
+    "ui/chat_screen.json",
+    "ui/gender_menu.json"
+  ]
+}

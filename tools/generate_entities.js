@@ -68,7 +68,9 @@ const SPECIAL = [
   { id: 'piglin_throneroom_spawner', hp: 10, size: [0, 0], families: ['piglin_throneroom_spawner', 'spawner'] },
   { id: 'rabbit_player_projectile', projectile: true, families: ['projectile'] },
   { id: 'rabbit_projectile_bloodlust', projectile: true, families: ['projectile'] },
-  { id: 'digestion_bar', boss: true, hp: 100, size: [0, 0], families: ['digestion_bar'] }
+  { id: 'digestion_bar', boss: true, hp: 100, size: [0, 0], families: ['digestion_bar'] },
+  // invisible stash that holds digested players' belongings until the predator dies
+  { id: 'belly_storage', container: true, hp: 100, size: [0, 0], families: ['belly_storage'] }
 ];
 const INVISIBLE_GEO = 'geometry.pcraftrevorn.invisible';
 const INVISIBLE_TEX = 'textures/entity/pcraftrevorn/invisible';
@@ -78,6 +80,9 @@ const TAMEABLE = new Set(['gilded_basaltmite', 'piglin_royal_knight', 'rabbit_wi
 const SPAWN_EGG = new Set(['zombie', 'piglin_royal', 'vinemaiden', 'piglin_royal_knight', 'silverfish', 'basaltmite', 'rabbit_wizard', 'gilded_basaltmite', 'scarecrow']);
 // entities with a separate emissive glow texture (drawn as a 2nd render controller)
 const GLOW = { binding_ring: 'binding_ring_glow', shielding_ring: 'shielding_ring_glow', scarecrow: 'scarecrow_glow' };
+// entities whose original AI does NOT target players -> neutral (only retaliate)
+// or target a different family. Others default to player+villager.
+const TARGETS = { basaltmite: [], gilded_basaltmite: [], scarecrow: ['monster'] };
 // temporary/loop animations (short name): only these loop, the rest play once
 const LOOP_ANIMS = new Set(['idle', 'walk', 'sprint', 'hidden']);
 
@@ -265,15 +270,15 @@ function genBehavior(e, skinMax) {
   if (e.hostile) {
     componentGroups[`${NS}:aggressive`] = {
       'minecraft:behavior.melee_attack': { priority: 1, speed_multiplier: 1.2 },
-      'minecraft:behavior.nearest_attackable_target': {
-        priority: 3, must_see: true, reselect_targets: true, within_radius: e.follow || 16,
-        entity_types: [
-          { filters: { test: 'is_family', subject: 'other', value: 'player' }, max_dist: e.follow || 16 },
-          { filters: { test: 'is_family', subject: 'other', value: 'villager' }, max_dist: e.follow || 16 }
-        ]
-      },
       'minecraft:behavior.hurt_by_target': { priority: 2 }
     };
+    const targets = TARGETS[e.id] ?? ['player', 'villager'];
+    if (targets.length) {
+      componentGroups[`${NS}:aggressive`]['minecraft:behavior.nearest_attackable_target'] = {
+        priority: 3, must_see: true, reselect_targets: true, within_radius: e.follow || 16,
+        entity_types: targets.map((t) => ({ filters: { test: 'is_family', subject: 'other', value: t }, max_dist: e.follow || 16 }))
+      };
+    }
     // during swallow the prey rides the predator (free look, position follows)
     componentGroups[`${NS}:prey_holder`] = {
       'minecraft:rideable': {
@@ -343,6 +348,16 @@ function genSpecial() {
       'minecraft:collision_box': { width: 0.25, height: 0.25 },
       'minecraft:physics': {},
       'minecraft:pushable': { is_pushable: false, is_pushable_by_piston: false }
+    } : s.container ? {
+      'minecraft:type_family': { family: s.families },
+      'minecraft:health': { value: s.hp, max: s.hp },
+      'minecraft:inventory': { container_type: 'inventory', inventory_size: 54, can_be_siphoned_from: false },
+      'minecraft:collision_box': { width: 0, height: 0 },
+      'minecraft:physics': { has_gravity: false, has_collision: false },
+      'minecraft:pushable': { is_pushable: false, is_pushable_by_piston: false },
+      'minecraft:fire_immune': {},
+      'minecraft:persistent': {},
+      'minecraft:damage_sensor': { triggers: [{ on_damage: { filters: { test: 'always', value: true } }, deals_damage: false }] }
     } : s.boss ? {
       'minecraft:type_family': { family: s.families },
       'minecraft:boss': { hud_range: 100, should_darken_sky: false },
@@ -375,12 +390,12 @@ function genSpecial() {
 // ---- spawn rules ----
 function genSpawnRules() {
   const rules = [
-    { id: 'basaltmite', weight: 40, min: 1, max: 1, biome: { test: 'has_biome_tag', value: 'basalt' }, pop: 'monster' },
-    { id: 'silverfish', weight: 75, min: 4, max: 4, anyBiome: true, pop: 'monster' },
-    { id: 'vinemaiden', weight: 18, min: 1, max: 1, anyBiome: true, pop: 'monster' },
-    { id: 'zombie', weight: 100, min: 1, max: 4, anyBiome: true, pop: 'monster' }
+    { id: 'basaltmite', weight: 20, min: 1, max: 2, biome: { test: 'has_biome_tag', value: 'basalt' }, pop: 'monster' },
+    { id: 'silverfish', weight: 10, min: 1, max: 2, anyBiome: true, pop: 'monster' },
+    { id: 'vinemaiden', weight: 5, min: 1, max: 1, anyBiome: true, pop: 'monster' },
+    { id: 'zombie', weight: 15, min: 1, max: 2, anyBiome: true, pop: 'monster' }
   ];
-  const anyFilter = { any_of: [{ test: 'has_biome_tag', value: 'overworld' }, { test: 'has_biome_tag', value: 'nether' }, { test: 'has_biome_tag', value: 'the_end' }] };
+  const anyFilter = { test: 'has_biome_tag', value: 'overworld' };
   for (const r of rules) {
     const cond = {
       'minecraft:spawns_on_surface': {},
@@ -456,6 +471,20 @@ function genAttachables() {
   }
 
   // rabbit staffs use a 3D geo model -> held-item attachables
+  // held-item wield animation (positions the staff at the hand)
+  writeJSON(path.join(RP, 'animations', 'pcraftrevorn_held.animation.json'), {
+    format_version: '1.8.0',
+    animations: {
+      'animation.pcraftrevorn.held.wield': {
+        loop: true,
+        bones: {
+          Staff: { rotation: ['query.is_first_person ? 7 : 0', 'query.is_first_person ? -29 : 0', 0], position: [0, 'query.is_first_person ? -2.75 : -6', 'query.is_first_person ? -0.75 : 0'] },
+          Eye: { rotation: ['query.is_first_person ? 7 : 0', 'query.is_first_person ? -29 : 0', 0], position: [0, 'query.is_first_person ? -2.75 : -6', 'query.is_first_person ? -0.75 : 0'] }
+        }
+      }
+    }
+  });
+
   const staffs = [
     { item: 'rabbit_staff', tex: 'rabbit_staff0' },
     { item: 'rabbit_staff_gold', tex: 'rabbit_staff1' },
@@ -473,8 +502,8 @@ function genAttachables() {
           materials: { default: 'entity_alphatest', enchanted: 'entity_alphatest_glint' },
           textures: { default: `textures/items/pcraftrevorn/${s.tex}`, enchanted: 'textures/misc/enchanted_item_glint' },
           geometry: { default: 'geometry.rabbit_staff' },
-          animations: { idle: 'animation.rabbit_staff.idle' },
-          scripts: { animate: ['idle'] },
+          animations: { idle: 'animation.rabbit_staff.idle', wield: 'animation.pcraftrevorn.held.wield' },
+          scripts: { animate: ['idle', 'wield'] },
           render_controllers: [rcName]
         }
       }

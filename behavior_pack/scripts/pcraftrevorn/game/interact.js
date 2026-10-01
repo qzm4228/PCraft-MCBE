@@ -1,5 +1,5 @@
 // Right-click interactions with predators (port of the mod's item procedures).
-import { world } from "@minecraft/server";
+import { world, system } from "@minecraft/server";
 import { assignSkin, getNum, setNum, localId, GENDERED } from "../skin/assign.js";
 import { isPredator } from "../vore/vore.js";
 import { openGuide } from "./guide.js";
@@ -39,6 +39,23 @@ function healFull(entity) {
 function isTamed(entity) {
   try { return !!entity.getComponent("minecraft:is_tamed"); } catch { return false; }
 }
+// Peculiar mirror: toggles a gendered predator. Guarded so the entity-interact
+// event and the item-use fallback don't both fire on the same press.
+const mirrorGuard = new Map(); // playerId -> tick
+function toggleMirror(player, target) {
+  const now = system.currentTick;
+  if ((mirrorGuard.get(player.id) ?? -999) > now - 6) return;
+  mirrorGuard.set(player.id, now);
+  const id = localId(target.typeId);
+  if (GENDERED.has(id)) {
+    setNum(target, "pc:gender", getNum(target, "pc:gender") === 1 ? 0 : 1);
+    assignSkin(target, getNum(target, "pc:full") === 1);
+    player.sendMessage("§d[奇异之镜] 性别已转换。");
+  } else {
+    player.sendMessage("§7[奇异之镜] 这个生物无法转换性别。");
+  }
+}
+
 function cycleVariant(entity, id) {
   const list = VARIANTS[id];
   if (list) {
@@ -59,16 +76,7 @@ export function wireInteractEvents() {
 
     if (item === "pcraftrevorn:pred_guidebook_item") { void openGuide(player); return; }
 
-    if (item === "pcraftrevorn:peculiar_mirror") {
-      if (GENDERED.has(id)) {
-        setNum(target, "pc:gender", getNum(target, "pc:gender") === 1 ? 0 : 1);
-        assignSkin(target, getNum(target, "pc:full") === 1);
-        player.sendMessage("§d[奇异之镜] 性别已转换。");
-      } else {
-        player.sendMessage("§7[奇异之镜] 这个生物无法转换性别。");
-      }
-      return;
-    }
+    if (item === "pcraftrevorn:peculiar_mirror") { toggleMirror(player, target); return; }
 
     if (item === "pcraftrevorn:vibrant_elixir") {
       cycleVariant(target, id);
@@ -90,5 +98,19 @@ export function wireInteractEvents() {
     }
 
     player.sendMessage(`§7[${id}] 变种 §f${getNum(target, "pc:variant")}§7 · 体重阶段 §f${getNum(target, "pc:wg")}§7 · 驯服 §f${isTamed(target) ? "是" : "否"}`);
+  });
+
+  // Fallback trigger for the mirror: some platforms/devices don't raise
+  // playerInteractWithEntity for plain items, so also handle item use while a
+  // predator is within reach.
+  world.afterEvents.itemUse.subscribe((ev) => {
+    const player = ev.source;
+    if (player?.typeId !== "minecraft:player") return;
+    if (ev.itemStack?.typeId !== "pcraftrevorn:peculiar_mirror") return;
+    let pred;
+    try {
+      pred = player.dimension.getEntities({ families: ["predator"], location: player.location, maxDistance: 4, closest: 1 })[0];
+    } catch { pred = undefined; }
+    if (pred) toggleMirror(player, pred);
   });
 }

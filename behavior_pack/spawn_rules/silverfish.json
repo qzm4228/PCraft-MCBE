@@ -18,27 +18,15 @@
           "max": "hard"
         },
         "minecraft:weight": {
-          "default": 75
+          "default": 10
         },
         "minecraft:herd": {
-          "min_size": 4,
-          "max_size": 4
+          "min_size": 1,
+          "max_size": 2
         },
         "minecraft:biome_filter": {
-          "any_of": [
-            {
-              "test": "has_biome_tag",
-              "value": "overworld"
-            },
-            {
-              "test": "has_biome_tag",
-              "value": "nether"
-            },
-            {
-              "test": "has_biome_tag",
-              "value": "the_end"
-            }
-          ]
+          "test": "has_biome_tag",
+          "value": "overworld"
         }
       }
     ]

@@ -23,6 +23,9 @@
           "priority": 1,
           "speed_multiplier": 1.2
         },
+        "minecraft:behavior.hurt_by_target": {
+          "priority": 2
+        },
         "minecraft:behavior.nearest_attackable_target": {
           "priority": 3,
           "must_see": true,
@@ -33,22 +36,11 @@
               "filters": {
                 "test": "is_family",
                 "subject": "other",
-                "value": "player"
-              },
-              "max_dist": 64
-            },
-            {
-              "filters": {
-                "test": "is_family",
-                "subject": "other",
-                "value": "villager"
+                "value": "monster"
               },
               "max_dist": 64
             }
           ]
-        },
-        "minecraft:behavior.hurt_by_target": {
-          "priority": 2
         }
       },
       "pcraftrevorn:prey_holder": {

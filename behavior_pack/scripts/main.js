@@ -9,6 +9,7 @@ import { openSettings } from "./pcraftrevorn/game/config.js";
 import { openGuide } from "./pcraftrevorn/game/guide.js";
 import { wireStructure } from "./pcraftrevorn/game/structure.js";
 import { wireWorldgen } from "./pcraftrevorn/game/worldgen.js";
+import { wireVinemaiden } from "./pcraftrevorn/game/vinemaiden.js";
 
 wireVoreEvents();
 wireInteractEvents();
@@ -16,6 +17,7 @@ wireFermentEvents();
 wireBaubles();
 wireStructure();
 wireWorldgen();
+wireVinemaiden();
 
 // Assign skins to predators when they spawn / are summoned.
 world.afterEvents.entitySpawn.subscribe((ev) => {
@@ -84,7 +86,6 @@ world.afterEvents.itemUse.subscribe((ev) => {
   const potion = POTION_EFFECTS[ev.itemStack?.typeId];
   if (potion) {
     try { player.addEffect(potion.effect, potion.dur, { amplifier: potion.amp, showParticles: true }); } catch { /* ignore */ }
-    consumeHeld(player);
     player.sendMessage("§b[药水] 你饮下了药水。");
     return;
   }
