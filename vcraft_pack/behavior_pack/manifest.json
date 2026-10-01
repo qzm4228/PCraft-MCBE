@@ -1,0 +1,65 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "VCraft §2砂墨§r",
+    "description": "VCraft Reborn Bedrock 移植 · 二次修改作品 · 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 前置：性别组件包(PCraftRevorn 性别包) · 详见 README.txt",
+    "uuid": "7f1e2d3c-4b5a-4697-88a9-0b1c2d3e4f50",
+    "version": [
+      0,
+      1,
+      0
+    ],
+    "min_engine_version": [
+      1,
+      21,
+      100
+    ]
+  },
+  "modules": [
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "8a2f3e4d-5c6b-47a8-99ba-1c2d3e4f5061",
+      "entry": "scripts/main.js",
+      "version": [
+        0,
+        1,
+        0
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "uuid": "9b3a4f5e-6d7c-48b9-aabb-2d3e4f506172",
+      "version": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "uuid": "1e2d3c4b-5a69-4877-9a8b-0123456789ab",
+      "version": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "module_name": "@minecraft/server",
+      "version": "2.0.0"
+    },
+    {
+      "module_name": "@minecraft/server-ui",
+      "version": "2.0.0"
+    }
+  ],
+  "metadata": {
+    "authors": [
+      "砂墨SandMo",
+      "Bilibili: 砂墨",
+      "原创: MysticSummoner"
+    ],
+    "license": "AFL-3.0"
+  }
+}

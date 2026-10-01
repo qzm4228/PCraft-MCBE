@@ -58,6 +58,8 @@ export function assignSkin(entity, belly = false) {
   const id = localId(entity.typeId);
   const map = SKINS[id];
   if (!map) return;
+  // share a "digesting" marker so VCraft won't prey on a busy predator
+  try { if (belly) entity.addTag("vore_digesting"); else entity.removeTag("vore_digesting"); } catch { /* ignore */ }
   const variant = getNum(entity, "pc:variant");
   const gender = getNum(entity, "pc:gender");
   const counter = getNum(entity, "pc:counter");

@@ -1,7 +1,7 @@
 {
   "namespace": "chat",
   "pcraftrevorn_gender_button@common.button": {
-    "$command|default": "pcgender_open",
+    "$command|default": "/pcraftrevorn:gender",
     "$text|default": "§b性别",
     "$is_chat_not_command|default": false,
     "$pressed_button_name": "button.nodata",

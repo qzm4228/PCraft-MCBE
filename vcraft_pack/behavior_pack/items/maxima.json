@@ -1,0 +1,13 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:item": {
+    "description": {
+      "identifier": "vcraft:maxima",
+      "menu_category": { "category": "equipment" }
+    },
+    "components": {
+      "minecraft:icon": { "textures": { "default": "vcraft_maxima" } },
+      "minecraft:max_stack_size": 1
+    }
+  }
+}

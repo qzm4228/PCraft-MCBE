@@ -575,6 +575,8 @@ export function wireVoreEvents() {
   system.runInterval(followBelly, 5);
   system.runInterval(mobHuntTick, 40);
 
+
+
   world.afterEvents.entityHurt.subscribe((ev) => {
     const predator = ev.damageSource?.damagingEntity;
     const victim = ev.hurtEntity;
@@ -582,6 +584,8 @@ export function wireVoreEvents() {
     if (!isPredator(predator)) return;
     // don't (re)swallow something already dying from digestion
     try { if ((victim.getComponent("minecraft:health")?.currentValue ?? 1) <= 0) return; } catch { /* ignore */ }
+    // VCraft: a target already being swallowed/digested can't be preyed on again
+    try { if (victim.hasTag("vcraft_prey") || victim.hasTag("vcraft_pprey") || victim.hasTag("vore_digesting")) return; } catch { /* ignore */ }
 
     if (victim.typeId === "minecraft:player") {
       if (sessions.has(victim.id)) return;

@@ -23,11 +23,13 @@
                 "preset9": "textures/pcraftrevorn_gender/presets/preset9",
                 "preset10": "textures/pcraftrevorn_gender/presets/preset10",
                 "preset11": "textures/pcraftrevorn_gender/presets/preset11",
-                "preset12": "textures/pcraftrevorn_gender/presets/preset12"
+                "preset12": "textures/pcraftrevorn_gender/presets/preset12",
+                "vcraft_belly": "textures/vcraft/belly"
             },
             "geometry": {
                 "default": "geometry.humanoid.custom",
                 "b": "geometry.b",
+                "vcraft_belly": "geometry.vcraft_belly",
                 "cape": "geometry.cape"
             },
             "scripts": {
@@ -289,7 +291,9 @@
                 { "controller.render.pcskin9": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && math.floor(query.scoreboard('pc_state') / 10) == 9" },
                 { "controller.render.pcskin10": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && math.floor(query.scoreboard('pc_state') / 10) == 10" },
                 { "controller.render.pcskin11": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && math.floor(query.scoreboard('pc_state') / 10) == 11" },
-                { "controller.render.pcskin12": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && math.floor(query.scoreboard('pc_state') / 10) == 12" }
+                { "controller.render.pcskin12": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && math.floor(query.scoreboard('pc_state') / 10) == 12" },
+                { "controller.render.vcraft_belly1": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && query.scoreboard('pc_belly') == 1" },
+                { "controller.render.vcraft_belly2": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && query.scoreboard('pc_belly') == 2" }
             ],
             "enable_attachables": true
         }

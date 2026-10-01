@@ -1,0 +1,9 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": { "identifier": "vcraft:bits_to_bonemeal" },
+    "tags": [ "crafting_table" ],
+    "ingredients": [ { "item": "vcraft:bone_bits" } ],
+    "result": { "item": "minecraft:bone_meal", "count": 1 }
+  }
+}
