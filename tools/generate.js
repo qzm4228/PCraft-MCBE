@@ -501,6 +501,22 @@ function genAssets() {
       };
     }
   }
+  // Replace the vanilla zombie sounds with the mod's (female) ones. A custom
+  // sound_definitions.json overrides the vanilla events of the same name.
+  const zDir = path.join(MOD, 'assets', 'minecraft', 'sounds', 'mob', 'zombie');
+  if (exists(zDir)) {
+    for (const f of fs.readdirSync(zDir)) {
+      if (f.endsWith('.ogg')) copy(path.join(zDir, f), path.join(RP, 'sounds', 'mob', 'zombie', f));
+    }
+    const zmap = {
+      'mob.zombie.say': ['say1', 'say2', 'say3'],
+      'mob.zombie.hurt': ['hurt1', 'hurt2'],
+      'mob.zombie.death': ['death']
+    };
+    for (const [ev, files] of Object.entries(zmap)) {
+      soundDefs.sound_definitions[ev] = { category: 'hostile', sounds: files.map((n) => ({ name: 'sounds/mob/zombie/' + n })) };
+    }
+  }
   writeJSON(path.join(RP, 'sounds', 'sound_definitions.json'), soundDefs);
 }
 
@@ -531,6 +547,10 @@ function genManifests() {
     format_version: 2,
     header: { name: 'PCraftRevorn 资源 §2砂墨§r', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.rpHeader, version: [0, 2, 0], min_engine_version: [1, 21, 100] },
     modules: [{ type: 'resources', uuid: UUID.rpRes, version: [0, 2, 0] }],
+    subpacks: [
+      { folder_name: 'bibaso', name: "Bibaso's Zombie Girl", memory_tier: 0 },
+      { folder_name: 'original', name: '原版 Zombie Girl', memory_tier: 0 }
+    ],
     metadata: { authors: ['砂墨SandMo', 'Bilibili: 砂墨', '原创: MysticSummoner'], license: 'AFL-3.0' }
   });
   // pack icons

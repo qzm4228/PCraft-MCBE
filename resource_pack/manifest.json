@@ -26,6 +26,18 @@
       ]
     }
   ],
+  "subpacks": [
+    {
+      "folder_name": "bibaso",
+      "name": "Bibaso's Zombie Girl",
+      "memory_tier": 0
+    },
+    {
+      "folder_name": "original",
+      "name": "原版 Zombie Girl",
+      "memory_tier": 0
+    }
+  ],
   "metadata": {
     "authors": [
       "砂墨SandMo",

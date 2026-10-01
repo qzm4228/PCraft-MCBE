@@ -180,6 +180,39 @@
           "stream": false
         }
       ]
+    },
+    "mob.zombie.say": {
+      "category": "hostile",
+      "sounds": [
+        {
+          "name": "sounds/mob/zombie/say1"
+        },
+        {
+          "name": "sounds/mob/zombie/say2"
+        },
+        {
+          "name": "sounds/mob/zombie/say3"
+        }
+      ]
+    },
+    "mob.zombie.hurt": {
+      "category": "hostile",
+      "sounds": [
+        {
+          "name": "sounds/mob/zombie/hurt1"
+        },
+        {
+          "name": "sounds/mob/zombie/hurt2"
+        }
+      ]
+    },
+    "mob.zombie.death": {
+      "category": "hostile",
+      "sounds": [
+        {
+          "name": "sounds/mob/zombie/death"
+        }
+      ]
     }
   }
 }

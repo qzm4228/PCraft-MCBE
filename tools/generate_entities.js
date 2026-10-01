@@ -512,6 +512,62 @@ function genAttachables() {
   writeJSON(path.join(RP, 'render_controllers', 'staffs.render_controllers.json'), { format_version: '1.10.0', render_controllers: rc });
 }
 
+// ---- zombiegirl model variants (resource-pack subpacks) ----
+// Two selectable subpacks: "bibaso" (default, the new/optimized model, same as
+// the base pack) and "original" (the old model, taken from .work/matopt_orig).
+// Only geo/anim/textures differ; the animation names (and thus the client
+// entity) are identical, so no client-entity override is needed.
+function genZombiegirlSubpack() {
+  const origGeo = path.join(ROOT, '.work', 'matopt_orig', 'geo', 'zombiegirl.geo.json');
+  const origAnim = path.join(ROOT, '.work', 'matopt_orig', 'animations', 'zombiegirl.animation.json');
+  const origTex = path.join(ROOT, '.work', 'matopt_orig', 'textures');
+  if (!exists(origGeo) || !exists(origAnim)) return;
+
+  const unwrap = (v) => {
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      if (Array.isArray(v.vector)) return v.vector;
+      if (v.pre !== undefined || v.post !== undefined || v.lerp_mode !== undefined) {
+        const o = {};
+        if (v.pre !== undefined) o.pre = (v.pre && Array.isArray(v.pre.vector)) ? v.pre.vector : v.pre;
+        if (v.post !== undefined) o.post = (v.post && Array.isArray(v.post.vector)) ? v.post.vector : v.post;
+        if (v.lerp_mode !== undefined) o.lerp_mode = v.lerp_mode;
+        return o;
+      }
+    }
+    return v;
+  };
+  const convertChannel = (ch) => {
+    if (ch === null || typeof ch !== 'object' || Array.isArray(ch)) return ch;
+    if (Array.isArray(ch.vector)) return ch.vector;
+    const out = {};
+    for (const [t, v] of Object.entries(ch)) out[t] = unwrap(v);
+    return out;
+  };
+  const convertAnim = (j) => {
+    delete j.geckolib_format_version;
+    for (const [name, anim] of Object.entries(j.animations || {})) {
+      anim.loop = LOOP_ANIMS.has(name.split('.').pop());
+      for (const bd of Object.values(anim.bones || {})) {
+        for (const ch of ['rotation', 'position', 'scale']) if (bd[ch] !== undefined) bd[ch] = convertChannel(bd[ch]);
+      }
+    }
+    return j;
+  };
+  const writeVariant = (dest, geoFile, animFile, texDir) => {
+    writeJSON(path.join(dest, 'models', 'entity', 'zombiegirl.geo.json'), readJSON(geoFile));
+    writeJSON(path.join(dest, 'animations', 'zombiegirl.animation.json'), convertAnim(readJSON(animFile)));
+    if (exists(texDir)) {
+      for (const f of fs.readdirSync(texDir)) {
+        if (f.startsWith('zombie') && f.endsWith('.png')) copy(path.join(texDir, f), path.join(dest, 'textures', 'entity', 'pcraftrevorn', f));
+      }
+    }
+  };
+
+  writeVariant(path.join(RP, 'subpacks', 'bibaso'),
+    path.join(SRC_GEO, 'zombiegirl.geo.json'), path.join(SRC_ANIM, 'zombiegirl.animation.json'), SRC_TEX);
+  writeVariant(path.join(RP, 'subpacks', 'original'), origGeo, origAnim, origTex);
+}
+
 function main() {
   if (!exists(MOD)) { console.error('Missing .work/mod. Run tools/extract.ps1 first.'); process.exit(1); }
   for (const d of [
@@ -528,6 +584,7 @@ function main() {
   genSpawnRules();
   genSkinData();
   genAttachables();
+  genZombiegirlSubpack();
   console.log('Phase 2 entities generated.');
 }
 main();
