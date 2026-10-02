@@ -531,13 +531,13 @@ const UUID = {
 function genManifests() {
   writeJSON(path.join(BP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn §2砂墨§r', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.bpHeader, version: [0, 3, 0], min_engine_version: [1, 21, 100] },
+    header: { name: 'PCraftRevorn §2砂墨§r', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.bpHeader, version: [0, 4, 0], min_engine_version: [1, 21, 100] },
     modules: [
-      { type: 'data', uuid: UUID.bpData, version: [0, 3, 0] },
-      { type: 'script', language: 'javascript', uuid: UUID.bpScript, entry: 'scripts/main.js', version: [0, 3, 0] }
+      { type: 'data', uuid: UUID.bpData, version: [0, 4, 0] },
+      { type: 'script', language: 'javascript', uuid: UUID.bpScript, entry: 'scripts/main.js', version: [0, 4, 0] }
     ],
     dependencies: [
-      { uuid: UUID.rpHeader, version: [0, 2, 0] },
+      { uuid: UUID.rpHeader, version: [0, 4, 0] },
       { module_name: '@minecraft/server', version: '2.0.0' },
       { module_name: '@minecraft/server-ui', version: '2.0.0' }
     ],
@@ -545,8 +545,8 @@ function genManifests() {
   });
   writeJSON(path.join(RP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn 资源 §2砂墨§r', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.rpHeader, version: [0, 2, 0], min_engine_version: [1, 21, 100] },
-    modules: [{ type: 'resources', uuid: UUID.rpRes, version: [0, 2, 0] }],
+    header: { name: 'PCraftRevorn 资源 §2砂墨§r', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.rpHeader, version: [0, 4, 0], min_engine_version: [1, 21, 100] },
+    modules: [{ type: 'resources', uuid: UUID.rpRes, version: [0, 4, 0] }],
     subpacks: [
       { folder_name: 'bibaso', name: "Bibaso's Zombie Girl", memory_tier: 0 },
       { folder_name: 'original', name: '原版 Zombie Girl', memory_tier: 0 }

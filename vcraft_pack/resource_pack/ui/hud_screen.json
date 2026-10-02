@@ -1,0 +1,107 @@
+{
+  "namespace": "hud",
+
+  // Adds a small always-on "Vore" key on the HUD. Tapping it pushes
+  // "/vcraft:menu" into the chat box and sends it (button.send), which runs the
+  // custom command. Same mechanism as the inventory entry; depends on the
+  // engine's #message_text_box being reachable from this screen.
+  "hud_content": {
+    "modifications": [
+      {
+        "operation": "insert_after",
+        "control_name": "root_panel",
+        "value": [
+          { "vcraft_hud_button@hud.vcraft_hud_button": {} }
+        ]
+      }
+    ]
+  },
+
+  "vcraft_hud_button@common.button": {
+    "$command|default": "/vcraft:menu",
+    "$text|default": "§dVore",
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [ 6, 44 ],
+    "size": [ 46, 20 ],
+    "controls": [
+      {
+        "default": {
+          "type": "image",
+          "texture": "textures/ui/White",
+          "color": [ 0.12, 0.12, 0.16, 0.85 ],
+          "controls": [
+            { "label": { "type": "label", "text": "$text", "anchor_from": "center", "anchor_to": "center", "color": [ 1, 1, 1 ], "layer": 4, "font_scale_factor": 0.8 } }
+          ]
+        }
+      },
+      {
+        "hover": {
+          "type": "image",
+          "texture": "textures/ui/White",
+          "color": [ 0.3, 0.34, 0.44, 1 ],
+          "controls": [
+            { "label": { "type": "label", "text": "$text", "anchor_from": "center", "anchor_to": "center", "color": [ 1, 1, 1 ], "layer": 4, "font_scale_factor": 0.8 } }
+          ]
+        }
+      },
+      {
+        "pressed": {
+          "type": "image",
+          "texture": "textures/ui/White",
+          "color": [ 0.08, 0.08, 0.1, 1 ],
+          "offset": [ 0, 1 ],
+          "controls": [
+            { "label": { "type": "label", "text": "$text", "anchor_from": "center", "anchor_to": "center", "color": [ 1, 1, 1 ], "layer": 4, "font_scale_factor": 0.8 } }
+          ]
+        }
+      },
+      {
+        "text_edit_box": {
+          "type": "edit_box",
+          "text_box_name": "#message_text_box",
+          "max_length": 2147483647,
+          "can_be_deselected": true,
+          "text_control": "text_control",
+          "always_listening": true,
+          "focus_enabled": true,
+          "size": [ "100%sm", "100%sm" ],
+          "selected": "#selected",
+          "bindings": [
+            { "binding_type": "view", "source_property_name": "(#selected or not #selected)", "target_property_name": "#selected" }
+          ],
+          "controls": [
+            {
+              "text_control": {
+                "type": "label",
+                "text": "#item_name",
+                "visible": false,
+                "localize": false,
+                "property_bag": { "#property_field": "#item_name" },
+                "bindings": [
+                  { "binding_type": "view", "source_control_name": "display_text", "source_property_name": "#item_name", "target_property_name": "#text_content" },
+                  { "binding_type": "view", "source_property_name": "((#text_content + $command))", "target_property_name": "#item_name" }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "sendbutton@common_buttons.light_text_button": {
+          "layer": 0,
+          "propagate_alpha": true,
+          "always_listen_to_input": true,
+          "alpha": 0,
+          "size": [ "100%sm", "100%sm" ],
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "$button_text": "exit",
+          "button_mappings": [
+            { "from_button_id": "button.menu_select", "to_button_id": "button.send", "consume_event": false, "mapping_type": "pressed", "scope": "global" }
+          ]
+        }
+      }
+    ]
+  }
+}
