@@ -16618,7 +16618,7 @@
       }
     },
     "animation.scarecrow.idleSMOOTH": {
-      "loop": false,
+      "loop": true,
       "animation_length": 3,
       "bones": {
         "Body": {

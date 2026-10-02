@@ -85214,7 +85214,7 @@
       "loop": false
     },
     "animation.rabbit.new": {
-      "loop": false
+      "loop": true
     }
   }
 }

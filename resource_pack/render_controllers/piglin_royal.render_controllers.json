@@ -2,7 +2,7 @@
   "format_version": "1.10.0",
   "render_controllers": {
     "controller.render.pcraftrevorn.piglin_royal": {
-      "geometry": "Geometry.default",
+      "geometry": "Array.geos[q.property('pcraftrevorn:set')]",
       "materials": [
         {
           "*": "Material.default"
@@ -14,7 +14,17 @@
             "Texture.skin0",
             "Texture.skin1",
             "Texture.skin2",
-            "Texture.skin3"
+            "Texture.skin3",
+            "Texture.skin4",
+            "Texture.skin5",
+            "Texture.skin6",
+            "Texture.skin7"
+          ]
+        },
+        "geometries": {
+          "Array.geos": [
+            "geometry.piglin_royalty",
+            "geometry.piglin_royal.v_royalrump"
           ]
         }
       },

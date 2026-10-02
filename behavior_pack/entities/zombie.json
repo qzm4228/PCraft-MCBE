@@ -10,7 +10,16 @@
           "type": "int",
           "range": [
             0,
-            30
+            510
+          ],
+          "default": 0,
+          "client_sync": true
+        },
+        "pcraftrevorn:set": {
+          "type": "int",
+          "range": [
+            0,
+            2
           ],
           "default": 0,
           "client_sync": true

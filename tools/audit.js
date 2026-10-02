@@ -122,7 +122,7 @@ for (const [id, f] of rpClient) {
   if (id === 'minecraft:player') continue; // overrides the vanilla player entity (gender model)
   const d = readJSON(path.join(RP, 'entity', f))['minecraft:client_entity'].description;
   if (!bpEntities.has(id)) warn(`client entity ${id}: no matching BP entity`);
-  for (const g of Object.values(d.geometry || {})) if (!geoms.has(g)) err(`client ${id}: missing geometry ${g}`);
+  for (const g of Object.values(d.geometry || {})) { if (typeof g === 'string' && (/\[|\]/.test(g) || g.startsWith('Array.'))) continue; if (!geoms.has(g)) err(`client ${id}: missing geometry ${g}`); }
   for (const rc of d.render_controllers || []) if (!renderControllers.has(rc)) err(`client ${id}: missing render controller ${rc}`);
   // scripts.animate entries reference the animations map, which may point to a controller
   const resolveCtrl = (entry) => {

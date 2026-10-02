@@ -1,0 +1,65 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:eevee_rabbit",
+      "min_engine_version": "1.8.0",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/eevee_rabbit0",
+        "skin1": "textures/entity/pcraftrevorn/eevee_rabbit0_belly",
+        "skin2": "textures/entity/pcraftrevorn/eevee_rabbit0_wg",
+        "skin3": "textures/entity/pcraftrevorn/eevee_rabbit0_wg2",
+        "skin4": "textures/entity/pcraftrevorn/eevee_rabbit0_wg2_belly",
+        "skin5": "textures/entity/pcraftrevorn/eevee_rabbit0_wg_belly",
+        "skin6": "textures/entity/pcraftrevorn/eevee_rabbit1",
+        "skin7": "textures/entity/pcraftrevorn/eevee_rabbit1_belly",
+        "skin8": "textures/entity/pcraftrevorn/eevee_rabbit1_wg",
+        "skin9": "textures/entity/pcraftrevorn/eevee_rabbit1_wg2",
+        "skin10": "textures/entity/pcraftrevorn/eevee_rabbit1_wg2_belly",
+        "skin11": "textures/entity/pcraftrevorn/eevee_rabbit1_wg_belly",
+        "skin12": "textures/entity/pcraftrevorn/eevee_rabbit2",
+        "skin13": "textures/entity/pcraftrevorn/eevee_rabbit2_belly",
+        "skin14": "textures/entity/pcraftrevorn/eevee_rabbit2_wg",
+        "skin15": "textures/entity/pcraftrevorn/eevee_rabbit2_wg2",
+        "skin16": "textures/entity/pcraftrevorn/eevee_rabbit2_wg2_belly",
+        "skin17": "textures/entity/pcraftrevorn/eevee_rabbit2_wg_belly"
+      },
+      "geometry": {
+        "default": "geometry.eevee_rabbit"
+      },
+      "animations": {
+        "swallow": "animation.eevee_rabbit.swallow",
+        "swallowWG1": "animation.eevee_rabbit.swallowWG1",
+        "swallowWG2": "animation.eevee_rabbit.swallowWG2",
+        "idle": "animation.eevee_rabbit.idle",
+        "warp": "animation.eevee_rabbit.warp",
+        "walk": "animation.eevee_rabbit.walk",
+        "digest": "animation.eevee_rabbit.digest",
+        "digestWG1": "animation.eevee_rabbit.digestWG1",
+        "digestWG2": "animation.eevee_rabbit.digestWG2",
+        "attack": "animation.eevee_rabbit.attack",
+        "Downed": "animation.eevee_rabbit.Downed",
+        "Downed2": "animation.eevee_rabbit.Downed2"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "idle": "1.0 - math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walk": "math.min(1.0, query.modified_move_speed * 4.0)"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.eevee_rabbit"
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_eevee_rabbit_spawn_egg"
+      }
+    }
+  }
+}

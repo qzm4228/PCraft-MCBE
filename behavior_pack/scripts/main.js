@@ -10,6 +10,7 @@ import { openGuide } from "./pcraftrevorn/game/guide.js";
 import { wireStructure } from "./pcraftrevorn/game/structure.js";
 import { wireWorldgen } from "./pcraftrevorn/game/worldgen.js";
 import { wireVinemaiden } from "./pcraftrevorn/game/vinemaiden.js";
+import { openVariants, wireVariants } from "./pcraftrevorn/game/variants.js";
 
 wireVoreEvents();
 wireInteractEvents();
@@ -18,6 +19,7 @@ wireBaubles();
 wireStructure();
 wireWorldgen();
 wireVinemaiden();
+wireVariants();
 
 // Assign skins to predators when they spawn / are summoned.
 world.afterEvents.entitySpawn.subscribe((ev) => {
@@ -98,6 +100,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
   switch (ev.id) {
     case "pcraftrevorn:form": void runFormDemo(player); break;
     case "pcraftrevorn:guide": void openGuide(player); break;
+    case "pcraftrevorn:variants": void openVariants(player); break;
     case "pcraftrevorn:settings": void openSettings(player); break;
     case "pcraftrevorn:swallow": {
       const pred = nearestPredator(player);

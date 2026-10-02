@@ -56,7 +56,20 @@ for (const f of list(path.join(RP, 'entity'), '.json')) {
   const d = readJSON(path.join(RP, 'entity', f))['minecraft:client_entity'].description;
   if (d.identifier === 'minecraft:player') continue;
   const geoId = d.geometry?.default;
-  const bones = geoBones.get(geoId);
+  let bones = geoBones.get(geoId);
+  if (!bones && typeof geoId === 'string' && (/\[|\]/.test(geoId) || geoId.startsWith('Array.'))) {
+    // geometry selected by an array (e.g. rework sets): union all listed geometries
+    const arrName = geoId.match(/^Array\.([A-Za-z0-9_]+)/)?.[1];
+    let geoList = [];
+    for (const rcName of d.render_controllers || []) {
+      const rcFile = list(path.join(RP, 'render_controllers'), '.json').find((x) => readJSON(path.join(RP, 'render_controllers', x)).render_controllers?.[rcName]);
+      if (!rcFile) continue;
+      const rcDef = readJSON(path.join(RP, 'render_controllers', rcFile)).render_controllers[rcName];
+      const arr = rcDef.arrays?.geometries?.[`Array.${arrName}`];
+      if (arr) { geoList = arr; break; }
+    }
+    if (geoList.length) { bones = new Set(); for (const gid of geoList) { const b = geoBones.get(gid); if (b) for (const x of b) bones.add(x); } }
+  }
   if (!bones) { problems.push(`client ${d.identifier}: geometry ${geoId} not found`); continue; }
   for (const [key, animName] of Object.entries(d.animations || {})) {
     if (animName.startsWith('controller.')) continue;
@@ -95,6 +108,12 @@ for (const f of list(path.join(BP, 'entities'), '.json')) {
 const vore = fs.readFileSync(path.join(BP, 'scripts', 'pcraftrevorn', 'vore', 'vore.js'), 'utf8');
 const predBlock = vore.match(/PREDATORS = new Set\(\[([\s\S]*?)\]\)/);
 const scriptPreds = new Set((predBlock?.[1] || '').match(/"[^"]+"/g)?.map((s) => s.replace(/"/g, '')) || []);
+// community-imported predators are merged at runtime from data/community.js
+const commPath = path.join(BP, 'scripts', 'pcraftrevorn', 'data', 'community.js');
+if (fs.existsSync(commPath)) {
+  const cm = fs.readFileSync(commPath, 'utf8').match(/"predatorIds":\s*\[([\s\S]*?)\]/);
+  for (const s of (cm?.[1] || '').match(/"[^"]+"/g) || []) scriptPreds.add(`pcraftrevorn:${s.replace(/"/g, '')}`);
+}
 const eventPreds = new Set(hostiles);
 for (const p of scriptPreds) if (!eventPreds.has(p)) problems.push(`script PREDATORS has ${p} but it has no aggressive group/events`);
 for (const p of eventPreds) if (!scriptPreds.has(p)) problems.push(`entity ${p} has aggressive group but is not in script PREDATORS`);

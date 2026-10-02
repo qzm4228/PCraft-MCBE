@@ -98,7 +98,7 @@ resource_pack/
 - `folder_name`：子包目录名；`name`：玩家看到的名称（**不可本地化**）；`memory_tier`：每级约 250MB。
 - 新字段 `memory_performance_tier`（1–5，实验，需 v3）。
 - 默认按设备档位自动选最高不超过设备档的子包；玩家可在包设置里手动下调。
-- **同档位多个子包时取列表中最后一个** → 本仓库的两个子包 `memory_tier` 都是 0，需注意这个“取最后”规则（当前默认会选 `original`，若希望默认 `bibaso` 应调整）。
+- **同档位多个子包时取列表中最后一个** → 多个子包 `memory_tier` 相同时要留意这个“取最后”规则。（本仓库曾用它做 ZombieGirl `bibaso`/`original`，现已取消子包、把 Bibaso 改为独立生物 `pcraftrevorn:bibaso_zombie`。）
 
 ### 3.3 配置入口（本仓库踩的坑）
 - 子包选择器出现在**资源包/世界资源包的“设置”**里；外部 Packs 列表上也应有设置按钮。
@@ -180,7 +180,7 @@ resource_pack/
 ### ⑥ Genders Addon V1.1.2（Jun Channel · Bedrock 性别 addon）
 - 位置：用户已装（`.work/pgender/GendersAdd\GendersAddonV1.1.2`）
 - 要点：**用 `subpacks` 提供 4 种性别/动画变体**（`type1`/`type2`/`type1+animation`/`type2+animation`），全部 `memory_tier:0`。
-- 教训：这是本项目做 ZombieGirl `bibaso`/`original` 子包的**直接样板**（结构一致）。
+- 教训：这曾是本项目做 ZombieGirl `bibaso`/`original` 子包的**直接样板**（结构一致）；该子包现已取消，Bibaso 改为独立掠食者 `pcraftrevorn:bibaso_zombie`。
 
 ### ⑦ Ponder（Bedrock addon · JSON-UI 状态总线样板）
 - 位置：`.work/Ponder`
@@ -234,7 +234,8 @@ resource_pack/
 | 主题 | 现状 | 建议 |
 |---|---|---|
 | manifest 版本 | 全部 `[0,4,0]`（v2） | 保持；若要用包设置页再评估 v3 |
-| 子包 | ZombieGirl `bibaso`/`original` | 文档化“同 tier 取最后”→ 若要默认 bibaso，改成不同 tier 或调换顺序 |
+| 子包 | 已取消（原 ZombieGirl `bibaso`/`original`） | Bibaso 现为独立掠食者 `pcraftrevorn:bibaso_zombie`；`pcraftrevorn:zombie` 用经典原版模型 |
+| Bibaso 僵尸 | 独立实体（贴图 `bibaso_zombie*`、`geometry.bibaso_zombie`、自带生成蛋） | 生成器 `genBibasoZombie`；脚本已加入 `PREDATORS`/`SKINS`/`PRED_STATS` |
 | 依赖版本一致 | audit 已校验 | 每次改版本后跑 `node tools/audit.js` |
 | UI 跨包冲突 | PCraft 占 `additional_screen_content`、性别占 `main_screen_content` | **统一到一个包**，或串联同一 `$additional_screen_content` |
 | HUD “Vore 键” | 已试「HUD 屏 + 发 `/vcraft:menu`」 | 若 HUD 屏写不了 `#message_text_box`，回退到聊天栏按钮（已验证） |

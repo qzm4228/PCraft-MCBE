@@ -13,6 +13,7 @@ const SCALE_ITEMS = new Set([
 const VARIANTS = {
   rabbit_wizard: [0, 1, 2],
   zombie: [0, 1, 2, 3],
+  bibaso_zombie: [0, 1, 2, 3],
   vinemaiden: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
   piglin_royal_knight: [0, 1]
 };
@@ -42,6 +43,15 @@ function isTamed(entity) {
 // Peculiar mirror: toggles a gendered predator. Guarded so the entity-interact
 // event and the item-use fallback don't both fire on the same press.
 const mirrorGuard = new Map(); // playerId -> tick
+// Guidebook can be opened by right-clicking a predator OR using it in the air;
+// guard dedupes when both events fire for the same press.
+const guideGuard = new Map(); // playerId -> tick
+function openGuideGuarded(player) {
+  const now = system.currentTick;
+  if ((guideGuard.get(player.id) ?? -999) > now - 6) return;
+  guideGuard.set(player.id, now);
+  void openGuide(player);
+}
 function toggleMirror(player, target) {
   const now = system.currentTick;
   if ((mirrorGuard.get(player.id) ?? -999) > now - 6) return;
@@ -74,7 +84,7 @@ export function wireInteractEvents() {
     const id = localId(target.typeId);
     const item = ev.itemStack?.typeId;
 
-    if (item === "pcraftrevorn:pred_guidebook_item") { void openGuide(player); return; }
+    if (item === "pcraftrevorn:pred_guidebook_item") { openGuideGuarded(player); return; }
 
     if (item === "pcraftrevorn:peculiar_mirror") { toggleMirror(player, target); return; }
 
@@ -106,7 +116,10 @@ export function wireInteractEvents() {
   world.afterEvents.itemUse.subscribe((ev) => {
     const player = ev.source;
     if (player?.typeId !== "minecraft:player") return;
-    if (ev.itemStack?.typeId !== "pcraftrevorn:peculiar_mirror") return;
+    const held = ev.itemStack?.typeId;
+    // Guidebook: open by right-clicking in the air (also on a predator above).
+    if (held === "pcraftrevorn:pred_guidebook_item") { openGuideGuarded(player); return; }
+    if (held !== "pcraftrevorn:peculiar_mirror") return;
     let pred;
     try {
       pred = player.dimension.getEntities({ families: ["predator"], location: player.location, maxDistance: 4, closest: 1 })[0];

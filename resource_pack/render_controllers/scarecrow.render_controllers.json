@@ -2,7 +2,7 @@
   "format_version": "1.10.0",
   "render_controllers": {
     "controller.render.pcraftrevorn.scarecrow": {
-      "geometry": "Geometry.default",
+      "geometry": "Array.geos[q.property('pcraftrevorn:set')]",
       "materials": [
         {
           "*": "Material.default"
@@ -46,7 +46,50 @@
             "Texture.skin32",
             "Texture.skin33",
             "Texture.skin34",
-            "Texture.skin35"
+            "Texture.skin35",
+            "Texture.skin36",
+            "Texture.skin37",
+            "Texture.skin38",
+            "Texture.skin39",
+            "Texture.skin40",
+            "Texture.skin41",
+            "Texture.skin42",
+            "Texture.skin43",
+            "Texture.skin44",
+            "Texture.skin45",
+            "Texture.skin46",
+            "Texture.skin47",
+            "Texture.skin48",
+            "Texture.skin49",
+            "Texture.skin50",
+            "Texture.skin51",
+            "Texture.skin52",
+            "Texture.skin53",
+            "Texture.skin54",
+            "Texture.skin55",
+            "Texture.skin56",
+            "Texture.skin57",
+            "Texture.skin58",
+            "Texture.skin59",
+            "Texture.skin60",
+            "Texture.skin61",
+            "Texture.skin62",
+            "Texture.skin63",
+            "Texture.skin64",
+            "Texture.skin65",
+            "Texture.skin66",
+            "Texture.skin67",
+            "Texture.skin68",
+            "Texture.skin69",
+            "Texture.skin70",
+            "Texture.skin71",
+            "Texture.skin72"
+          ]
+        },
+        "geometries": {
+          "Array.geos": [
+            "geometry.scarecrow",
+            "geometry.scarecrow.v_scarecrowtaste"
           ]
         }
       },
@@ -55,7 +98,7 @@
       ]
     },
     "controller.render.pcraftrevorn.scarecrow.glow": {
-      "geometry": "Geometry.default",
+      "geometry": "Array.geos[q.property('pcraftrevorn:set')]",
       "materials": [
         {
           "*": "Material.glow"
@@ -63,7 +106,15 @@
       ],
       "textures": [
         "Texture.glow"
-      ]
+      ],
+      "arrays": {
+        "geometries": {
+          "Array.geos": [
+            "geometry.scarecrow",
+            "geometry.scarecrow.v_scarecrowtaste"
+          ]
+        }
+      }
     }
   }
 }

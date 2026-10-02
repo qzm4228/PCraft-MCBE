@@ -91,6 +91,7 @@ const ARMOR = {
 };
 const SPAWN_EGGS = {
   zombie_spawn_egg: { entity: 'zombie', base: -11363863, overlay: -13677023 },
+  bibaso_zombie_spawn_egg: { entity: 'bibaso_zombie', base: -11363863, overlay: -13677023 },
   piglin_royal_spawn_egg: { entity: 'piglin_royal', base: -2978963, overlay: -3098555 },
   vinemaiden_spawn_egg: { entity: 'vinemaiden', base: -8403377, overlay: -3846321 },
   piglin_royal_knight_spawn_egg: { entity: 'piglin_royal_knight', base: -6133183, overlay: -3298757 },
@@ -457,6 +458,14 @@ function genLang() {
       emit(bpLines, k, v); // consumed by scripts later
     }
   }
+  // names for content added by the Bedrock port (not present in the original lang)
+  const EXTRA_LANG = [
+    ['entity.pcraftrevorn:bibaso_zombie.name', 'Bibaso 僵尸'],
+    ['item.pcraftrevorn:bibaso_zombie_spawn_egg.name', 'Bibaso 僵尸生成蛋'],
+    ['item.pcraftrevorn:bibaso_zombie_spawn_egg', 'Bibaso 僵尸生成蛋'],
+    ['item.spawn_egg.entity.pcraftrevorn:bibaso_zombie.name', 'Bibaso 僵尸生成蛋']
+  ];
+  for (const [k, v] of EXTRA_LANG) emit(bpLines, k, v);
   const header = '# Generated from PCraftRevorn 3.1.1 (author: MysticSummoner)\n';
   writeText(path.join(BP, 'texts', 'en_US.lang'), header + bpLines.sort().join('\n') + '\n');
   writeText(path.join(BP, 'texts', 'zh_CN.lang'), header + bpLines.sort().join('\n') + '\n');
@@ -528,16 +537,19 @@ const UUID = {
   rpHeader: 'e9a8f5d4-a061-4dc4-af50-4d5e6f708192',
   rpRes: 'fab9a6e5-b172-4ed5-b061-5e6f70819203'
 };
+// Build version: date-based beta. Bedrock v2 manifests require an integer triple,
+// so "261002-beta-1" is encoded as [261002, 0, 1] with the label kept in the name.
+const PACK_VERSION = [261002, 0, 1];
 function genManifests() {
   writeJSON(path.join(BP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn §2砂墨§r', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.bpHeader, version: [0, 4, 0], min_engine_version: [1, 21, 100] },
+    header: { name: 'PCraftRevorn §2砂墨§r §7· 261002-beta-1', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.bpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
     modules: [
-      { type: 'data', uuid: UUID.bpData, version: [0, 4, 0] },
-      { type: 'script', language: 'javascript', uuid: UUID.bpScript, entry: 'scripts/main.js', version: [0, 4, 0] }
+      { type: 'data', uuid: UUID.bpData, version: PACK_VERSION },
+      { type: 'script', language: 'javascript', uuid: UUID.bpScript, entry: 'scripts/main.js', version: PACK_VERSION }
     ],
     dependencies: [
-      { uuid: UUID.rpHeader, version: [0, 4, 0] },
+      { uuid: UUID.rpHeader, version: PACK_VERSION },
       { module_name: '@minecraft/server', version: '2.0.0' },
       { module_name: '@minecraft/server-ui', version: '2.0.0' }
     ],
@@ -545,12 +557,8 @@ function genManifests() {
   });
   writeJSON(path.join(RP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn 资源 §2砂墨§r', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.rpHeader, version: [0, 4, 0], min_engine_version: [1, 21, 100] },
-    modules: [{ type: 'resources', uuid: UUID.rpRes, version: [0, 4, 0] }],
-    subpacks: [
-      { folder_name: 'bibaso', name: "Bibaso's Zombie Girl", memory_tier: 0 },
-      { folder_name: 'original', name: '原版 Zombie Girl', memory_tier: 0 }
-    ],
+    header: { name: 'PCraftRevorn 资源 §2砂墨§r §7· 261002-beta-1', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.rpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
+    modules: [{ type: 'resources', uuid: UUID.rpRes, version: PACK_VERSION }],
     metadata: { authors: ['砂墨SandMo', 'Bilibili: 砂墨', '原创: MysticSummoner'], license: 'AFL-3.0' }
   });
   // pack icons

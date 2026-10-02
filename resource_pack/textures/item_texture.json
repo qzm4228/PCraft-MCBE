@@ -95,6 +95,9 @@
     "pcraftrevorn_zombie_spawn_egg": {
       "textures": "textures/items/pcraftrevorn/zombie_spawn_egg"
     },
+    "pcraftrevorn_bibaso_zombie_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/bibaso_zombie_spawn_egg"
+    },
     "pcraftrevorn_piglin_royal_spawn_egg": {
       "textures": "textures/items/pcraftrevorn/piglin_royal_spawn_egg"
     },
@@ -133,6 +136,30 @@
     },
     "pcraftrevorn_rotten_stench_potion": {
       "textures": "textures/items/pcraftrevorn/rotten_stench_potion"
+    },
+    "pcraftrevorn_cathyl_rabbit_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/cathyl_rabbit_spawn_egg"
+    },
+    "pcraftrevorn_plant_maiden_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/plant_maiden_spawn_egg"
+    },
+    "pcraftrevorn_lamia_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/lamia_spawn_egg"
+    },
+    "pcraftrevorn_eevee_rabbit_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/eevee_rabbit_spawn_egg"
+    },
+    "pcraftrevorn_eevee_scarecrow_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/eevee_scarecrow_spawn_egg"
+    },
+    "pcraftrevorn_eevee_silverfish_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/eevee_silverfish_spawn_egg"
+    },
+    "pcraftrevorn_eevee_vinemaiden_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/eevee_vinemaiden_spawn_egg"
+    },
+    "pcraftrevorn_eevee_zombie_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/eevee_zombie_spawn_egg"
     }
   }
 }

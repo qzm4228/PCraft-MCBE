@@ -142,6 +142,46 @@ Bedrock 附加包**不支持 jigsaw 结构**，原 `royal_castle_remnant`（jigs
 ⚠️ 风险：方块**状态名映射**为最佳猜测（尤其楼梯朝向 `weirdo_direction` 0=E/1=W/2=S/3=N），
 若游戏内楼梯/墙朝向错乱，改 `tools/nbt_to_data.js` 的 `STAIR_DIR`/`WALL_CONN` 即可。
 
+## 1.12 动画转换要点（GeckoLib → Bedrock）
+
+转换器：`tools/generate_entities.js` 的 `convertAnimObject()`（所有动画、含 Bibaso 与经典僵尸）。
+
+- **关键帧形态**：GeckoLib 的 `{"vector":[…]}`（可带 `easing`）与 `{pre,post,lerp_mode}` 递归解包为
+  Bedrock 的普通数组 / `{pre,post,lerp_mode}`。实测移植后无残留 `vector`/`easing`/`geckolib_format_version`。
+- **缓动（easing）**：Bedrock 关键帧**只支持线性插值**（官方 Animations 文档；`pre`/`post` 仅用于不连续），
+  **没有 `easing` 字段**。原包 4500+ 处 `easing`（以 `easeInOutSine` 为主）因此被丢弃 →
+  动画仍经过相同关键帧，但插值由曲线变为线性。属可接受近似，无法 1:1 还原。
+- **循环（loop）**：优先**保留原包声明的 `loop`**（`true` / `false` / `"hold_on_last_frame"`，Bedrock 三者都支持），
+  仅当原包未声明时才按名字回退（`idle/walk/sprint/hidden` 循环）。
+  > 修复前是按名字硬编码，导致 `animation.rabbit.new`、`scarecrow.idleSMOOTH`、`vinemaiden.witherstun`
+  > （原包 `loop:true`）被误设为不循环，且 `vinemaiden.hidden`（原包 `hold_on_last_frame`）被改成循环。
+- **骨骼名不匹配**：Bedrock 明确**忽略几何中不存在的骨骼**（官方文档：“You can animate bones that don't exist
+  in the targeted geometry (missing bones are ignored)”）。原包自身就存在这类“孤儿”轨道（非移植引入）：
+  - `basaltmite` / `silverfish`：`VoreStomachWG / UpperStomach4..6 / LowerStomach4..6 / VoreStomachMultiprey`（其几何无这些骨骼）；
+  - `rabbit`：`Tail / Tail2 / flap1 / flap2 / flaps`；
+  - `zombiegirl`（Bibaso 76 骨骼几何）：`EYE / MOUTH / joues / bubble` —— 几何里对应的是法文名 `yeux / bouche / face / blush`。
+    Bibaso 的 `swallow/idle/walk/struggle*` 都引用这 4 个骨骼，故**面部表情不播放**（身体动画正常）。
+  - `node tools/check.js` 会以 warning 形式列出这些，`PROBLEMS` 为 0。
+- **几何一致性**：`resource_pack` 的所有实体几何与原包逐骨骼一致；唯一差异是经典 `zombiegirl`（28 骨骼原版）
+  与独立 `bibaso_zombie`（76 骨骼），见 §2.3。
+
+## 1.13 社区资源包接入（独立生物 / subpack）
+
+来源：`examples/resourcepacks.zip`（解包后复制到 `.work/community/`），生成器 `tools/generate_community.js`（由 `generate_entities.js` 末尾调用）。
+
+- **判定规则**：重做但**设定/性质不变** → subpack；**变成新设定/新萌物** → 独立生物。（同尺寸逐像素差 >10 像素仅作“确实重绘”的旁证。）
+- **独立生物（已接入 8 个）**：
+  - `cathyl_rabbit`（兔法师）、`plant_maiden`（藤娘）、`lamia`（僵尸）、`eevee_rabbit/scarecrow/silverfish/vinemaiden/zombie`。
+  - 每个：geo/animation/贴图重命名 → BP 实体（predator + vore 组，按来源决定是否可驯服）+ client entity + render controller + 生成蛋；注册表写入 `scripts/pcraftrevorn/data/community.js`，由 `assign.js`/`vore.js`/`guide.js` 合并。
+  - 贴图命名沿用 `buildSkinName`：`<base>[_male|_female]<variant>[_decor/health N][_wg|_wg2][_belly]`；`_decor`/`_health` 用 `pc:counter`（随机范围见 `COMMUNITY.counterMax`）。
+  - 分辨率原样保留（2000² / 128×800）。
+- **重做型（已接入为“游戏内每生物变体”而非 subpack）**：predatopiaV2 / predatopiazombie（僵尸）、Royal Rump（猪灵王）、silverfish 重绘（蠹虫）、TasteTested（稻草人）。
+  - 生成器 `tools/generate_variants.js` 把每个包作为对应生物的一组“外观集”：追加 geo（`geometry.<物种>.v_<id>`）、动画（`animation.<物种>.v_<id>.*`）、命名空间贴图（`pcv_<id>_*`）。
+  - 客户端实体改为 `geometry = Array.geos[q.property('pcraftrevorn:set')]`，贴图数组拼接基础皮肤 + 各套皮肤，`scripts.animate` 用 `q.property('pcraftrevorn:set')` 门控各套 idle/walk。
+  - BP 实体新增 `pcraftrevorn:set` 实体属性并加宽 `pcraftrevorn:skin` 范围；注册表 `data/variants.js`。
+  - 运行时：`scripts/pcraftrevorn/game/variants.js`（`/scriptevent pcraftrevorn:variants` 打开菜单）按**物种**选择外观集，写入 world dynamic property `pc:set:<物种>`，并每 3 秒同步到已加载实体；`assign.js` 的 `assignSkin` 按 `pcraftrevorn:set` 选皮肤。
+  - 说明：外观集选择是**服务端统一**（同种生物所有个体外观一致），不是每玩家；且重做集的 `swallow/digest/struggle` 一次性动画仍走基础集（重做集主要体现 idle/walk + 模型 + 贴图）。
+
 
 ---
 
@@ -184,7 +224,6 @@ Bedrock 附加包**不支持 jigsaw 结构**，原 `royal_castle_remnant`（jigs
 - **Curios 饰品**（`basaltmite_plated_soles`、`gilded_shield`、`piglin_might_talisman`、`piglin_royal_talisman`、`sugar_neutralizing_water`）暂作为普通物品，交互逻辑 P5
 
 ### 2.3 生物（16）— ⏳ P2
-
 | ID | 类别 | 变体维度 |
 |---|---|---|
 | `basaltmite` / `gilded_basaltmite` | 挖矿、可驯服 | 性别 × 体型 × WG(3) |
@@ -213,6 +252,7 @@ P2 精修：
 - [x] `_belly` 满腹贴图并入 skin 数组，脚本 `assignSkin(pred, true)` 联动
 - [x] 弹射物专用 `geometry.pcraftrevorn.projectile` + `cupid_arrow` 贴图
 - [x] 生成蛋改用**新版 `spawn_egg.texture`**（每实体独立纹理，非 base/overlay 颜色）
+- [x] Bibaso 僵尸由资源包 subpack 改为**独立掠食者** `pcraftrevorn:bibaso_zombie`：`geometry.bibaso_zombie`、`animation.bibaso_zombie.*`、贴图 `bibaso_zombie*`、自带生成蛋；原 `pcraftrevorn:zombie` 恢复经典 28 骨骼原版（`subpacks` 已删除）
 - [ ] 胃部骨骼显隐（`UpperStomach2..6`/`LowerStomach2..6`/`WGStomach*` 等）→ `part_visibility` + 属性（需逐状态核对，暂缓）
 
 ### 2.4 自定义状态效果（18）— ❌ 不可注册

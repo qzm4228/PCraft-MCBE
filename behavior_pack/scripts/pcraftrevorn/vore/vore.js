@@ -9,6 +9,7 @@ import { assignSkin, playAnim, getNum, setNum, localId } from "../skin/assign.js
 import { getCfg } from "../game/config.js";
 import { addWgProgress } from "../game/wg.js";
 import { newPrompt, pressDir, labelFor, animFor, DIRS } from "./struggle.js";
+import { COMMUNITY } from "../data/community.js";
 
 export const CONFIG = {
   digestTicksToKill: 3000,
@@ -33,9 +34,10 @@ const sessions = new Map(); // playerId -> session
 
 const PREDATORS = new Set([
   "pcraftrevorn:basaltmite", "pcraftrevorn:gilded_basaltmite", "pcraftrevorn:silverfish",
-  "pcraftrevorn:vinemaiden", "pcraftrevorn:zombie", "pcraftrevorn:scarecrow",
+  "pcraftrevorn:vinemaiden", "pcraftrevorn:zombie", "pcraftrevorn:bibaso_zombie", "pcraftrevorn:scarecrow",
   "pcraftrevorn:rabbit_wizard", "pcraftrevorn:piglin_royal_knight"
 ]);
+for (const id of COMMUNITY.predatorIds ?? []) PREDATORS.add(`pcraftrevorn:${id}`);
 const isPredator = (entity) => !!entity && PREDATORS.has(entity.typeId);
 export { isPredator };
 

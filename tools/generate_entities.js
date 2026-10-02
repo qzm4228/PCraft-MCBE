@@ -17,6 +17,8 @@
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
+const { generateCommunity } = require('./generate_community.js');
+const { generateVariants } = require('./generate_variants.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const MOD = path.join(ROOT, '.work', 'mod');
@@ -56,6 +58,9 @@ const ENTITIES = [
   { id: 'vinemaiden', geo: 'vinemaiden', anim: 'vinemaiden', skins: /^vinemaiden(\d|_buried)/, kind: 'creature', hp: 30, speed: 0.3, dmg: 5, follow: 12, kbr: 0, size: [0.7, 1.9], hostile: true, families: ['vinemaiden', 'predator', 'monster'], pop: 'monster' },
   { id: 'vinemaiden_seedling', geo: 'vinemaiden_seedling', anim: 'vinemaiden_seedling', skins: /^vinemaiden_seedling/, kind: 'creature', hp: 8, speed: 0.3, dmg: 3, follow: 16, kbr: 0, size: [0.6, 1.8], hostile: false, families: ['vinemaiden', 'monster'], pop: 'monster' },
   { id: 'zombie', geo: 'zombiegirl', anim: 'zombiegirl', skins: /^zombie(\d|_girl)/, kind: 'monster', hp: 20, speed: 0.23, dmg: 3, follow: 35, kbr: 0, size: [0.6, 1.8], hostile: true, families: ['zombie', 'predator', 'undead', 'monster'], pop: 'monster', loot: 'zombie' },
+  // Bibaso zombie: formerly a selectable subpack, now a standalone predator.
+  // Reuses the mod's optimized zombiegirl model/textures (renamed to bibaso_*).
+  { id: 'bibaso_zombie', geo: 'bibaso_zombie', anim: 'bibaso_zombie', skins: /^zombie(\d|_girl)/, texPrefix: 'bibaso_', kind: 'monster', hp: 20, speed: 0.23, dmg: 3, follow: 35, kbr: 0, size: [0.6, 1.8], hostile: true, families: ['bibaso_zombie', 'predator', 'undead', 'monster'], pop: 'monster', loot: 'zombie' },
   { id: 'scarecrow', geo: 'scarecrow', anim: 'scarecrow', skins: /^scarecrow_(?!glow)/, kind: 'monster', hp: 50, speed: 0.3, dmg: 3, follow: 64, kbr: 0, size: [0.8, 2.4], hostile: true, families: ['scarecrow', 'predator', 'monster'], pop: 'monster' },
   { id: 'rabbit_wizard', geo: 'rabbit', anim: 'rabbit', skins: /^rabbit\d/, kind: 'creature', hp: 24, speed: 0.25, dmg: 3, follow: 16, kbr: 0, size: [0.6, 1.8], hostile: true, families: ['rabbit_wizard', 'predator', 'village_protector'], pop: 'animal' },
   { id: 'piglin_royal', geo: 'piglin_royalty', anim: 'piglin_royalty', skins: /^piglin_royal_(?!knight)/, kind: 'monster', hp: 150, speed: 0.3, dmg: 3, follow: 16, kbr: 1, size: [1.5, 3.4], hostile: false, families: ['piglin', 'piglin_royal', 'monster'], pop: 'monster', loot: 'piglin_royal' },
@@ -77,7 +82,7 @@ const INVISIBLE_TEX = 'textures/entity/pcraftrevorn/invisible';
 // preds that can be tamed (pcraftrevorn:tameable_preds tag)
 const TAMEABLE = new Set(['gilded_basaltmite', 'piglin_royal_knight', 'rabbit_wizard', 'scarecrow', 'vinemaiden']);
 // entities that ship a spawn egg item
-const SPAWN_EGG = new Set(['zombie', 'piglin_royal', 'vinemaiden', 'piglin_royal_knight', 'silverfish', 'basaltmite', 'rabbit_wizard', 'gilded_basaltmite', 'scarecrow']);
+const SPAWN_EGG = new Set(['zombie', 'bibaso_zombie', 'piglin_royal', 'vinemaiden', 'piglin_royal_knight', 'silverfish', 'basaltmite', 'rabbit_wizard', 'gilded_basaltmite', 'scarecrow']);
 // entities with a separate emissive glow texture (drawn as a 2nd render controller)
 const GLOW = { binding_ring: 'binding_ring_glow', shielding_ring: 'shielding_ring_glow', scarecrow: 'scarecrow_glow' };
 // entities whose original AI does NOT target players -> neutral (only retaliate)
@@ -88,30 +93,27 @@ const LOOP_ANIMS = new Set(['idle', 'walk', 'sprint', 'hidden']);
 
 // ---- helpers ----
 const texFiles = () => fs.readdirSync(SRC_TEX).filter(f => f.endsWith('.png')).map(f => f.slice(0, -4));
+// Resolve geometry/animation sources from the generated RP when present, so
+// entities whose files are renamed/derived (e.g. bibaso_zombie) work too.
 const geoIdent = (file) => {
   if (file === 'vinemaiden_seedling') return 'geometry.vinemaiden_seedling';
-  const j = readJSON(path.join(SRC_GEO, file + '.geo.json'));
+  const rp = path.join(RP, 'models', 'entity', file + '.geo.json');
+  const j = readJSON(exists(rp) ? rp : path.join(SRC_GEO, file + '.geo.json'));
   return j['minecraft:geometry'][0].description.identifier;
 };
 const animNames = (file) => {
-  const j = readJSON(path.join(SRC_ANIM, file + '.animation.json'));
+  const rp = path.join(RP, 'animations', file + '.animation.json');
+  const j = readJSON(exists(rp) ? rp : path.join(SRC_ANIM, file + '.animation.json'));
   return Object.keys(j.animations);
 };
 
 const allTex = texFiles();
+// Output texture basenames for an entity (applies an optional rename prefix).
+const skinsFor = (e) => allTex.filter((n) => e.skins.test(n)).sort().map((n) => (e.texPrefix ? e.texPrefix + n : n));
 
-function genTextureAndGeometry() {
-  // geometries
-  for (const f of fs.readdirSync(SRC_GEO)) {
-    if (!f.endsWith('.geo.json')) continue;
-    const src = path.join(SRC_GEO, f);
-    const j = readJSON(src);
-    // fix bad identifier
-    if (f === 'vinemaiden_seedling.geo.json') j['minecraft:geometry'][0].description.identifier = 'geometry.vinemaiden_seedling';
-    writeJSON(path.join(RP, 'models', 'entity', f), j);
-  }
-  // animations: GeckoLib keyframes are {"vector":[...],"easing":...} which Bedrock
-  // does NOT understand (Bedrock uses plain arrays / molang / {pre,post}). Convert.
+// Convert a GeckoLib animation JSON to Bedrock: unwrap {vector:...} keyframes,
+// keep {pre,post,lerp_mode}, drop the GeckoLib root field and add loop flags.
+function convertAnimObject(j) {
   const unwrap = (v) => {
     if (v && typeof v === 'object' && !Array.isArray(v)) {
       if (Array.isArray(v.vector)) return v.vector;
@@ -132,24 +134,60 @@ function genTextureAndGeometry() {
     for (const [t, v] of Object.entries(ch)) out[t] = unwrap(v);
     return out;
   };
-  for (const f of fs.readdirSync(SRC_ANIM)) {
-    if (!f.endsWith('.animation.json')) continue;
-    const j = readJSON(path.join(SRC_ANIM, f));
-    delete j.geckolib_format_version; // GeckoLib-only root field
-    for (const [name, anim] of Object.entries(j.animations || {})) {
-      anim.loop = LOOP_ANIMS.has(name.split('.').pop());
-      for (const bd of Object.values(anim.bones || {})) {
-        for (const ch of ['rotation', 'position', 'scale']) {
-          if (bd[ch] !== undefined) bd[ch] = convertChannel(bd[ch]);
-        }
+  delete j.geckolib_format_version; // GeckoLib-only root field
+  for (const [name, anim] of Object.entries(j.animations || {})) {
+    // Preserve an explicit GeckoLib loop mode (true / false / "hold_on_last_frame");
+    // Bedrock supports all three. Only fall back to the name heuristic when the
+    // source does not declare loop (otherwise e.g. rabbit.new / scarecrow.idleSMOOTH
+    // / vinemaiden.witherstun would be forced non-looping, and vinemaiden.hidden
+    // would lose its hold_on_last_frame).
+    const declared = anim.loop;
+    anim.loop = (declared === true || declared === false || declared === 'hold_on_last_frame')
+      ? declared
+      : LOOP_ANIMS.has(name.split('.').pop());
+    for (const bd of Object.values(anim.bones || {})) {
+      for (const ch of ['rotation', 'position', 'scale']) {
+        if (bd[ch] !== undefined) bd[ch] = convertChannel(bd[ch]);
       }
     }
-    writeJSON(path.join(RP, 'animations', f), j);
+  }
+  return j;
+}
+
+function genTextureAndGeometry() {
+  // geometries
+  for (const f of fs.readdirSync(SRC_GEO)) {
+    if (!f.endsWith('.geo.json')) continue;
+    const src = path.join(SRC_GEO, f);
+    const j = readJSON(src);
+    // fix bad identifier
+    if (f === 'vinemaiden_seedling.geo.json') j['minecraft:geometry'][0].description.identifier = 'geometry.vinemaiden_seedling';
+    writeJSON(path.join(RP, 'models', 'entity', f), j);
+  }
+  // animations: GeckoLib keyframes are {"vector":[...],"easing":...} which Bedrock
+  // does NOT understand (Bedrock uses plain arrays / molang / {pre,post}). Convert.
+  for (const f of fs.readdirSync(SRC_ANIM)) {
+    if (!f.endsWith('.animation.json')) continue;
+    writeJSON(path.join(RP, 'animations', f), convertAnimObject(readJSON(path.join(SRC_ANIM, f))));
   }
   // textures
   for (const f of fs.readdirSync(SRC_TEX)) {
     if (!f.endsWith('.png')) continue;
     copy(path.join(SRC_TEX, f), path.join(RP, 'textures', 'entity', 'pcraftrevorn', f));
+  }
+  // Restore the classic Zombie Girl as the base pcraftrevorn:zombie model.
+  // (Bibaso is now its own entity; see genBibasoZombie.)
+  const ORIG = path.join(ROOT, '.work', 'matopt_orig');
+  if (exists(path.join(ORIG, 'geo', 'zombiegirl.geo.json'))) {
+    writeJSON(path.join(RP, 'models', 'entity', 'zombiegirl.geo.json'), readJSON(path.join(ORIG, 'geo', 'zombiegirl.geo.json')));
+  }
+  if (exists(path.join(ORIG, 'animations', 'zombiegirl.animation.json'))) {
+    writeJSON(path.join(RP, 'animations', 'zombiegirl.animation.json'), convertAnimObject(readJSON(path.join(ORIG, 'animations', 'zombiegirl.animation.json'))));
+  }
+  if (exists(path.join(ORIG, 'textures'))) {
+    for (const f of fs.readdirSync(path.join(ORIG, 'textures'))) {
+      if (f.startsWith('zombie') && f.endsWith('.png')) copy(path.join(ORIG, 'textures', f), path.join(RP, 'textures', 'entity', 'pcraftrevorn', f));
+    }
   }
   // invisible placeholder texture + geometry
   writePng(path.join(RP, 'textures', 'entity', 'pcraftrevorn', 'invisible.png'), 16, 16, Buffer.alloc(16 * 16 * 4, 0));
@@ -173,7 +211,7 @@ function genTextureAndGeometry() {
 // ---- entities ----
 function genMobs() {
   for (const e of ENTITIES) {
-    const skins = allTex.filter(n => e.skins.test(n)).sort();
+    const skins = skinsFor(e);
     const n = skins.length;
     const textureMap = {}; const arrayEntries = [];
     skins.forEach((s, i) => { textureMap['skin' + i] = 'textures/entity/pcraftrevorn/' + s; arrayEntries.push('Texture.skin' + i); });
@@ -419,7 +457,7 @@ function genSpawnRules() {
 function genSkinData() {
   const out = {};
   for (const e of ENTITIES) {
-    const skins = allTex.filter(n => e.skins.test(n)).sort();
+    const skins = skinsFor(e);
     const map = {};
     skins.forEach((s, i) => { map[s] = i; });
     out[e.id] = map;
@@ -512,79 +550,51 @@ function genAttachables() {
   writeJSON(path.join(RP, 'render_controllers', 'staffs.render_controllers.json'), { format_version: '1.10.0', render_controllers: rc });
 }
 
-// ---- zombiegirl model variants (resource-pack subpacks) ----
-// Two selectable subpacks: "bibaso" (default, the new/optimized model, same as
-// the base pack) and "original" (the old model, taken from .work/matopt_orig).
-// Only geo/anim/textures differ; the animation names (and thus the client
-// entity) are identical, so no client-entity override is needed.
-function genZombiegirlSubpack() {
-  const origGeo = path.join(ROOT, '.work', 'matopt_orig', 'geo', 'zombiegirl.geo.json');
-  const origAnim = path.join(ROOT, '.work', 'matopt_orig', 'animations', 'zombiegirl.animation.json');
-  const origTex = path.join(ROOT, '.work', 'matopt_orig', 'textures');
-  if (!exists(origGeo) || !exists(origAnim)) return;
+// ---- Bibaso zombie (standalone entity) ----
+// Was a resource-pack subpack; now its own predator pcraftrevorn:bibaso_zombie.
+// Reuses the mod's optimized zombiegirl geo/anim/textures, renamed so it can
+// coexist with the classic pcraftrevorn:zombie.
+function genBibasoZombie() {
+  const geo = readJSON(path.join(SRC_GEO, 'zombiegirl.geo.json'));
+  geo['minecraft:geometry'][0].description.identifier = 'geometry.bibaso_zombie';
+  writeJSON(path.join(RP, 'models', 'entity', 'bibaso_zombie.geo.json'), geo);
 
-  const unwrap = (v) => {
-    if (v && typeof v === 'object' && !Array.isArray(v)) {
-      if (Array.isArray(v.vector)) return v.vector;
-      if (v.pre !== undefined || v.post !== undefined || v.lerp_mode !== undefined) {
-        const o = {};
-        if (v.pre !== undefined) o.pre = (v.pre && Array.isArray(v.pre.vector)) ? v.pre.vector : v.pre;
-        if (v.post !== undefined) o.post = (v.post && Array.isArray(v.post.vector)) ? v.post.vector : v.post;
-        if (v.lerp_mode !== undefined) o.lerp_mode = v.lerp_mode;
-        return o;
-      }
-    }
-    return v;
-  };
-  const convertChannel = (ch) => {
-    if (ch === null || typeof ch !== 'object' || Array.isArray(ch)) return ch;
-    if (Array.isArray(ch.vector)) return ch.vector;
-    const out = {};
-    for (const [t, v] of Object.entries(ch)) out[t] = unwrap(v);
-    return out;
-  };
-  const convertAnim = (j) => {
-    delete j.geckolib_format_version;
-    for (const [name, anim] of Object.entries(j.animations || {})) {
-      anim.loop = LOOP_ANIMS.has(name.split('.').pop());
-      for (const bd of Object.values(anim.bones || {})) {
-        for (const ch of ['rotation', 'position', 'scale']) if (bd[ch] !== undefined) bd[ch] = convertChannel(bd[ch]);
-      }
-    }
-    return j;
-  };
-  const writeVariant = (dest, geoFile, animFile, texDir) => {
-    writeJSON(path.join(dest, 'models', 'entity', 'zombiegirl.geo.json'), readJSON(geoFile));
-    writeJSON(path.join(dest, 'animations', 'zombiegirl.animation.json'), convertAnim(readJSON(animFile)));
-    if (exists(texDir)) {
-      for (const f of fs.readdirSync(texDir)) {
-        if (f.startsWith('zombie') && f.endsWith('.png')) copy(path.join(texDir, f), path.join(dest, 'textures', 'entity', 'pcraftrevorn', f));
-      }
-    }
-  };
+  const anim = convertAnimObject(readJSON(path.join(SRC_ANIM, 'zombiegirl.animation.json')));
+  const renamed = {};
+  for (const [k, v] of Object.entries(anim.animations || {})) {
+    renamed[k.replace(/^animation\.zombiegirl\./, 'animation.bibaso_zombie.')] = v;
+  }
+  anim.animations = renamed;
+  writeJSON(path.join(RP, 'animations', 'bibaso_zombie.animation.json'), anim);
 
-  writeVariant(path.join(RP, 'subpacks', 'bibaso'),
-    path.join(SRC_GEO, 'zombiegirl.geo.json'), path.join(SRC_ANIM, 'zombiegirl.animation.json'), SRC_TEX);
-  writeVariant(path.join(RP, 'subpacks', 'original'), origGeo, origAnim, origTex);
+  for (const f of fs.readdirSync(SRC_TEX)) {
+    if (f.startsWith('zombie') && f.endsWith('.png')) {
+      copy(path.join(SRC_TEX, f), path.join(RP, 'textures', 'entity', 'pcraftrevorn', 'bibaso_' + f));
+    }
+  }
 }
 
 function main() {
   if (!exists(MOD)) { console.error('Missing .work/mod. Run tools/extract.ps1 first.'); process.exit(1); }
   for (const d of [
     path.join(BP, 'entities'), path.join(BP, 'spawn_rules'),
-    path.join(BP, 'scripts', 'pcraftrevorn', 'data'),
+    // only skins.js is owned here; structures.js is produced by nbt_to_data.js
+    path.join(BP, 'scripts', 'pcraftrevorn', 'data', 'skins.js'),
     path.join(RP, 'entity'), path.join(RP, 'models', 'entity'),
     path.join(RP, 'animations'), path.join(RP, 'animation_controllers'),
     path.join(RP, 'render_controllers'), path.join(RP, 'attachables'),
-    path.join(RP, 'textures', 'entity', 'pcraftrevorn')
+    path.join(RP, 'textures', 'entity', 'pcraftrevorn'),
+    path.join(RP, 'subpacks')
   ]) rmrf(d);
   genTextureAndGeometry();
+  genBibasoZombie();
   genMobs();
   genSpecial();
   genSpawnRules();
   genSkinData();
   genAttachables();
-  genZombiegirlSubpack();
+  generateCommunity();
+  generateVariants();
   console.log('Phase 2 entities generated.');
 }
 main();

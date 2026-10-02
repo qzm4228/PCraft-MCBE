@@ -4583,7 +4583,7 @@
       "loop": false
     },
     "animation.vinemaiden.hidden": {
-      "loop": true,
+      "loop": "hold_on_last_frame",
       "animation_length": 0.5,
       "bones": {
         "Head": {
@@ -4765,7 +4765,7 @@
       }
     },
     "animation.vinemaiden.witherstun": {
-      "loop": false,
+      "loop": true,
       "animation_length": 2,
       "bones": {
         "Head": {

@@ -19,7 +19,13 @@
         "skin8": "textures/entity/pcraftrevorn/silverfish_male0_wg",
         "skin9": "textures/entity/pcraftrevorn/silverfish_male0_wg2",
         "skin10": "textures/entity/pcraftrevorn/silverfish_male0_wg2_belly",
-        "skin11": "textures/entity/pcraftrevorn/silverfish_male0_wg_belly"
+        "skin11": "textures/entity/pcraftrevorn/silverfish_male0_wg_belly",
+        "skin12": "textures/entity/pcraftrevorn/pcv_silverfish_silverfish_female0",
+        "skin13": "textures/entity/pcraftrevorn/pcv_silverfish_silverfish_female0_belly",
+        "skin14": "textures/entity/pcraftrevorn/pcv_silverfish_silverfish_female0_wg",
+        "skin15": "textures/entity/pcraftrevorn/pcv_silverfish_silverfish_female0_wg2",
+        "skin16": "textures/entity/pcraftrevorn/pcv_silverfish_silverfish_female0_wg2_belly",
+        "skin17": "textures/entity/pcraftrevorn/pcv_silverfish_silverfish_female0_wg_belly"
       },
       "geometry": {
         "default": "geometry.silverfish"
@@ -42,15 +48,23 @@
         "walk": "animation.silverfish.walk",
         "attack": "animation.silverfish.attack",
         "eat": "animation.silverfish.eat",
-        "no": "animation.silverfish.no"
+        "no": "animation.silverfish.no",
+        "silverfishrework_idle": "animation.silverfish.v_silverfishrework.idle",
+        "silverfishrework_walk": "animation.silverfish.v_silverfishrework.walk"
       },
       "scripts": {
         "animate": [
           {
-            "idle": "1.0 - math.min(1.0, query.modified_move_speed * 4.0)"
+            "idle": "q.property('pcraftrevorn:set') == 0 ? (1.0 - math.min(1.0, query.modified_move_speed * 4.0)) : 0.0"
           },
           {
-            "walk": "math.min(1.0, query.modified_move_speed * 4.0)"
+            "walk": "q.property('pcraftrevorn:set') == 0 ? math.min(1.0, query.modified_move_speed * 4.0) : 0.0"
+          },
+          {
+            "silverfishrework_idle": "q.property('pcraftrevorn:set') == 1 ? (1.0 - math.min(1.0, query.modified_move_speed * 4.0)) : 0.0"
+          },
+          {
+            "silverfishrework_walk": "q.property('pcraftrevorn:set') == 1 ? math.min(1.0, query.modified_move_speed * 4.0) : 0.0"
           }
         ]
       },

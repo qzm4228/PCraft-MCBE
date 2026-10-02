@@ -11,7 +11,11 @@
         "skin0": "textures/entity/pcraftrevorn/piglin_royal_female0",
         "skin1": "textures/entity/pcraftrevorn/piglin_royal_female0_belly",
         "skin2": "textures/entity/pcraftrevorn/piglin_royal_male0",
-        "skin3": "textures/entity/pcraftrevorn/piglin_royal_male0_belly"
+        "skin3": "textures/entity/pcraftrevorn/piglin_royal_male0_belly",
+        "skin4": "textures/entity/pcraftrevorn/pcv_royalrump_piglin_royal_female0",
+        "skin5": "textures/entity/pcraftrevorn/pcv_royalrump_piglin_royal_female0_belly",
+        "skin6": "textures/entity/pcraftrevorn/pcv_royalrump_piglin_royal_male0",
+        "skin7": "textures/entity/pcraftrevorn/pcv_royalrump_piglin_royal_male0_belly"
       },
       "geometry": {
         "default": "geometry.piglin_royalty"
@@ -32,15 +36,19 @@
         "idle": "animation.piglin_royalty.idle",
         "digest": "animation.piglin_royalty.digest",
         "walk": "animation.piglin_royalty.walk",
-        "stomp": "animation.piglin_royalty.stomp"
+        "stomp": "animation.piglin_royalty.stomp",
+        "royalrump_idle": "animation.piglin_royal.v_royalrump.idle"
       },
       "scripts": {
         "animate": [
           {
-            "idle": "1.0 - math.min(1.0, query.modified_move_speed * 4.0)"
+            "idle": "q.property('pcraftrevorn:set') == 0 ? (1.0 - math.min(1.0, query.modified_move_speed * 4.0)) : 0.0"
           },
           {
-            "walk": "math.min(1.0, query.modified_move_speed * 4.0)"
+            "walk": "q.property('pcraftrevorn:set') == 0 ? math.min(1.0, query.modified_move_speed * 4.0) : 0.0"
+          },
+          {
+            "royalrump_idle": "q.property('pcraftrevorn:set') == 1 ? (1.0 - math.min(1.0, query.modified_move_speed * 4.0)) : 0.0"
           }
         ]
       },

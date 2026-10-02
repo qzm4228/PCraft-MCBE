@@ -1,13 +1,13 @@
 {
   "format_version": 2,
   "header": {
-    "name": "PCraftRevorn 性别包 §2砂墨§r",
+    "name": "PCraftRevorn 性别包 §2砂墨§r §7· 261002-beta-1",
     "description": "玩家性别 / 体型菜单 + 分数板联机同步 · 二次修改作品 · 砂墨SandMo（Bilibili: 砂墨）· 参考 Wildfire's Female Gender Mod · 详见 README.txt",
     "uuid": "3a4f5e6d-7c81-4a99-bcad-23456789abcd",
     "version": [
+      261002,
       0,
-      4,
-      0
+      1
     ],
     "min_engine_version": [
       1,
@@ -22,9 +22,9 @@
       "uuid": "4b5a6f7e-8d92-4baa-cdbe-3456789abcde",
       "entry": "scripts/main.js",
       "version": [
+        261002,
         0,
-        4,
-        0
+        1
       ]
     }
   ],
@@ -32,9 +32,9 @@
     {
       "uuid": "1e2d3c4b-5a69-4877-9a8b-0123456789ab",
       "version": [
+        261002,
         0,
-        4,
-        0
+        1
       ]
     },
     {

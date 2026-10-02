@@ -1,0 +1,81 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:bibaso_zombie",
+      "min_engine_version": "1.8.0",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/bibaso_zombie0",
+        "skin1": "textures/entity/pcraftrevorn/bibaso_zombie0_belly",
+        "skin2": "textures/entity/pcraftrevorn/bibaso_zombie0_wg",
+        "skin3": "textures/entity/pcraftrevorn/bibaso_zombie0_wg2",
+        "skin4": "textures/entity/pcraftrevorn/bibaso_zombie0_wg2_belly",
+        "skin5": "textures/entity/pcraftrevorn/bibaso_zombie0_wg_belly",
+        "skin6": "textures/entity/pcraftrevorn/bibaso_zombie1",
+        "skin7": "textures/entity/pcraftrevorn/bibaso_zombie1_belly",
+        "skin8": "textures/entity/pcraftrevorn/bibaso_zombie1_wg",
+        "skin9": "textures/entity/pcraftrevorn/bibaso_zombie1_wg2",
+        "skin10": "textures/entity/pcraftrevorn/bibaso_zombie1_wg2_belly",
+        "skin11": "textures/entity/pcraftrevorn/bibaso_zombie1_wg_belly",
+        "skin12": "textures/entity/pcraftrevorn/bibaso_zombie2",
+        "skin13": "textures/entity/pcraftrevorn/bibaso_zombie2_belly",
+        "skin14": "textures/entity/pcraftrevorn/bibaso_zombie2_wg",
+        "skin15": "textures/entity/pcraftrevorn/bibaso_zombie2_wg2",
+        "skin16": "textures/entity/pcraftrevorn/bibaso_zombie2_wg2_belly",
+        "skin17": "textures/entity/pcraftrevorn/bibaso_zombie2_wg_belly",
+        "skin18": "textures/entity/pcraftrevorn/bibaso_zombie3",
+        "skin19": "textures/entity/pcraftrevorn/bibaso_zombie3_belly",
+        "skin20": "textures/entity/pcraftrevorn/bibaso_zombie3_wg",
+        "skin21": "textures/entity/pcraftrevorn/bibaso_zombie3_wg2",
+        "skin22": "textures/entity/pcraftrevorn/bibaso_zombie3_wg2_belly",
+        "skin23": "textures/entity/pcraftrevorn/bibaso_zombie3_wg_belly",
+        "skin24": "textures/entity/pcraftrevorn/bibaso_zombie66",
+        "skin25": "textures/entity/pcraftrevorn/bibaso_zombie66_belly",
+        "skin26": "textures/entity/pcraftrevorn/bibaso_zombie66_wg",
+        "skin27": "textures/entity/pcraftrevorn/bibaso_zombie66_wg2",
+        "skin28": "textures/entity/pcraftrevorn/bibaso_zombie66_wg2_belly",
+        "skin29": "textures/entity/pcraftrevorn/bibaso_zombie66_wg_belly",
+        "skin30": "textures/entity/pcraftrevorn/bibaso_zombie_girl"
+      },
+      "geometry": {
+        "default": "geometry.bibaso_zombie"
+      },
+      "animations": {
+        "swallow": "animation.bibaso_zombie.swallow",
+        "struggleup": "animation.bibaso_zombie.struggleup",
+        "struggledown": "animation.bibaso_zombie.struggledown",
+        "struggleleft": "animation.bibaso_zombie.struggleleft",
+        "struggleright": "animation.bibaso_zombie.struggleright",
+        "struggleupleft": "animation.bibaso_zombie.struggleupleft",
+        "struggledownleft": "animation.bibaso_zombie.struggledownleft",
+        "struggleupright": "animation.bibaso_zombie.struggleupright",
+        "struggledownright": "animation.bibaso_zombie.struggledownright",
+        "struggleupdown": "animation.bibaso_zombie.struggleupdown",
+        "struggleleftright": "animation.bibaso_zombie.struggleleftright",
+        "strugglefail": "animation.bibaso_zombie.strugglefail",
+        "idle": "animation.bibaso_zombie.idle",
+        "digest": "animation.bibaso_zombie.digest",
+        "walk": "animation.bibaso_zombie.walk"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "idle": "1.0 - math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walk": "math.min(1.0, query.modified_move_speed * 4.0)"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.bibaso_zombie"
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_bibaso_zombie_spawn_egg"
+      }
+    }
+  }
+}

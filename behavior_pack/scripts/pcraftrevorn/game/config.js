@@ -1,5 +1,6 @@
 // Per-player settings (port of PCraftGeneralConfiguration-ish knobs).
-import { showPcModal } from "../ui/forms.js";
+import { showPcModal, showPcForm } from "../ui/forms.js";
+import { openVariants } from "./variants.js";
 
 const DEFAULTS = { swallow: 25, difficulty: 40, timer: 60 };
 
@@ -28,4 +29,23 @@ export async function openSettings(player) {
   const [swallow, difficulty, timer] = res.values;
   safeSet(player, "pc:cfg", JSON.stringify({ swallow, difficulty, timer }));
   player.sendMessage(`§a[PCraft] 设置已保存：概率 ${swallow}% / 难度 ${difficulty}% / 时限 ${timer} 刻`);
+}
+
+/** Options hub: game settings + appearance (community rework look-sets). */
+export async function openOptions(player) {
+  while (true) {
+    const res = await showPcForm(player, {
+      title: "PCraft 选项",
+      body: "§7游戏设置与外观设置。",
+      level: 0,
+      buttons: [
+        { id: "game", label: "§f游戏设置" },
+        { id: "look", label: "§f外观设置 §7(社区变体)" },
+        { id: "__back", label: "§a返回" }
+      ]
+    });
+    if (res.canceled || res.id === "__back") break;
+    if (res.id === "game") await openSettings(player);
+    else if (res.id === "look") await openVariants(player);
+  }
 }
