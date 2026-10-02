@@ -7,3 +7,6 @@ node_modules/
 # OS
 Thumbs.db
 desktop.ini
+
+# large third-party reference jar (assets extracted to tools/assets)
+examples/*Cobblemon*.jar

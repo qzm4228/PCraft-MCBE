@@ -88,8 +88,8 @@
         },
         "geometries": {
           "Array.geos": [
-            "geometry.scarecrow",
-            "geometry.scarecrow.v_scarecrowtaste"
+            "Geometry.default",
+            "Geometry.v_scarecrowtaste"
           ]
         }
       },
@@ -110,8 +110,8 @@
       "arrays": {
         "geometries": {
           "Array.geos": [
-            "geometry.scarecrow",
-            "geometry.scarecrow.v_scarecrowtaste"
+            "Geometry.default",
+            "Geometry.v_scarecrowtaste"
           ]
         }
       }

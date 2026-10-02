@@ -85,7 +85,8 @@
         "skin72": "textures/entity/pcraftrevorn/pcv_scarecrow_scarecrow_male0_health2_wg_belly"
       },
       "geometry": {
-        "default": "geometry.scarecrow"
+        "default": "geometry.scarecrow",
+        "v_scarecrowtaste": "geometry.scarecrow.v_scarecrowtaste"
       },
       "animations": {
         "swallow": "animation.scarecrow.swallow",

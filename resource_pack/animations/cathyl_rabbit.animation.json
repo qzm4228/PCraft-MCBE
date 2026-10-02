@@ -4,7 +4,7 @@
     "animation.cathyl_rabbit.swallow": {
       "animation_length": 7,
       "bones": {
-        "foot first pred": {
+        "foot_first_pred": {
           "rotation": {
             "0.0": [
               127.5,
@@ -3527,7 +3527,7 @@
             }
           }
         },
-        "foot first prey": {
+        "foot_first_prey": {
           "rotation": {
             "0.0": [
               -177.5,
@@ -4529,7 +4529,7 @@
             }
           }
         },
-        "head first pred": {
+        "head_first_pred": {
           "rotation": {
             "0.0": [
               127.5,
@@ -8081,7 +8081,7 @@
             }
           }
         },
-        "av head first": {
+        "av_head_first": {
           "rotation": {
             "0.0": [
               5,
@@ -12308,7 +12308,7 @@
             }
           }
         },
-        "ub prey": {
+        "ub_prey": {
           "rotation": {
             "0.0": {
               "post": [
@@ -13496,7 +13496,7 @@
     "animation.cathyl_rabbit.swallowWG1": {
       "animation_length": 7,
       "bones": {
-        "foot first pred": {
+        "foot_first_pred": {
           "rotation": {
             "0.0": [
               127.5,
@@ -17019,7 +17019,7 @@
             }
           }
         },
-        "foot first prey": {
+        "foot_first_prey": {
           "rotation": {
             "0.0": [
               -177.5,
@@ -18021,7 +18021,7 @@
             }
           }
         },
-        "head first pred": {
+        "head_first_pred": {
           "rotation": {
             "0.0": [
               127.5,
@@ -21573,7 +21573,7 @@
             }
           }
         },
-        "av head first": {
+        "av_head_first": {
           "rotation": {
             "0.0": [
               5,
@@ -25800,7 +25800,7 @@
             }
           }
         },
-        "ub prey": {
+        "ub_prey": {
           "rotation": {
             "0.0": {
               "post": [
@@ -26988,7 +26988,7 @@
     "animation.cathyl_rabbit.swallowWG2": {
       "animation_length": 7,
       "bones": {
-        "foot first pred": {
+        "foot_first_pred": {
           "rotation": {
             "0.0": [
               127.5,
@@ -30511,7 +30511,7 @@
             }
           }
         },
-        "foot first prey": {
+        "foot_first_prey": {
           "rotation": {
             "0.0": [
               -177.5,
@@ -31513,7 +31513,7 @@
             }
           }
         },
-        "head first pred": {
+        "head_first_pred": {
           "rotation": {
             "0.0": [
               127.5,
@@ -35065,7 +35065,7 @@
             }
           }
         },
-        "av head first": {
+        "av_head_first": {
           "rotation": {
             "0.0": [
               5,
@@ -39292,7 +39292,7 @@
             }
           }
         },
-        "ub prey": {
+        "ub_prey": {
           "rotation": {
             "0.0": {
               "post": [
@@ -40480,7 +40480,7 @@
     "animation.cathyl_rabbit.digest": {
       "animation_length": 7,
       "bones": {
-        "left total leg": {
+        "left_total_leg": {
           "rotation": {
             "0.0": [
               0,
@@ -40556,7 +40556,7 @@
             ]
           }
         },
-        "left hooves": {
+        "left_hooves": {
           "rotation": {
             "0.0": {
               "post": [
@@ -40642,7 +40642,7 @@
             }
           }
         },
-        "right total leg": {
+        "right_total_leg": {
           "rotation": {
             "0.0": [
               0,
@@ -40718,7 +40718,7 @@
             ]
           }
         },
-        "right hooves": {
+        "right_hooves": {
           "rotation": {
             "0.0": {
               "post": [
@@ -41016,7 +41016,7 @@
             }
           }
         },
-        "breast up down": {
+        "breast_up_down": {
           "rotation": {
             "0.0": [
               7.5,
@@ -41090,7 +41090,7 @@
             ]
           }
         },
-        "RIGHT ANIMATED BREAST PART": {
+        "RIGHT_ANIMATED_BREAST_PART": {
           "rotation": {
             "0.0": [
               0,
@@ -41216,7 +41216,7 @@
             ]
           }
         },
-        "LEFT ANIMATED BREAST PART": {
+        "LEFT_ANIMATED_BREAST_PART": {
           "rotation": {
             "0.0": [
               0,
@@ -41478,7 +41478,7 @@
             ]
           }
         },
-        "right ears": {
+        "right_ears": {
           "rotation": {
             "0.0": [
               0,
@@ -41620,7 +41620,7 @@
             }
           }
         },
-        "left ears": {
+        "left_ears": {
           "rotation": {
             "0.0": [
               0,
@@ -41762,7 +41762,7 @@
             }
           }
         },
-        "left paupierebas": {
+        "left_paupierebas": {
           "position": {
             "0.0": [
               0,
@@ -41816,7 +41816,7 @@
             ]
           }
         },
-        "right paupierebas": {
+        "right_paupierebas": {
           "position": {
             "0.0": [
               0,
@@ -42005,7 +42005,7 @@
             }
           }
         },
-        "SKULL DISPOSAL": {
+        "SKULL_DISPOSAL": {
           "rotation": {
             "5.625": {
               "pre": [
@@ -54062,7 +54062,7 @@
             }
           }
         },
-        "foot first prey": {
+        "foot_first_prey": {
           "scale": {
             "0.0": [
               0,
@@ -60670,7 +60670,7 @@
             }
           }
         },
-        "av head first": {
+        "av_head_first": {
           "scale": 0
         },
         "SKULL_DISPOSAL2": {
@@ -67836,7 +67836,7 @@
             }
           }
         },
-        "ub prey": {
+        "ub_prey": {
           "scale": 0
         },
         "av_prey_pos2": {
@@ -67848,7 +67848,7 @@
     "animation.cathyl_rabbit.digestWG1": {
       "animation_length": 7,
       "bones": {
-        "left total leg": {
+        "left_total_leg": {
           "rotation": {
             "0.0": [
               0,
@@ -67924,7 +67924,7 @@
             ]
           }
         },
-        "left hooves": {
+        "left_hooves": {
           "rotation": {
             "0.0": {
               "post": [
@@ -68010,7 +68010,7 @@
             }
           }
         },
-        "right total leg": {
+        "right_total_leg": {
           "rotation": {
             "0.0": [
               0,
@@ -68086,7 +68086,7 @@
             ]
           }
         },
-        "right hooves": {
+        "right_hooves": {
           "rotation": {
             "0.0": {
               "post": [
@@ -68384,7 +68384,7 @@
             }
           }
         },
-        "breast up down": {
+        "breast_up_down": {
           "rotation": {
             "0.0": [
               7.5,
@@ -68458,7 +68458,7 @@
             ]
           }
         },
-        "RIGHT ANIMATED BREAST PART": {
+        "RIGHT_ANIMATED_BREAST_PART": {
           "rotation": {
             "0.0": [
               0,
@@ -68584,7 +68584,7 @@
             ]
           }
         },
-        "LEFT ANIMATED BREAST PART": {
+        "LEFT_ANIMATED_BREAST_PART": {
           "rotation": {
             "0.0": [
               0,
@@ -68846,7 +68846,7 @@
             ]
           }
         },
-        "right ears": {
+        "right_ears": {
           "rotation": {
             "0.0": [
               0,
@@ -68988,7 +68988,7 @@
             }
           }
         },
-        "left ears": {
+        "left_ears": {
           "rotation": {
             "0.0": [
               0,
@@ -69130,7 +69130,7 @@
             }
           }
         },
-        "left paupierebas": {
+        "left_paupierebas": {
           "position": {
             "0.0": [
               0,
@@ -69184,7 +69184,7 @@
             ]
           }
         },
-        "right paupierebas": {
+        "right_paupierebas": {
           "position": {
             "0.0": [
               0,
@@ -69373,7 +69373,7 @@
             }
           }
         },
-        "SKULL DISPOSAL": {
+        "SKULL_DISPOSAL": {
           "rotation": {
             "5.625": {
               "pre": [
@@ -81430,7 +81430,7 @@
             }
           }
         },
-        "foot first prey": {
+        "foot_first_prey": {
           "scale": {
             "0.0": [
               0,
@@ -88038,7 +88038,7 @@
             }
           }
         },
-        "av head first": {
+        "av_head_first": {
           "scale": 0
         },
         "SKULL_DISPOSAL2": {
@@ -95204,7 +95204,7 @@
             }
           }
         },
-        "ub prey": {
+        "ub_prey": {
           "scale": 0
         },
         "av_prey_pos2": {
@@ -95216,7 +95216,7 @@
     "animation.cathyl_rabbit.digestWG2": {
       "animation_length": 7,
       "bones": {
-        "left total leg": {
+        "left_total_leg": {
           "rotation": {
             "0.0": [
               0,
@@ -95292,7 +95292,7 @@
             ]
           }
         },
-        "left hooves": {
+        "left_hooves": {
           "rotation": {
             "0.0": {
               "post": [
@@ -95378,7 +95378,7 @@
             }
           }
         },
-        "right total leg": {
+        "right_total_leg": {
           "rotation": {
             "0.0": [
               0,
@@ -95454,7 +95454,7 @@
             ]
           }
         },
-        "right hooves": {
+        "right_hooves": {
           "rotation": {
             "0.0": {
               "post": [
@@ -95752,7 +95752,7 @@
             }
           }
         },
-        "breast up down": {
+        "breast_up_down": {
           "rotation": {
             "0.0": [
               7.5,
@@ -95826,7 +95826,7 @@
             ]
           }
         },
-        "RIGHT ANIMATED BREAST PART": {
+        "RIGHT_ANIMATED_BREAST_PART": {
           "rotation": {
             "0.0": [
               0,
@@ -95952,7 +95952,7 @@
             ]
           }
         },
-        "LEFT ANIMATED BREAST PART": {
+        "LEFT_ANIMATED_BREAST_PART": {
           "rotation": {
             "0.0": [
               0,
@@ -96214,7 +96214,7 @@
             ]
           }
         },
-        "right ears": {
+        "right_ears": {
           "rotation": {
             "0.0": [
               0,
@@ -96356,7 +96356,7 @@
             }
           }
         },
-        "left ears": {
+        "left_ears": {
           "rotation": {
             "0.0": [
               0,
@@ -96498,7 +96498,7 @@
             }
           }
         },
-        "left paupierebas": {
+        "left_paupierebas": {
           "position": {
             "0.0": [
               0,
@@ -96552,7 +96552,7 @@
             ]
           }
         },
-        "right paupierebas": {
+        "right_paupierebas": {
           "position": {
             "0.0": [
               0,
@@ -96741,7 +96741,7 @@
             }
           }
         },
-        "SKULL DISPOSAL": {
+        "SKULL_DISPOSAL": {
           "rotation": {
             "5.625": {
               "pre": [
@@ -108798,7 +108798,7 @@
             }
           }
         },
-        "foot first prey": {
+        "foot_first_prey": {
           "scale": {
             "0.0": [
               0,
@@ -115406,7 +115406,7 @@
             }
           }
         },
-        "av head first": {
+        "av_head_first": {
           "scale": 0
         },
         "SKULL_DISPOSAL2": {
@@ -122572,7 +122572,7 @@
             }
           }
         },
-        "ub prey": {
+        "ub_prey": {
           "scale": 0
         },
         "av_prey_pos2": {
@@ -129855,7 +129855,7 @@
             }
           }
         },
-        "av head first": {
+        "av_head_first": {
           "scale": 0
         },
         "SKULL_DISPOSAL2": {
@@ -133492,10 +133492,10 @@
         "SKULL_DISPOSAL4": {
           "scale": 0
         },
-        "foot first prey": {
+        "foot_first_prey": {
           "scale": 0
         },
-        "ub prey": {
+        "ub_prey": {
           "scale": 0
         },
         "av_prey_pos2": {
@@ -136539,7 +136539,7 @@
             }
           }
         },
-        "foot first prey": {
+        "foot_first_prey": {
           "scale": 0
         },
         "SKULL_DISPOSAL3": {
@@ -142970,10 +142970,10 @@
         "av_head_first2": {
           "scale": 0
         },
-        "ub prey": {
+        "ub_prey": {
           "scale": 0
         },
-        "av head first": {
+        "av_head_first": {
           "scale": 0
         }
       }

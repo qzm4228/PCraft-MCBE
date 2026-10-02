@@ -1816,7 +1816,7 @@
           ]
         },
         {
-          "name": "breasts up and down",
+          "name": "breasts_up_and_down",
           "parent": "bone6",
           "pivot": [
             0,
@@ -1826,7 +1826,7 @@
         },
         {
           "name": "breasts2",
-          "parent": "breasts up and down",
+          "parent": "breasts_up_and_down",
           "pivot": [
             0,
             37.77767,
@@ -4240,7 +4240,7 @@
           ]
         },
         {
-          "name": "directional struggle sway",
+          "name": "directional_struggle_sway",
           "parent": "bone6",
           "pivot": [
             0,
@@ -4250,7 +4250,7 @@
         },
         {
           "name": "stomach2",
-          "parent": "directional struggle sway",
+          "parent": "directional_struggle_sway",
           "pivot": [
             1,
             29.01606,
@@ -4477,7 +4477,7 @@
           ]
         },
         {
-          "name": "left leg",
+          "name": "left_leg",
           "parent": "legs",
           "pivot": [
             -8.79655,
@@ -4491,8 +4491,8 @@
           ]
         },
         {
-          "name": "right thigh",
-          "parent": "left leg",
+          "name": "right_thigh",
+          "parent": "left_leg",
           "pivot": [
             0.29862,
             8.85168,
@@ -4556,8 +4556,8 @@
           ]
         },
         {
-          "name": "right lower",
-          "parent": "left leg",
+          "name": "right_lower",
+          "parent": "left_leg",
           "pivot": [
             -8.79655,
             10.4631,
@@ -4647,7 +4647,7 @@
           ]
         },
         {
-          "name": "right leg",
+          "name": "right_leg",
           "parent": "legs",
           "pivot": [
             8.79655,
@@ -4661,8 +4661,8 @@
           ]
         },
         {
-          "name": "left thigh",
-          "parent": "right leg",
+          "name": "left_thigh",
+          "parent": "right_leg",
           "pivot": [
             -0.29862,
             8.85168,
@@ -4726,8 +4726,8 @@
           ]
         },
         {
-          "name": "left lower",
-          "parent": "right leg",
+          "name": "left_lower",
+          "parent": "right_leg",
           "pivot": [
             8.79655,
             10.4631,
@@ -4834,7 +4834,7 @@
           ]
         },
         {
-          "name": "hip and prey",
+          "name": "hip_and_prey",
           "parent": "torsp",
           "pivot": [
             0,
@@ -4844,7 +4844,7 @@
         },
         {
           "name": "hips",
-          "parent": "hip and prey",
+          "parent": "hip_and_prey",
           "pivot": [
             0,
             18.5,
@@ -4870,7 +4870,7 @@
           ]
         },
         {
-          "name": "loin cloth",
+          "name": "loin_cloth",
           "parent": "hips",
           "pivot": [
             0,
@@ -4924,7 +4924,7 @@
           ]
         },
         {
-          "name": "left buttcheek",
+          "name": "left_buttcheek",
           "parent": "ass",
           "pivot": [
             7.49179,
@@ -4962,7 +4962,7 @@
           ]
         },
         {
-          "name": "right buttcheek",
+          "name": "right_buttcheek",
           "parent": "ass",
           "pivot": [
             -7.49179,
@@ -4999,7 +4999,7 @@
           ]
         },
         {
-          "name": "prey out",
+          "name": "prey_out",
           "parent": "ass",
           "pivot": [
             0,
@@ -5014,7 +5014,7 @@
         },
         {
           "name": "OVPhautducorps3",
-          "parent": "prey out",
+          "parent": "prey_out",
           "pivot": [
             0,
             -3,
@@ -5819,7 +5819,7 @@
         },
         {
           "name": "OVPjambes2",
-          "parent": "prey out",
+          "parent": "prey_out",
           "pivot": [
             0,
             -4,
@@ -6036,7 +6036,7 @@
         },
         {
           "name": "ring",
-          "parent": "prey out",
+          "parent": "prey_out",
           "pivot": [
             0,
             -1,
@@ -6221,7 +6221,7 @@
           ]
         },
         {
-          "name": "left breast",
+          "name": "left_breast",
           "parent": "breasts",
           "pivot": [
             5,
@@ -6339,7 +6339,7 @@
           ]
         },
         {
-          "name": "right breast",
+          "name": "right_breast",
           "parent": "breasts",
           "pivot": [
             -5,
@@ -6458,7 +6458,7 @@
         },
         {
           "name": "piercing",
-          "parent": "right breast",
+          "parent": "right_breast",
           "pivot": [
             -5,
             35.77767,
@@ -6541,7 +6541,7 @@
           ]
         },
         {
-          "name": "right pred arm",
+          "name": "right_pred_arm",
           "parent": "arms",
           "pivot": [
             -13.5,
@@ -6568,8 +6568,8 @@
           ]
         },
         {
-          "name": "right lower pred arm",
-          "parent": "right pred arm",
+          "name": "right_lower_pred_arm",
+          "parent": "right_pred_arm",
           "pivot": [
             -13.5,
             22.5,
@@ -6612,7 +6612,7 @@
           ]
         },
         {
-          "name": "left pred arm",
+          "name": "left_pred_arm",
           "parent": "arms",
           "pivot": [
             13.5,
@@ -6640,8 +6640,8 @@
           ]
         },
         {
-          "name": "left lower pred arm",
-          "parent": "left pred arm",
+          "name": "left_lower_pred_arm",
+          "parent": "left_pred_arm",
           "pivot": [
             13.5,
             22.5,
@@ -6828,7 +6828,7 @@
           ]
         },
         {
-          "name": "frills left",
+          "name": "frills_left",
           "parent": "hair",
           "pivot": [
             0,
@@ -6969,7 +6969,7 @@
           ]
         },
         {
-          "name": "frills front",
+          "name": "frills_front",
           "parent": "hair",
           "pivot": [
             0,
@@ -7372,7 +7372,7 @@
           ]
         },
         {
-          "name": "frills right",
+          "name": "frills_right",
           "parent": "hair",
           "pivot": [
             0,
@@ -7579,7 +7579,7 @@
           ]
         },
         {
-          "name": "nose ring",
+          "name": "nose_ring",
           "parent": "snout",
           "pivot": [
             0,

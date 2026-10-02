@@ -18,7 +18,8 @@
         "skin7": "textures/entity/pcraftrevorn/pcv_royalrump_piglin_royal_male0_belly"
       },
       "geometry": {
-        "default": "geometry.piglin_royalty"
+        "default": "geometry.piglin_royalty",
+        "v_royalrump": "geometry.piglin_royal.v_royalrump"
       },
       "animations": {
         "swallow": "animation.piglin_royalty.swallow",

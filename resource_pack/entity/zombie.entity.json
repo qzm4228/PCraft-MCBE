@@ -521,7 +521,9 @@
         "skin510": "textures/entity/pcraftrevorn/pcv_predz_zombie_male2_decor4_wg_belly"
       },
       "geometry": {
-        "default": "geometry.zombiegirl"
+        "default": "geometry.zombiegirl",
+        "v_predatopiav2": "geometry.zombie.v_predatopiav2",
+        "v_predatopiazombie": "geometry.zombie.v_predatopiazombie"
       },
       "animations": {
         "swallow": "animation.zombiegirl.swallow",

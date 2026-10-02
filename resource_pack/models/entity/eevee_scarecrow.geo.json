@@ -42,7 +42,7 @@
           ]
         },
         {
-          "name": "othertete&cou",
+          "name": "othertete_cou",
           "parent": "Skull",
           "pivot": [
             0,
@@ -52,7 +52,7 @@
         },
         {
           "name": "othertete",
-          "parent": "othertete&cou",
+          "parent": "othertete_cou",
           "pivot": [
             0,
             18,
@@ -1930,7 +1930,7 @@
         },
         {
           "name": "cou",
-          "parent": "othertete&cou",
+          "parent": "othertete_cou",
           "pivot": [
             0,
             17,

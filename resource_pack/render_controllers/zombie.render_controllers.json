@@ -526,9 +526,9 @@
         },
         "geometries": {
           "Array.geos": [
-            "geometry.zombiegirl",
-            "geometry.zombie.v_predatopiav2",
-            "geometry.zombie.v_predatopiazombie"
+            "Geometry.default",
+            "Geometry.v_predatopiav2",
+            "Geometry.v_predatopiazombie"
           ]
         }
       },

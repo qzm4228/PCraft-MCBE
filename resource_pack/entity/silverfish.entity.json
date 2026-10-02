@@ -28,7 +28,8 @@
         "skin17": "textures/entity/pcraftrevorn/pcv_silverfish_silverfish_female0_wg_belly"
       },
       "geometry": {
-        "default": "geometry.silverfish"
+        "default": "geometry.silverfish",
+        "v_silverfishrework": "geometry.silverfish.v_silverfishrework"
       },
       "animations": {
         "swallow": "animation.silverfish.swallow",

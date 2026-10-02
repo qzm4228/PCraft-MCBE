@@ -12,7 +12,7 @@
  * Run via generate_entities.js (called at the end of main), or directly:
  *   node tools/generate_community.js
  */
-const fs = require('fs'), path = require('path');
+const fs = require('fs'), path = require('path'), zlib = require('zlib');
 const ROOT = path.resolve(__dirname, '..');
 const COMM = path.join(ROOT, '.work', 'community');
 const BP = path.join(ROOT, 'behavior_pack');
@@ -25,6 +25,52 @@ const writeJSON = (f, o) => writeText(f, JSON.stringify(o, null, 2) + '\n');
 const readJSON = (f) => JSON.parse(fs.readFileSync(f, 'utf8'));
 const copy = (s, d) => { ensureDir(path.dirname(d)); fs.copyFileSync(s, d); };
 const LOOP_ANIMS = new Set(['idle', 'walk', 'sprint', 'hidden']);
+
+// ---- PNG writer (Poké Ball spawn-egg icon) ----
+const CRC_TABLE = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); t[n] = c >>> 0; } return t; })();
+const crc32 = (buf) => { let c = 0xFFFFFFFF; for (let i = 0; i < buf.length; i++) c = CRC_TABLE[(c ^ buf[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function pngChunk(type, data) {
+  const len = Buffer.alloc(4); len.writeUInt32BE(data.length, 0);
+  const body = Buffer.concat([Buffer.from(type, 'ascii'), data]);
+  const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(body), 0);
+  return Buffer.concat([len, body, crc]);
+}
+function writePng(file, w, h, rgba) {
+  const sig = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = 6;
+  const stride = w * 4, raw = Buffer.alloc((stride + 1) * h);
+  for (let y = 0; y < h; y++) { raw[y * (stride + 1)] = 0; rgba.copy(raw, y * (stride + 1) + 1, y * stride, y * stride + stride); }
+  ensureDir(path.dirname(file));
+  fs.writeFileSync(file, Buffer.concat([sig, pngChunk('IHDR', ihdr), pngChunk('IDAT', zlib.deflateSync(raw)), pngChunk('IEND', Buffer.alloc(0))]));
+}
+// Tracked Poké Ball sprites (from Cobblemon). Each creature can name its ball.
+const BALL_DIR = path.join(ROOT, 'tools', 'assets', 'balls');
+const BALL_SRC = [
+  path.join(ROOT, 'tools', 'assets', 'pokeball.png'),
+  path.join(ROOT, '.work', 'pokeball.png')
+].find((p) => fs.existsSync(p));
+function ballPng(file, ball, size = 16) {
+  const themed = ball && ball !== true && fs.existsSync(path.join(BALL_DIR, ball + '.png')) ? path.join(BALL_DIR, ball + '.png') : null;
+  const src = themed || BALL_SRC;
+  if (src) { copy(src, file); return; }
+  const rgba = Buffer.alloc(size * size * 4, 0);
+  const c = (size - 1) / 2, R = size / 2 - 0.6, btnR = size * 0.21;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const dx = x - c, dy = y - c, d = Math.sqrt(dx * dx + dy * dy), o = (y * size + x) * 4;
+      if (d > R) continue;
+      let col;
+      if (d > R - 1.0) col = [20, 20, 20];                       // outline
+      else if (d < btnR) col = [242, 242, 242];                  // button
+      else if (d < btnR + 1.0) col = [20, 20, 20];               // button ring
+      else if (Math.abs(dy) < size * 0.10) col = [20, 20, 20];   // band
+      else if (dy < 0) col = [216, 44, 44];                      // top: red
+      else col = [242, 242, 242];                                // bottom: white
+      rgba[o] = col[0]; rgba[o + 1] = col[1]; rgba[o + 2] = col[2]; rgba[o + 3] = 255;
+    }
+  }
+  writePng(file, size, size, rgba);
+}
 
 function convertAnimObject(j) {
   const unwrap = (v) => {
@@ -58,6 +104,39 @@ function convertAnimObject(j) {
   return j;
 }
 
+// Bedrock bone names must be [A-Za-z_][A-Za-z0-9_.]*; community models use names
+// with spaces / '&', which can make Bedrock ignore the animation. Rename the bad
+// names identically in the geometry and the animation so they still match.
+function sanitizeBones(geo, anim) {
+  const g = geo['minecraft:geometry'][0];
+  const gb = g.bones || [];
+  const names = new Set(gb.map((b) => b.name));
+  for (const a of Object.values((anim && anim.animations) || {})) for (const k of Object.keys(a.bones || {})) names.add(k);
+  const valid = /^[A-Za-z][A-Za-z0-9_.]*$/;
+  const used = new Set([...names].filter((n) => valid.test(n)));
+  const map = new Map();
+  for (const n of names) {
+    if (valid.test(n)) continue;
+    let base = String(n).replace(/[^A-Za-z0-9_.]/g, '_');
+    if (!/^[A-Za-z_]/.test(base)) base = '_' + base;
+    let cand = base, i = 1;
+    while (used.has(cand) && cand !== n) cand = `${base}_${i++}`;
+    used.add(cand);
+    map.set(n, cand);
+  }
+  if (!map.size) return 0;
+  for (const b of gb) {
+    if (map.has(b.name)) b.name = map.get(b.name);
+    if (b.parent && map.has(b.parent)) b.parent = map.get(b.parent);
+  }
+  for (const a of Object.values((anim && anim.animations) || {})) {
+    const nb = {};
+    for (const [k, v] of Object.entries(a.bones || {})) nb[map.get(k) ?? k] = v;
+    a.bones = nb;
+  }
+  return map.size;
+}
+
 // base predator stats (mirrors skin/assign.js PRED_STATS)
 const BASE_STATS = {
   rabbit_wizard: { swallow: 0.15, struggles: 11, difficulty: 0.30, acid: 3.2, acidMax: 13.0, acidIncr: 0.04, wg1: 1, wg2: 4 },
@@ -83,21 +162,21 @@ const CREATURES = [
     name: '拉米亚', lore: '取代僵尸的蛇身掠食者，拥有多套装饰外观。',
     behavior: { hp: 20, speed: 0.23, dmg: 3, follow: 35, size: [0.6, 1.8], loot: 'zombie', tameable: false, baseStats: 'zombie', undead: true } },
   { id: 'eevee_rabbit', pack: 'eeveelution', srcMob: 'rabbit', texBase: 'eevee_rabbit',
-    variants: [0, 1, 2], gendered: false, endKind: null, counterMax: 1, egg: 'rabbit_wizard',
-    name: '伊布兔', lore: '伊布化的兔法师。', behavior: { hp: 24, speed: 0.25, dmg: 3, follow: 16, size: [0.6, 1.8], loot: null, tameable: true, baseStats: 'rabbit_wizard', undead: false } },
+    variants: [0, 1, 2], gendered: false, endKind: null, counterMax: 1, egg: 'rabbit_wizard', ball: 'dream_ball',
+    name: '太阳伊布', lore: '紫色宝可梦 · 太阳伊布（Espeon）——换皮的兔法师掠食者。', behavior: { hp: 24, speed: 0.25, dmg: 3, follow: 16, size: [0.6, 1.8], loot: null, tameable: true, baseStats: 'rabbit_wizard', undead: false } },
   { id: 'eevee_scarecrow', pack: 'eeveelution', srcMob: 'scarecrow', texBase: 'eevee_scarecrow',
-    variants: [0], gendered: true, endKind: 'health', counterMax: 3, egg: 'scarecrow',
-    name: '伊布稻草人', lore: '伊布化的稻草人。', behavior: { hp: 50, speed: 0.3, dmg: 3, follow: 64, size: [0.8, 2.4], loot: null, tameable: true, baseStats: 'scarecrow', undead: false } },
+    variants: [0], gendered: true, endKind: 'health', counterMax: 3, egg: 'scarecrow', ball: 'dive_ball',
+    name: '水伊布', lore: '青蓝色宝可梦 · 水伊布（Vaporeon）——换皮的稻草人掠食者。', behavior: { hp: 50, speed: 0.3, dmg: 3, follow: 64, size: [0.8, 2.4], loot: null, tameable: true, baseStats: 'scarecrow', undead: false } },
   { id: 'eevee_silverfish', pack: 'eeveelution', srcMob: 'silverfish', texBase: 'eevee_silverfish',
-    variants: [0], gendered: true, endKind: null, counterMax: 1, egg: 'silverfish',
-    name: '伊布蠹虫', lore: '伊布化的吞食蠹虫。', behavior: { hp: 12, speed: 0.3, dmg: 4, follow: 16, size: [0.6, 1.8], loot: null, tameable: false, baseStats: 'silverfish', undead: false } },
+    variants: [0], gendered: true, endKind: null, counterMax: 1, egg: 'silverfish', ball: 'moon_ball',
+    name: '月亮伊布', lore: '黑色宝可梦 · 月亮伊布（Umbreon）——换皮的吞食蠹虫掠食者。', behavior: { hp: 12, speed: 0.3, dmg: 4, follow: 16, size: [0.6, 1.8], loot: null, tameable: false, baseStats: 'silverfish', undead: false } },
   { id: 'eevee_vinemaiden', pack: 'eeveelution', srcMob: 'vinemaiden', texBase: 'eevee_vinemaiden',
-    variants: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 31, 99], gendered: false, endKind: null, counterMax: 1, egg: 'vinemaiden',
-    name: '伊布藤娘', lore: '伊布化的藤娘。', behavior: { hp: 30, speed: 0.3, dmg: 5, follow: 12, size: [0.7, 1.9], loot: null, tameable: true, baseStats: 'vinemaiden', undead: false },
+    variants: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 31, 99], gendered: false, endKind: null, counterMax: 1, egg: 'vinemaiden', ball: 'quick_ball',
+    name: '雷伊布', lore: '黄色宝可梦 · 雷伊布（Jolteon）——换皮的藤娘掠食者。', behavior: { hp: 30, speed: 0.3, dmg: 5, follow: 12, size: [0.7, 1.9], loot: null, tameable: true, baseStats: 'vinemaiden', undead: false },
     skip: [/_buried/, /_seedling/] },
   { id: 'eevee_zombie', pack: 'eeveelution', srcMob: 'zombie', texBase: 'eevee_zombie',
-    variants: [0, 1, 2, 13], gendered: true, endKind: 'decor', counterMax: 5, egg: 'zombie',
-    name: '伊布僵尸', lore: '伊布化的吞食僵尸。', behavior: { hp: 20, speed: 0.23, dmg: 3, follow: 35, size: [0.6, 1.8], loot: 'zombie', tameable: false, baseStats: 'zombie', undead: true } }
+    variants: [0, 1, 2, 13], gendered: true, endKind: 'decor', counterMax: 5, egg: 'zombie', ball: 'repeat_ball',
+    name: '火伊布', lore: '橙红色宝可梦 · 火伊布（Flareon）——换皮的吞食僵尸掠食者。', behavior: { hp: 20, speed: 0.23, dmg: 3, follow: 35, size: [0.6, 1.8], loot: 'zombie', tameable: false, baseStats: 'zombie', undead: true } }
 ];
 
 const validSeg = (s) => /^[A-Za-z][A-Za-z0-9_.]*$/.test(s);
@@ -173,20 +252,21 @@ function generateCommunity() {
     const root = path.join(COMM, c.pack, 'assets', 'pcraftrevorn');
     if (!fs.existsSync(root)) { console.warn(`skip ${c.id}: missing ${root}`); continue; }
 
-    // geometry
+    // geometry + animation
     const geo = readJSON(path.join(root, 'geo', c.srcMob + '.geo.json'));
+    const anim = convertAnimObject(readJSON(path.join(root, 'animations', c.srcMob + '.animation.json')));
+    sanitizeBones(geo, anim);
     geo['minecraft:geometry'][0].description.identifier = 'geometry.' + c.id;
     writeJSON(path.join(RP, 'models', 'entity', c.id + '.geo.json'), geo);
 
-    // animation (rename prefix; drop names illegal in Bedrock)
-    const anim = convertAnimObject(readJSON(path.join(root, 'animations', c.srcMob + '.animation.json')));
+    // rename animation identifiers; drop names illegal in Bedrock
     const renamed = {};
     const shorts = [];
     for (const [k, v] of Object.entries(anim.animations || {})) {
       const short = k.split('.').pop();
       if (!validSeg(short)) continue;
-      const nk = `animation.${c.id}.${short}`;
-      renamed[nk] = v; shorts.push(short);
+      renamed[`animation.${c.id}.${short}`] = v;
+      shorts.push(short);
     }
     anim.animations = renamed;
     writeJSON(path.join(RP, 'animations', c.id + '.animation.json'), anim);
@@ -237,9 +317,10 @@ function generateCommunity() {
     // behavior entity
     writeJSON(path.join(BP, 'entities', c.id + '.json'), behavior(c, skinMax));
 
-    // spawn egg
+    // spawn egg (Poké Ball for the eeveelution reskins)
     const itemId = c.id + '_spawn_egg';
-    eggPng(c.id, c.egg);
+    if (c.ball) ballPng(path.join(RP, 'textures', 'items', 'pcraftrevorn', itemId + '.png'), c.ball, 16);
+    else eggPng(c.id, c.egg);
     writeJSON(path.join(BP, 'items', itemId + '.json'), {
       format_version: '1.21.0',
       'minecraft:item': {

@@ -23,8 +23,8 @@
         },
         "geometries": {
           "Array.geos": [
-            "geometry.piglin_royalty",
-            "geometry.piglin_royal.v_royalrump"
+            "Geometry.default",
+            "Geometry.v_royalrump"
           ]
         }
       },

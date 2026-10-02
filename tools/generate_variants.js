@@ -71,6 +71,36 @@ function parseTex(name) {
 }
 const stateKey = (t) => `${t.variant}|${t.gender}|${t.counter}|${t.wg}|${t.belly}`;
 
+// rename Bedrock-illegal bone names identically in geo + anim (see generate_community)
+function sanitizeBones(geo, anim) {
+  const g = geo['minecraft:geometry'][0];
+  const gb = g.bones || [];
+  const names = new Set(gb.map((b) => b.name));
+  for (const a of Object.values((anim && anim.animations) || {})) for (const k of Object.keys(a.bones || {})) names.add(k);
+  const valid = /^[A-Za-z][A-Za-z0-9_.]*$/;
+  const used = new Set([...names].filter((n) => valid.test(n)));
+  const map = new Map();
+  for (const n of names) {
+    if (valid.test(n)) continue;
+    let base = String(n).replace(/[^A-Za-z0-9_.]/g, '_');
+    if (!/^[A-Za-z_]/.test(base)) base = '_' + base;
+    let cand = base, i = 1;
+    while (used.has(cand) && cand !== n) cand = `${base}_${i++}`;
+    used.add(cand);
+    map.set(n, cand);
+  }
+  if (!map.size) return;
+  for (const b of gb) {
+    if (map.has(b.name)) b.name = map.get(b.name);
+    if (b.parent && map.has(b.parent)) b.parent = map.get(b.parent);
+  }
+  for (const a of Object.values((anim && anim.animations) || {})) {
+    const nb = {};
+    for (const [k, v] of Object.entries(a.bones || {})) nb[map.get(k) ?? k] = v;
+    a.bones = nb;
+  }
+}
+
 const SPECIES = [
   { species: 'zombie', baseGeo: 'zombiegirl', sets: [
     { id: 'predatopiav2', pack: 'v_predatopiaV2', geo: 'zombie', anim: 'zombie', tex: /^zombie_/, prefix: 'pcv_predatopia_', name: 'Predatopia V2' },
@@ -110,19 +140,24 @@ function generateVariants() {
 
     let offset = baseCount;
     const sets = [];
-    const geoArray = [baseGeoId];
+    // geometry array entries must reference the client-entity geometry map
+    // (Geometry.<key>), not raw identifiers, or Bedrock renders nothing.
+    const geoArray = ['Geometry.default'];
     const skinsArray = rcDef.arrays.textures['Array.skins'].slice();
     for (const s of sp.sets) {
       const root = path.join(COMM, s.pack, 'assets', 'pcraftrevorn');
       // geo
+      // geo + anim (sanitize illegal bone names consistently across both)
       const geo = readJSON(path.join(root, 'geo', s.geo + '.geo.json'));
+      const anim = s.anim ? convertAnimObject(readJSON(path.join(root, 'animations', s.anim + '.animation.json'))) : null;
+      if (anim) sanitizeBones(geo, anim);
       geo['minecraft:geometry'][0].description.identifier = `geometry.${sp.species}.v_${s.id}`;
       writeJSON(path.join(RP, 'models', 'entity', `${sp.species}.v_${s.id}.geo.json`), geo);
-      geoArray.push(`geometry.${sp.species}.v_${s.id}`);
+      desc.geometry[`v_${s.id}`] = `geometry.${sp.species}.v_${s.id}`;
+      geoArray.push(`Geometry.v_${s.id}`);
       // anim
       let idleKey = null, walkKey = null;
-      if (s.anim) {
-        const anim = convertAnimObject(readJSON(path.join(root, 'animations', s.anim + '.animation.json')));
+      if (anim) {
         const renamed = {};
         for (const [k, v] of Object.entries(anim.animations || {})) {
           const short = k.split('.').pop();

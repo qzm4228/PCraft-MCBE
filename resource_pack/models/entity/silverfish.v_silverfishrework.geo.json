@@ -24,7 +24,7 @@
           ]
         },
         {
-          "name": "reg idle",
+          "name": "reg_idle",
           "parent": "ALL",
           "pivot": [
             0,
@@ -34,7 +34,7 @@
         },
         {
           "name": "upper",
-          "parent": "reg idle",
+          "parent": "reg_idle",
           "pivot": [
             0,
             16,
@@ -234,7 +234,7 @@
           ]
         },
         {
-          "name": "butt wg",
+          "name": "butt_wg",
           "parent": "ass",
           "pivot": [
             2,
@@ -244,7 +244,7 @@
         },
         {
           "name": "right_cheek2",
-          "parent": "butt wg",
+          "parent": "butt_wg",
           "pivot": [
             -2.49278,
             14.29001,
@@ -308,7 +308,7 @@
         },
         {
           "name": "left_cheek2",
-          "parent": "butt wg",
+          "parent": "butt_wg",
           "pivot": [
             2.99278,
             14.29001,
@@ -512,7 +512,7 @@
           ]
         },
         {
-          "name": "tail extra pivot",
+          "name": "tail_extra_pivot",
           "parent": "pelv",
           "pivot": [
             0,
@@ -522,7 +522,7 @@
         },
         {
           "name": "tail",
-          "parent": "tail extra pivot",
+          "parent": "tail_extra_pivot",
           "pivot": [
             0,
             15.5,
@@ -591,7 +591,7 @@
           ]
         },
         {
-          "name": "lower tail",
+          "name": "lower_tail",
           "parent": "tail",
           "pivot": [
             0,
@@ -874,7 +874,7 @@
           ]
         },
         {
-          "name": "wg2 belly",
+          "name": "wg2_belly",
           "parent": "wg2",
           "pivot": [
             0.5,
@@ -1116,7 +1116,7 @@
           ]
         },
         {
-          "name": "right arm",
+          "name": "right_arm",
           "parent": "arm",
           "pivot": [
             5.33333,
@@ -1176,8 +1176,8 @@
           ]
         },
         {
-          "name": "right L arm",
-          "parent": "right arm",
+          "name": "right_L_arm",
+          "parent": "right_arm",
           "pivot": [
             5.5,
             18.25,
@@ -1220,7 +1220,7 @@
           ]
         },
         {
-          "name": "left arm",
+          "name": "left_arm",
           "parent": "arm",
           "pivot": [
             -5.33333,
@@ -1280,8 +1280,8 @@
           ]
         },
         {
-          "name": "left L arm",
-          "parent": "left arm",
+          "name": "left_L_arm",
+          "parent": "left_arm",
           "pivot": [
             -5.5,
             18.25,
@@ -1324,7 +1324,7 @@
           ]
         },
         {
-          "name": "prey swallow parent bone",
+          "name": "prey_swallow_parent_bone",
           "parent": "torso",
           "pivot": [
             0,
@@ -1334,7 +1334,7 @@
         },
         {
           "name": "OVprey",
-          "parent": "prey swallow parent bone",
+          "parent": "prey_swallow_parent_bone",
           "pivot": [
             0,
             19,
@@ -1836,7 +1836,7 @@
           ]
         },
         {
-          "name": "right prey arm",
+          "name": "right_prey_arm",
           "parent": "OVPbras",
           "pivot": [
             4.85894,
@@ -1899,8 +1899,8 @@
           ]
         },
         {
-          "name": "right oovplower arm",
-          "parent": "right prey arm",
+          "name": "right_oovplower_arm",
+          "parent": "right_prey_arm",
           "pivot": [
             5.30235,
             17.89888,
@@ -1945,7 +1945,7 @@
           ]
         },
         {
-          "name": "left prey arm",
+          "name": "left_prey_arm",
           "parent": "OVPbras",
           "pivot": [
             -4.85894,
@@ -2005,8 +2005,8 @@
           ]
         },
         {
-          "name": "left oovplower arm",
-          "parent": "left prey arm",
+          "name": "left_oovplower_arm",
+          "parent": "left_prey_arm",
           "pivot": [
             -5.30235,
             17.89888,
@@ -2155,7 +2155,7 @@
           ]
         },
         {
-          "name": "right oovp leg",
+          "name": "right_oovp_leg",
           "parent": "OVPjambes",
           "pivot": [
             2,
@@ -2215,8 +2215,8 @@
           ]
         },
         {
-          "name": "right oovp leg lower",
-          "parent": "right oovp leg",
+          "name": "right_oovp_leg_lower",
+          "parent": "right_oovp_leg",
           "pivot": [
             2,
             6,
@@ -2259,7 +2259,7 @@
           ]
         },
         {
-          "name": "left oovp leg",
+          "name": "left_oovp_leg",
           "parent": "OVPjambes",
           "pivot": [
             -2,
@@ -2319,8 +2319,8 @@
           ]
         },
         {
-          "name": "left oovp leg lower",
-          "parent": "left oovp leg",
+          "name": "left_oovp_leg_lower",
+          "parent": "left_oovp_leg",
           "pivot": [
             -2,
             6,
@@ -2364,7 +2364,7 @@
         },
         {
           "name": "OVskull",
-          "parent": "prey swallow parent bone",
+          "parent": "prey_swallow_parent_bone",
           "pivot": [
             0,
             23.75,
@@ -4005,7 +4005,7 @@
           ]
         },
         {
-          "name": "right frill",
+          "name": "right_frill",
           "parent": "frills",
           "pivot": [
             6.5,
@@ -4042,7 +4042,7 @@
           ]
         },
         {
-          "name": "upper frill",
+          "name": "upper_frill",
           "parent": "frills",
           "pivot": [
             0,
@@ -4051,8 +4051,8 @@
           ]
         },
         {
-          "name": "right upper frill",
-          "parent": "upper frill",
+          "name": "right_upper_frill",
+          "parent": "upper_frill",
           "pivot": [
             0,
             34.25,
@@ -4088,8 +4088,8 @@
           ]
         },
         {
-          "name": "left upper frill",
-          "parent": "upper frill",
+          "name": "left_upper_frill",
+          "parent": "upper_frill",
           "pivot": [
             0,
             34.25,
@@ -4125,7 +4125,7 @@
           ]
         },
         {
-          "name": "left frill",
+          "name": "left_frill",
           "parent": "frills",
           "pivot": [
             -6.5,
@@ -4226,7 +4226,7 @@
           ]
         },
         {
-          "name": "left horn",
+          "name": "left_horn",
           "parent": "horns",
           "pivot": [
             4,
@@ -4340,7 +4340,7 @@
           ]
         },
         {
-          "name": "right horn",
+          "name": "right_horn",
           "parent": "horns",
           "pivot": [
             -4,
@@ -4526,7 +4526,7 @@
           ]
         },
         {
-          "name": "right brow",
+          "name": "right_brow",
           "parent": "brow",
           "pivot": [
             2,
@@ -4553,7 +4553,7 @@
           ]
         },
         {
-          "name": "left brow",
+          "name": "left_brow",
           "parent": "brow",
           "pivot": [
             -2,
@@ -4700,7 +4700,7 @@
           ]
         },
         {
-          "name": "right breast",
+          "name": "right_breast",
           "parent": "tits",
           "pivot": [
             0,
@@ -4764,7 +4764,7 @@
           ]
         },
         {
-          "name": "left breast",
+          "name": "left_breast",
           "parent": "tits",
           "pivot": [
             0,
@@ -4828,7 +4828,7 @@
           ]
         },
         {
-          "name": "breasts wg one",
+          "name": "breasts_wg_one",
           "parent": "tits",
           "pivot": [
             0,
@@ -4838,7 +4838,7 @@
         },
         {
           "name": "tits2",
-          "parent": "breasts wg one",
+          "parent": "breasts_wg_one",
           "pivot": [
             0,
             22,
@@ -4846,7 +4846,7 @@
           ]
         },
         {
-          "name": "right wg breast",
+          "name": "right_wg_breast",
           "parent": "tits2",
           "pivot": [
             0,
@@ -4910,7 +4910,7 @@
           ]
         },
         {
-          "name": "left wg breast",
+          "name": "left_wg_breast",
           "parent": "tits2",
           "pivot": [
             0,
@@ -4985,7 +4985,7 @@
           ]
         },
         {
-          "name": "breasts wg 2",
+          "name": "breasts_wg_2_1",
           "parent": "tits",
           "pivot": [
             0,
@@ -4995,7 +4995,7 @@
         },
         {
           "name": "tits3",
-          "parent": "breasts wg 2",
+          "parent": "breasts_wg_2_1",
           "pivot": [
             0,
             22,
@@ -5003,7 +5003,7 @@
           ]
         },
         {
-          "name": "right wg2 breast",
+          "name": "right_wg2_breast",
           "parent": "tits3",
           "pivot": [
             0,
@@ -5125,7 +5125,7 @@
           ]
         },
         {
-          "name": "left wg2 breast",
+          "name": "left_wg2_breast",
           "parent": "tits3",
           "pivot": [
             0,
@@ -5252,7 +5252,7 @@
         },
         {
           "name": "legs",
-          "parent": "reg idle",
+          "parent": "reg_idle",
           "pivot": [
             0,
             15.55,
@@ -5260,7 +5260,7 @@
           ]
         },
         {
-          "name": "left leg",
+          "name": "left_leg",
           "parent": "legs",
           "pivot": [
             -2.25,
@@ -5269,8 +5269,8 @@
           ]
         },
         {
-          "name": "left thigh",
-          "parent": "left leg",
+          "name": "left_thigh",
+          "parent": "left_leg",
           "pivot": [
             -1.5,
             7.85,
@@ -5315,7 +5315,7 @@
         },
         {
           "name": "left_thigh2",
-          "parent": "left thigh",
+          "parent": "left_thigh",
           "pivot": [
             -1.5,
             7.85,
@@ -5361,8 +5361,8 @@
           ]
         },
         {
-          "name": "left lower leg",
-          "parent": "left leg",
+          "name": "left_lower_leg",
+          "parent": "left_leg",
           "pivot": [
             -2.25,
             7.55,
@@ -5407,7 +5407,7 @@
         },
         {
           "name": "left_lower_leg2",
-          "parent": "left lower leg",
+          "parent": "left_lower_leg",
           "pivot": [
             -2.25,
             7.55,
@@ -5453,8 +5453,8 @@
           ]
         },
         {
-          "name": "left leg wg",
-          "parent": "left lower leg",
+          "name": "left_leg_wg",
+          "parent": "left_lower_leg",
           "pivot": [
             -2.25,
             14.55,
@@ -5462,7 +5462,7 @@
           ]
         },
         {
-          "name": "right leg",
+          "name": "right_leg",
           "parent": "legs",
           "pivot": [
             2.25,
@@ -5471,8 +5471,8 @@
           ]
         },
         {
-          "name": "right thigh",
-          "parent": "right leg",
+          "name": "right_thigh",
+          "parent": "right_leg",
           "pivot": [
             1.5,
             7.85,
@@ -5517,7 +5517,7 @@
         },
         {
           "name": "right_thigh2",
-          "parent": "right thigh",
+          "parent": "right_thigh",
           "pivot": [
             1.5,
             7.85,
@@ -5561,8 +5561,8 @@
           ]
         },
         {
-          "name": "right lower leg",
-          "parent": "right leg",
+          "name": "right_lower_leg",
+          "parent": "right_leg",
           "pivot": [
             2.25,
             7.55,
@@ -5607,7 +5607,7 @@
         },
         {
           "name": "right_lower_leg2",
-          "parent": "right lower leg",
+          "parent": "right_lower_leg",
           "pivot": [
             2.25,
             7.55,
@@ -5651,7 +5651,7 @@
           ]
         },
         {
-          "name": "idle vore",
+          "name": "idle_vore",
           "parent": "ALL",
           "pivot": [
             0,
@@ -5661,7 +5661,7 @@
         },
         {
           "name": "upper2",
-          "parent": "idle vore",
+          "parent": "idle_vore",
           "pivot": [
             0,
             16,
@@ -10879,7 +10879,7 @@
         },
         {
           "name": "legs2",
-          "parent": "idle vore",
+          "parent": "idle_vore",
           "pivot": [
             0,
             15.55,

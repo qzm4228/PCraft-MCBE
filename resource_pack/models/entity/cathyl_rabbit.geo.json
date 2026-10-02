@@ -24,7 +24,7 @@
           ]
         },
         {
-          "name": "foot first pred",
+          "name": "foot_first_pred",
           "parent": "pred",
           "pivot": [
             -0.3125,
@@ -34,7 +34,7 @@
         },
         {
           "name": "legs3",
-          "parent": "foot first pred",
+          "parent": "foot_first_pred",
           "pivot": [
             -0.625,
             22.8125,
@@ -915,7 +915,7 @@
         },
         {
           "name": "upper3",
-          "parent": "foot first pred",
+          "parent": "foot_first_pred",
           "pivot": [
             0,
             22,
@@ -4112,7 +4112,7 @@
           ]
         },
         {
-          "name": "foot first prey",
+          "name": "foot_first_prey",
           "parent": "ass3",
           "pivot": [
             0,
@@ -4122,7 +4122,7 @@
         },
         {
           "name": "av_head_first2",
-          "parent": "foot first prey",
+          "parent": "foot_first_prey",
           "pivot": [
             0,
             19,
@@ -5424,7 +5424,7 @@
           ]
         },
         {
-          "name": "ub pred",
+          "name": "ub_pred",
           "parent": "pred",
           "pivot": [
             -0.3125,
@@ -5434,7 +5434,7 @@
         },
         {
           "name": "legs4",
-          "parent": "ub pred",
+          "parent": "ub_pred",
           "pivot": [
             -0.625,
             22.8125,
@@ -6315,7 +6315,7 @@
         },
         {
           "name": "upper4",
-          "parent": "ub pred",
+          "parent": "ub_pred",
           "pivot": [
             0,
             22,
@@ -9512,7 +9512,7 @@
           ]
         },
         {
-          "name": "ub prey",
+          "name": "ub_prey",
           "parent": "ass4",
           "pivot": [
             0,
@@ -9522,7 +9522,7 @@
         },
         {
           "name": "av_prey4",
-          "parent": "ub prey",
+          "parent": "ub_prey",
           "pivot": [
             0,
             19,
@@ -10824,7 +10824,7 @@
           ]
         },
         {
-          "name": "head first pred",
+          "name": "head_first_pred",
           "parent": "pred",
           "pivot": [
             -0.3125,
@@ -10834,7 +10834,7 @@
         },
         {
           "name": "legs2",
-          "parent": "head first pred",
+          "parent": "head_first_pred",
           "pivot": [
             -0.625,
             22.8125,
@@ -11715,7 +11715,7 @@
         },
         {
           "name": "upper2",
-          "parent": "head first pred",
+          "parent": "head_first_pred",
           "pivot": [
             0,
             22,
@@ -14921,7 +14921,7 @@
           ]
         },
         {
-          "name": "av head first",
+          "name": "av_head_first",
           "parent": "av_prey_pos2",
           "pivot": [
             0,
@@ -14936,7 +14936,7 @@
         },
         {
           "name": "OVPhautducorps3",
-          "parent": "av head first",
+          "parent": "av_head_first",
           "pivot": [
             0,
             12,
@@ -15743,7 +15743,7 @@
         },
         {
           "name": "OVPjambes2",
-          "parent": "av head first",
+          "parent": "av_head_first",
           "pivot": [
             0,
             11,

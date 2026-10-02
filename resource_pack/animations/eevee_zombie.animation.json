@@ -763,7 +763,7 @@
             }
           }
         },
-        "othertete&cou": {
+        "othertete_cou": {
           "rotation": {
             "0.0": [
               72.5,
@@ -6561,7 +6561,7 @@
         "PREYmale": {
           "scale": 0
         },
-        "othertete&cou": {
+        "othertete_cou": {
           "rotation": {
             "0.0": {
               "post": [
@@ -10914,7 +10914,7 @@
         "PREYmale": {
           "scale": 0
         },
-        "othertete&cou": {
+        "othertete_cou": {
           "rotation": {
             "0.0": {
               "post": [
@@ -15962,7 +15962,7 @@
             }
           }
         },
-        "othertete&cou": {
+        "othertete_cou": {
           "rotation": {
             "0.0": {
               "post": [
@@ -19606,7 +19606,7 @@
         "PREYmale": {
           "scale": 0
         },
-        "othertete&cou": {
+        "othertete_cou": {
           "rotation": {
             "0.0": {
               "post": [

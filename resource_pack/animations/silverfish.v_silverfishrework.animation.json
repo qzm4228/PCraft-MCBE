@@ -5,7 +5,7 @@
       "loop": true,
       "animation_length": 2,
       "bones": {
-        "right arm": {
+        "right_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -87,7 +87,7 @@
             }
           }
         },
-        "lower tail": {
+        "lower_tail": {
           "rotation": {
             "0.0": {
               "post": [
@@ -274,7 +274,7 @@
             }
           }
         },
-        "left arm": {
+        "left_arm": {
           "rotation": {
             "2.0": {
               "pre": [
@@ -306,7 +306,7 @@
             }
           }
         },
-        "right L arm": {
+        "right_L_arm": {
           "rotation": {
             "0.0": [
               0,
@@ -332,7 +332,7 @@
             ]
           }
         },
-        "left L arm": {
+        "left_L_arm": {
           "rotation": {
             "0.0": [
               0,
@@ -346,7 +346,7 @@
             ]
           }
         },
-        "right breast": {
+        "right_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -472,7 +472,7 @@
             }
           }
         },
-        "left breast": {
+        "left_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -598,7 +598,7 @@
             }
           }
         },
-        "tail extra pivot": {
+        "tail_extra_pivot": {
           "rotation": {
             "0.0": {
               "post": [
@@ -768,7 +768,7 @@
             }
           }
         },
-        "right wg breast": {
+        "right_wg_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -796,7 +796,7 @@
             }
           }
         },
-        "left wg breast": {
+        "left_wg_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -900,7 +900,7 @@
             }
           }
         },
-        "right wg2 breast": {
+        "right_wg2_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -980,7 +980,7 @@
             }
           }
         },
-        "left wg2 breast": {
+        "left_wg2_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -1117,7 +1117,7 @@
         "vore": {
           "scale": 0
         },
-        "right leg": {
+        "right_leg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -1171,7 +1171,7 @@
             }
           }
         },
-        "left leg": {
+        "left_leg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -1225,7 +1225,7 @@
             }
           }
         },
-        "right lower leg": {
+        "right_lower_leg": {
           "rotation": [
             27.5,
             0,
@@ -1260,7 +1260,7 @@
             }
           }
         },
-        "butt wg": {
+        "butt_wg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -3721,7 +3721,7 @@
     "animation.silverfish.v_silverfishrework.digest": {
       "animation_length": 8,
       "bones": {
-        "right arm": {
+        "right_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -3819,7 +3819,7 @@
             }
           }
         },
-        "lower tail": {
+        "lower_tail": {
           "rotation": {
             "0.0": {
               "post": [
@@ -3998,7 +3998,7 @@
             }
           }
         },
-        "left arm": {
+        "left_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -4052,7 +4052,7 @@
             }
           }
         },
-        "right L arm": {
+        "right_L_arm": {
           "rotation": {
             "0.0": [
               0,
@@ -4088,7 +4088,7 @@
             ]
           }
         },
-        "left L arm": {
+        "left_L_arm": {
           "rotation": {
             "0.0": [
               0,
@@ -4113,7 +4113,7 @@
           ],
           "scale": 1
         },
-        "right breast": {
+        "right_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -4239,7 +4239,7 @@
             }
           }
         },
-        "left breast": {
+        "left_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -4365,7 +4365,7 @@
             }
           }
         },
-        "tail extra pivot": {
+        "tail_extra_pivot": {
           "rotation": {
             "0.0": {
               "post": [
@@ -4525,7 +4525,7 @@
             }
           }
         },
-        "right wg breast": {
+        "right_wg_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -4553,7 +4553,7 @@
             }
           }
         },
-        "left wg breast": {
+        "left_wg_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -4657,7 +4657,7 @@
             }
           }
         },
-        "right wg2 breast": {
+        "right_wg2_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -4737,7 +4737,7 @@
             }
           }
         },
-        "left wg2 breast": {
+        "left_wg2_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -4874,7 +4874,7 @@
         "vore": {
           "scale": 0
         },
-        "right leg": {
+        "right_leg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -4928,7 +4928,7 @@
             }
           }
         },
-        "left leg": {
+        "left_leg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -4982,7 +4982,7 @@
             }
           }
         },
-        "right lower leg": {
+        "right_lower_leg": {
           "rotation": [
             27.5,
             0,
@@ -5017,7 +5017,7 @@
             }
           }
         },
-        "butt wg": {
+        "butt_wg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -9647,7 +9647,7 @@
     "animation.silverfish.v_silverfishrework.digestWG1": {
       "animation_length": 8,
       "bones": {
-        "right arm": {
+        "right_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -9745,7 +9745,7 @@
             }
           }
         },
-        "lower tail": {
+        "lower_tail": {
           "rotation": {
             "0.0": {
               "post": [
@@ -9924,7 +9924,7 @@
             }
           }
         },
-        "left arm": {
+        "left_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -9978,7 +9978,7 @@
             }
           }
         },
-        "right L arm": {
+        "right_L_arm": {
           "rotation": {
             "0.0": [
               0,
@@ -10014,7 +10014,7 @@
             ]
           }
         },
-        "left L arm": {
+        "left_L_arm": {
           "rotation": {
             "0.0": [
               0,
@@ -10039,7 +10039,7 @@
           ],
           "scale": 1
         },
-        "right breast": {
+        "right_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -10165,7 +10165,7 @@
             }
           }
         },
-        "left breast": {
+        "left_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -10291,7 +10291,7 @@
             }
           }
         },
-        "tail extra pivot": {
+        "tail_extra_pivot": {
           "rotation": {
             "0.0": {
               "post": [
@@ -10451,7 +10451,7 @@
             }
           }
         },
-        "right wg breast": {
+        "right_wg_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -10479,7 +10479,7 @@
             }
           }
         },
-        "left wg breast": {
+        "left_wg_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -10583,7 +10583,7 @@
             }
           }
         },
-        "right wg2 breast": {
+        "right_wg2_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -10663,7 +10663,7 @@
             }
           }
         },
-        "left wg2 breast": {
+        "left_wg2_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -10800,7 +10800,7 @@
         "vore": {
           "scale": 0
         },
-        "right leg": {
+        "right_leg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -10854,7 +10854,7 @@
             }
           }
         },
-        "left leg": {
+        "left_leg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -10908,7 +10908,7 @@
             }
           }
         },
-        "right lower leg": {
+        "right_lower_leg": {
           "rotation": [
             27.5,
             0,
@@ -10943,7 +10943,7 @@
             }
           }
         },
-        "butt wg": {
+        "butt_wg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -15573,7 +15573,7 @@
     "animation.silverfish.v_silverfishrework.digestWG2": {
       "animation_length": 8,
       "bones": {
-        "right arm": {
+        "right_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -15671,7 +15671,7 @@
             }
           }
         },
-        "lower tail": {
+        "lower_tail": {
           "rotation": {
             "0.0": {
               "post": [
@@ -15850,7 +15850,7 @@
             }
           }
         },
-        "left arm": {
+        "left_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -15904,7 +15904,7 @@
             }
           }
         },
-        "right L arm": {
+        "right_L_arm": {
           "rotation": {
             "0.0": [
               0,
@@ -15940,7 +15940,7 @@
             ]
           }
         },
-        "left L arm": {
+        "left_L_arm": {
           "rotation": {
             "0.0": [
               0,
@@ -15965,7 +15965,7 @@
           ],
           "scale": 1
         },
-        "right breast": {
+        "right_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -16091,7 +16091,7 @@
             }
           }
         },
-        "left breast": {
+        "left_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -16217,7 +16217,7 @@
             }
           }
         },
-        "tail extra pivot": {
+        "tail_extra_pivot": {
           "rotation": {
             "0.0": {
               "post": [
@@ -16377,7 +16377,7 @@
             }
           }
         },
-        "right wg breast": {
+        "right_wg_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -16405,7 +16405,7 @@
             }
           }
         },
-        "left wg breast": {
+        "left_wg_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -16509,7 +16509,7 @@
             }
           }
         },
-        "right wg2 breast": {
+        "right_wg2_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -16589,7 +16589,7 @@
             }
           }
         },
-        "left wg2 breast": {
+        "left_wg2_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -16726,7 +16726,7 @@
         "vore": {
           "scale": 0
         },
-        "right leg": {
+        "right_leg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -16780,7 +16780,7 @@
             }
           }
         },
-        "left leg": {
+        "left_leg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -16834,7 +16834,7 @@
             }
           }
         },
-        "right lower leg": {
+        "right_lower_leg": {
           "rotation": [
             27.5,
             0,
@@ -16869,7 +16869,7 @@
             }
           }
         },
-        "butt wg": {
+        "butt_wg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -21954,7 +21954,7 @@
             ]
           }
         },
-        "right arm": {
+        "right_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -22430,7 +22430,7 @@
             }
           }
         },
-        "lower tail": {
+        "lower_tail": {
           "rotation": {
             "6.0": {
               "pre": [
@@ -22872,7 +22872,7 @@
             }
           }
         },
-        "left arm": {
+        "left_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -23150,7 +23150,7 @@
             }
           }
         },
-        "right L arm": {
+        "right_L_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -23202,7 +23202,7 @@
             }
           }
         },
-        "left L arm": {
+        "left_L_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -23254,7 +23254,7 @@
             }
           }
         },
-        "right breast": {
+        "right_breast": {
           "rotation": {
             "2.0": {
               "pre": [
@@ -23374,7 +23374,7 @@
             }
           }
         },
-        "left breast": {
+        "left_breast": {
           "rotation": {
             "2.0": {
               "pre": [
@@ -23494,7 +23494,7 @@
             }
           }
         },
-        "tail extra pivot": {
+        "tail_extra_pivot": {
           "rotation": {
             "6.0": {
               "pre": [
@@ -23599,7 +23599,7 @@
             ]
           }
         },
-        "prey swallow parent bone": {
+        "prey_swallow_parent_bone": {
           "rotation": {
             "1.1667": {
               "pre": [
@@ -23858,7 +23858,7 @@
             }
           }
         },
-        "right prey arm": {
+        "right_prey_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -23945,7 +23945,7 @@
             ]
           }
         },
-        "left prey arm": {
+        "left_prey_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -24193,7 +24193,7 @@
             }
           }
         },
-        "right oovp leg": {
+        "right_oovp_leg": {
           "rotation": {
             "2.25": [
               0,
@@ -24231,7 +24231,7 @@
             ]
           }
         },
-        "left oovp leg": {
+        "left_oovp_leg": {
           "rotation": {
             "2.25": [
               0,
@@ -24918,7 +24918,7 @@
             }
           }
         },
-        "right leg": {
+        "right_leg": {
           "rotation": {
             "0.2083": {
               "pre": [
@@ -25119,7 +25119,7 @@
           },
           "scale": 1
         },
-        "left leg": {
+        "left_leg": {
           "rotation": {
             "0.2083": {
               "pre": [
@@ -25320,7 +25320,7 @@
           },
           "scale": 1
         },
-        "left lower leg": {
+        "left_lower_leg": {
           "rotation": {
             "5.25": {
               "pre": [
@@ -25391,7 +25391,7 @@
             }
           }
         },
-        "right lower leg": {
+        "right_lower_leg": {
           "rotation": {
             "5.25": {
               "pre": [
@@ -31041,7 +31041,7 @@
             ]
           }
         },
-        "right arm": {
+        "right_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -31517,7 +31517,7 @@
             }
           }
         },
-        "lower tail": {
+        "lower_tail": {
           "rotation": {
             "6.0": {
               "pre": [
@@ -31959,7 +31959,7 @@
             }
           }
         },
-        "left arm": {
+        "left_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -32237,7 +32237,7 @@
             }
           }
         },
-        "right L arm": {
+        "right_L_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -32289,7 +32289,7 @@
             }
           }
         },
-        "left L arm": {
+        "left_L_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -32341,7 +32341,7 @@
             }
           }
         },
-        "right breast": {
+        "right_breast": {
           "rotation": {
             "2.0": {
               "pre": [
@@ -32461,7 +32461,7 @@
             }
           }
         },
-        "left breast": {
+        "left_breast": {
           "rotation": {
             "2.0": {
               "pre": [
@@ -32581,7 +32581,7 @@
             }
           }
         },
-        "tail extra pivot": {
+        "tail_extra_pivot": {
           "rotation": {
             "6.0": {
               "pre": [
@@ -32686,7 +32686,7 @@
             ]
           }
         },
-        "prey swallow parent bone": {
+        "prey_swallow_parent_bone": {
           "rotation": {
             "1.1667": {
               "pre": [
@@ -32945,7 +32945,7 @@
             }
           }
         },
-        "right prey arm": {
+        "right_prey_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -33032,7 +33032,7 @@
             ]
           }
         },
-        "left prey arm": {
+        "left_prey_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -33280,7 +33280,7 @@
             }
           }
         },
-        "right oovp leg": {
+        "right_oovp_leg": {
           "rotation": {
             "2.25": [
               0,
@@ -33318,7 +33318,7 @@
             ]
           }
         },
-        "left oovp leg": {
+        "left_oovp_leg": {
           "rotation": {
             "2.25": [
               0,
@@ -34005,7 +34005,7 @@
             }
           }
         },
-        "right leg": {
+        "right_leg": {
           "rotation": {
             "0.2083": {
               "pre": [
@@ -34206,7 +34206,7 @@
           },
           "scale": 1
         },
-        "left leg": {
+        "left_leg": {
           "rotation": {
             "0.2083": {
               "pre": [
@@ -34407,7 +34407,7 @@
           },
           "scale": 1
         },
-        "left lower leg": {
+        "left_lower_leg": {
           "rotation": {
             "5.25": {
               "pre": [
@@ -34478,7 +34478,7 @@
             }
           }
         },
-        "right lower leg": {
+        "right_lower_leg": {
           "rotation": {
             "5.25": {
               "pre": [
@@ -40128,7 +40128,7 @@
             ]
           }
         },
-        "right arm": {
+        "right_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -40604,7 +40604,7 @@
             }
           }
         },
-        "lower tail": {
+        "lower_tail": {
           "rotation": {
             "6.0": {
               "pre": [
@@ -41046,7 +41046,7 @@
             }
           }
         },
-        "left arm": {
+        "left_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -41324,7 +41324,7 @@
             }
           }
         },
-        "right L arm": {
+        "right_L_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -41376,7 +41376,7 @@
             }
           }
         },
-        "left L arm": {
+        "left_L_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -41428,7 +41428,7 @@
             }
           }
         },
-        "right breast": {
+        "right_breast": {
           "rotation": {
             "2.0": {
               "pre": [
@@ -41548,7 +41548,7 @@
             }
           }
         },
-        "left breast": {
+        "left_breast": {
           "rotation": {
             "2.0": {
               "pre": [
@@ -41668,7 +41668,7 @@
             }
           }
         },
-        "tail extra pivot": {
+        "tail_extra_pivot": {
           "rotation": {
             "6.0": {
               "pre": [
@@ -41773,7 +41773,7 @@
             ]
           }
         },
-        "prey swallow parent bone": {
+        "prey_swallow_parent_bone": {
           "rotation": {
             "1.1667": {
               "pre": [
@@ -42032,7 +42032,7 @@
             }
           }
         },
-        "right prey arm": {
+        "right_prey_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -42119,7 +42119,7 @@
             ]
           }
         },
-        "left prey arm": {
+        "left_prey_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -42367,7 +42367,7 @@
             }
           }
         },
-        "right oovp leg": {
+        "right_oovp_leg": {
           "rotation": {
             "2.25": [
               0,
@@ -42405,7 +42405,7 @@
             ]
           }
         },
-        "left oovp leg": {
+        "left_oovp_leg": {
           "rotation": {
             "2.25": [
               0,
@@ -43092,7 +43092,7 @@
             }
           }
         },
-        "right leg": {
+        "right_leg": {
           "rotation": {
             "0.2083": {
               "pre": [
@@ -43293,7 +43293,7 @@
           },
           "scale": 1
         },
-        "left leg": {
+        "left_leg": {
           "rotation": {
             "0.2083": {
               "pre": [
@@ -43494,7 +43494,7 @@
           },
           "scale": 1
         },
-        "left lower leg": {
+        "left_lower_leg": {
           "rotation": {
             "5.25": {
               "pre": [
@@ -43565,7 +43565,7 @@
             }
           }
         },
-        "right lower leg": {
+        "right_lower_leg": {
           "rotation": {
             "5.25": {
               "pre": [
@@ -49021,7 +49021,7 @@
       "loop": true,
       "animation_length": 1.25,
       "bones": {
-        "right arm": {
+        "right_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -49231,7 +49231,7 @@
             }
           }
         },
-        "lower tail": {
+        "lower_tail": {
           "rotation": {
             "0.0": [
               -4.273,
@@ -49507,7 +49507,7 @@
             0
           ]
         },
-        "left arm": {
+        "left_arm": {
           "rotation": {
             "0.0": {
               "post": [
@@ -49585,7 +49585,7 @@
             }
           }
         },
-        "right breast": {
+        "right_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -49767,7 +49767,7 @@
             }
           }
         },
-        "left breast": {
+        "left_breast": {
           "rotation": {
             "0.0": {
               "post": [
@@ -49949,7 +49949,7 @@
             }
           }
         },
-        "tail extra pivot": {
+        "tail_extra_pivot": {
           "rotation": {
             "0.0": {
               "post": [
@@ -50035,7 +50035,7 @@
             }
           }
         },
-        "right brow": {
+        "right_brow": {
           "rotation": {
             "0.0": {
               "post": [
@@ -50089,7 +50089,7 @@
             }
           }
         },
-        "left brow": {
+        "left_brow": {
           "rotation": {
             "0.0": {
               "post": [
@@ -50143,7 +50143,7 @@
             }
           }
         },
-        "right frill": {
+        "right_frill": {
           "rotation": {
             "0.0": {
               "post": [
@@ -50197,7 +50197,7 @@
             }
           }
         },
-        "left frill": {
+        "left_frill": {
           "rotation": {
             "0.0": {
               "post": [
@@ -50251,7 +50251,7 @@
             }
           }
         },
-        "right upper frill": {
+        "right_upper_frill": {
           "rotation": {
             "0.0": {
               "post": [
@@ -50305,7 +50305,7 @@
             }
           }
         },
-        "left upper frill": {
+        "left_upper_frill": {
           "rotation": {
             "0.0": {
               "post": [
@@ -50504,7 +50504,7 @@
             }
           }
         },
-        "right leg": {
+        "right_leg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -50590,7 +50590,7 @@
             }
           }
         },
-        "left leg": {
+        "left_leg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -50676,7 +50676,7 @@
             }
           }
         },
-        "left lower leg": {
+        "left_lower_leg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -50720,7 +50720,7 @@
             }
           }
         },
-        "right lower leg": {
+        "right_lower_leg": {
           "rotation": {
             "0.0": {
               "post": [
@@ -50764,7 +50764,7 @@
             }
           }
         },
-        "butt wg": {
+        "butt_wg": {
           "position": [
             0,
             -2,

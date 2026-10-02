@@ -193,21 +193,21 @@ export const COMMUNITY = {
     "cathyl_rabbit": "Cathyl 兔",
     "plant_maiden": "植物娘",
     "lamia": "拉米亚",
-    "eevee_rabbit": "伊布兔",
-    "eevee_scarecrow": "伊布稻草人",
-    "eevee_silverfish": "伊布蠹虫",
-    "eevee_vinemaiden": "伊布藤娘",
-    "eevee_zombie": "伊布僵尸"
+    "eevee_rabbit": "太阳伊布",
+    "eevee_scarecrow": "水伊布",
+    "eevee_silverfish": "月亮伊布",
+    "eevee_vinemaiden": "雷伊布",
+    "eevee_zombie": "火伊布"
   },
   "lore": {
     "cathyl_rabbit": "受委托重制的兔法师，外观与原版截然不同，仍是掠食者。",
     "plant_maiden": "藤娘的植物化变体，依然会埋伏与吞食。",
     "lamia": "取代僵尸的蛇身掠食者，拥有多套装饰外观。",
-    "eevee_rabbit": "伊布化的兔法师。",
-    "eevee_scarecrow": "伊布化的稻草人。",
-    "eevee_silverfish": "伊布化的吞食蠹虫。",
-    "eevee_vinemaiden": "伊布化的藤娘。",
-    "eevee_zombie": "伊布化的吞食僵尸。"
+    "eevee_rabbit": "紫色宝可梦 · 太阳伊布（Espeon）——换皮的兔法师掠食者。",
+    "eevee_scarecrow": "青蓝色宝可梦 · 水伊布（Vaporeon）——换皮的稻草人掠食者。",
+    "eevee_silverfish": "黑色宝可梦 · 月亮伊布（Umbreon）——换皮的吞食蠹虫掠食者。",
+    "eevee_vinemaiden": "黄色宝可梦 · 雷伊布（Jolteon）——换皮的藤娘掠食者。",
+    "eevee_zombie": "橙红色宝可梦 · 火伊布（Flareon）——换皮的吞食僵尸掠食者。"
   },
   "predatorIds": [
     "cathyl_rabbit",

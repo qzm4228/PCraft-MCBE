@@ -3,7 +3,7 @@
 # Bedrock requires zip entries to use forward slashes ("/"); PowerShell's
 # Compress-Archive can write backslashes, so entries are written explicitly
 # via System.IO.Compression with normalized paths.
-param([string]$Version = '261002-beta-1')
+param([string]$Version = '261002-beta-5')
 
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression

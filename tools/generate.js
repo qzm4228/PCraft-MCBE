@@ -538,12 +538,12 @@ const UUID = {
   rpRes: 'fab9a6e5-b172-4ed5-b061-5e6f70819203'
 };
 // Build version: date-based beta. Bedrock v2 manifests require an integer triple,
-// so "261002-beta-1" is encoded as [261002, 0, 1] with the label kept in the name.
-const PACK_VERSION = [261002, 0, 1];
+// so "261002-beta-5" is encoded as [261002, 0, 1] with the label kept in the name.
+const PACK_VERSION = [261002, 0, 5];
 function genManifests() {
   writeJSON(path.join(BP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn §2砂墨§r §7· 261002-beta-1', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.bpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
+    header: { name: 'PCraftRevorn §2砂墨§r §7· 261002-beta-5', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.bpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
     modules: [
       { type: 'data', uuid: UUID.bpData, version: PACK_VERSION },
       { type: 'script', language: 'javascript', uuid: UUID.bpScript, entry: 'scripts/main.js', version: PACK_VERSION }
@@ -557,7 +557,7 @@ function genManifests() {
   });
   writeJSON(path.join(RP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn 资源 §2砂墨§r §7· 261002-beta-1', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.rpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
+    header: { name: 'PCraftRevorn 资源 §2砂墨§r §7· 261002-beta-5', description: '掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt', uuid: UUID.rpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
     modules: [{ type: 'resources', uuid: UUID.rpRes, version: PACK_VERSION }],
     metadata: { authors: ['砂墨SandMo', 'Bilibili: 砂墨', '原创: MysticSummoner'], license: 'AFL-3.0' }
   });
