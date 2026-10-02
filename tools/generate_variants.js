@@ -134,8 +134,6 @@ function generateVariants() {
     // index base must be the render-controller skin-array length, NOT the texture-key
     // count (entities with a glow layer have an extra non-skin texture key).
     const baseCount = rcDef.arrays.textures['Array.skins'].length;
-    const baseGeoId = desc.geometry.default;
-    const baseAnimate = desc.scripts.animate;
     const allHaveAnim = sp.sets.every((s) => s.anim);
 
     let offset = baseCount;
