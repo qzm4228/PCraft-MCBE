@@ -3,7 +3,7 @@
   "minecraft:geometry": [
     {
       "description": {
-        "identifier": "geometry.zombie.v_predatopiav2",
+        "identifier": "geometry.predatopia_v2",
         "texture_width": 2000,
         "texture_height": 2000,
         "visible_bounds_width": 11,

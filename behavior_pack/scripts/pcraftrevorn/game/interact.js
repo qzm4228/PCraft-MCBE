@@ -13,7 +13,6 @@ const SCALE_ITEMS = new Set([
 const VARIANTS = {
   rabbit_wizard: [0, 1, 2],
   zombie: [0, 1, 2, 3],
-  bibaso_zombie: [0, 1, 2, 3],
   vinemaiden: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
   piglin_royal_knight: [0, 1]
 };

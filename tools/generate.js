@@ -91,7 +91,6 @@ const ARMOR = {
 };
 const SPAWN_EGGS = {
   zombie_spawn_egg: { entity: 'zombie', base: -11363863, overlay: -13677023 },
-  bibaso_zombie_spawn_egg: { entity: 'bibaso_zombie', base: -11363863, overlay: -13677023 },
   piglin_royal_spawn_egg: { entity: 'piglin_royal', base: -2978963, overlay: -3098555 },
   vinemaiden_spawn_egg: { entity: 'vinemaiden', base: -8403377, overlay: -3846321 },
   piglin_royal_knight_spawn_egg: { entity: 'piglin_royal_knight', base: -6133183, overlay: -3298757 },
@@ -458,14 +457,6 @@ function genLang() {
       emit(bpLines, k, v); // consumed by scripts later
     }
   }
-  // names for content added by the Bedrock port (not present in the original lang)
-  const EXTRA_LANG = [
-    ['entity.pcraftrevorn:bibaso_zombie.name', 'Bibaso 僵尸'],
-    ['item.pcraftrevorn:bibaso_zombie_spawn_egg.name', 'Bibaso 僵尸生成蛋'],
-    ['item.pcraftrevorn:bibaso_zombie_spawn_egg', 'Bibaso 僵尸生成蛋'],
-    ['item.spawn_egg.entity.pcraftrevorn:bibaso_zombie.name', 'Bibaso 僵尸生成蛋']
-  ];
-  for (const [k, v] of EXTRA_LANG) emit(bpLines, k, v);
   const header = '# Generated from PCraftRevorn 3.1.1 (author: MysticSummoner)\n';
   writeText(path.join(BP, 'texts', 'en_US.lang'), header + bpLines.sort().join('\n') + '\n');
   writeText(path.join(BP, 'texts', 'zh_CN.lang'), header + bpLines.sort().join('\n') + '\n');

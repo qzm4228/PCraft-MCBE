@@ -103,8 +103,7 @@ function sanitizeBones(geo, anim) {
 
 const SPECIES = [
   { species: 'zombie', baseGeo: 'zombiegirl', sets: [
-    { id: 'predatopiav2', pack: 'v_predatopiaV2', geo: 'zombie', anim: 'zombie', tex: /^zombie_/, prefix: 'pcv_predatopia_', name: 'Predatopia V2' },
-    { id: 'predatopiazombie', pack: 'v_predatopiazombie', geo: 'zombie', anim: 'zombie', tex: /^zombie_/, prefix: 'pcv_predz_', name: 'Predatopia' }
+    { id: 'bibaso', pack: 'bibaso', geo: 'zombiegirl', anim: 'zombiegirl', tex: /^zombie/, prefix: 'pcv_bibaso_', name: 'Bibaso' }
   ] },
   { species: 'piglin_royal', baseGeo: 'piglin_royalty', sets: [
     { id: 'royalrump', pack: 'v_royalrump', geo: 'piglin_royalty', anim: 'piglin_royalty', tex: /^piglin_royal_/, prefix: 'pcv_royalrump_', name: 'Royal Rump' }

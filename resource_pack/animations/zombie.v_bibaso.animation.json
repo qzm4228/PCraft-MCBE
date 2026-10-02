@@ -1,7 +1,7 @@
 {
   "format_version": "1.8.0",
   "animations": {
-    "animation.bibaso_zombie.swallow": {
+    "animation.zombie.v_bibaso.swallow": {
       "animation_length": 4.25,
       "bones": {
         "Head": {
@@ -1479,7 +1479,7 @@
       },
       "loop": false
     },
-    "animation.bibaso_zombie.struggleup": {
+    "animation.zombie.v_bibaso.struggleup": {
       "animation_length": 2.25,
       "bones": {
         "VoreStomachWG": {
@@ -2315,7 +2315,7 @@
       },
       "loop": false
     },
-    "animation.bibaso_zombie.struggledown": {
+    "animation.zombie.v_bibaso.struggledown": {
       "animation_length": 2.25,
       "bones": {
         "VoreStomachWG": {
@@ -3139,7 +3139,7 @@
       },
       "loop": false
     },
-    "animation.bibaso_zombie.struggleleft": {
+    "animation.zombie.v_bibaso.struggleleft": {
       "animation_length": 2.25,
       "bones": {
         "VoreStomachWG": {
@@ -3992,7 +3992,7 @@
       },
       "loop": false
     },
-    "animation.bibaso_zombie.struggleright": {
+    "animation.zombie.v_bibaso.struggleright": {
       "animation_length": 2.25,
       "bones": {
         "VoreStomachWG": {
@@ -4845,7 +4845,7 @@
       },
       "loop": false
     },
-    "animation.bibaso_zombie.struggleupleft": {
+    "animation.zombie.v_bibaso.struggleupleft": {
       "animation_length": 2.25,
       "bones": {
         "VoreStomachWG": {
@@ -5738,7 +5738,7 @@
       },
       "loop": false
     },
-    "animation.bibaso_zombie.struggledownleft": {
+    "animation.zombie.v_bibaso.struggledownleft": {
       "animation_length": 2.25,
       "bones": {
         "VoreStomachWG": {
@@ -6631,7 +6631,7 @@
       },
       "loop": false
     },
-    "animation.bibaso_zombie.struggleupright": {
+    "animation.zombie.v_bibaso.struggleupright": {
       "animation_length": 2.25,
       "bones": {
         "VoreStomachWG": {
@@ -7524,7 +7524,7 @@
       },
       "loop": false
     },
-    "animation.bibaso_zombie.struggledownright": {
+    "animation.zombie.v_bibaso.struggledownright": {
       "animation_length": 2.25,
       "bones": {
         "VoreStomachWG": {
@@ -8417,7 +8417,7 @@
       },
       "loop": false
     },
-    "animation.bibaso_zombie.struggleupdown": {
+    "animation.zombie.v_bibaso.struggleupdown": {
       "animation_length": 2.25,
       "bones": {
         "VoreStomachWG": {
@@ -9253,7 +9253,7 @@
       },
       "loop": false
     },
-    "animation.bibaso_zombie.struggleleftright": {
+    "animation.zombie.v_bibaso.struggleleftright": {
       "animation_length": 2.25,
       "bones": {
         "VoreStomachWG": {
@@ -10111,7 +10111,7 @@
       },
       "loop": false
     },
-    "animation.bibaso_zombie.strugglefail": {
+    "animation.zombie.v_bibaso.strugglefail": {
       "animation_length": 2.875,
       "bones": {
         "Head": {
@@ -11183,7 +11183,7 @@
       },
       "loop": false
     },
-    "animation.bibaso_zombie.idle": {
+    "animation.zombie.v_bibaso.idle": {
       "loop": true,
       "animation_length": 2.375,
       "bones": {
@@ -12165,7 +12165,7 @@
         }
       }
     },
-    "animation.bibaso_zombie.digest": {
+    "animation.zombie.v_bibaso.digest": {
       "animation_length": 7,
       "bones": {
         "Stomach": {
@@ -14186,7 +14186,7 @@
       },
       "loop": false
     },
-    "animation.bibaso_zombie.walk": {
+    "animation.zombie.v_bibaso.walk": {
       "loop": true,
       "animation_length": 1.5,
       "bones": {

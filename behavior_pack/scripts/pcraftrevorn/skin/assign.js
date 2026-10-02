@@ -15,7 +15,6 @@ const TEX_BASE = {
   piglin_royal_knight: "piglin_royal_knight",
   rabbit_wizard: "rabbit",
   zombie: "zombie",
-  bibaso_zombie: "bibaso_zombie",
   vinemaiden: "vinemaiden",
   vinemaiden_seedling: "vinemaiden_seedling"
 };
@@ -27,7 +26,6 @@ const END_KIND = { basaltmite: "scale", gilded_basaltmite: "scale", scarecrow: "
 const VARIANTS = {
   rabbit_wizard: [0, 1, 2],
   zombie: [0, 1, 2, 3],
-  bibaso_zombie: [0, 1, 2, 3],
   vinemaiden: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
   piglin_royal_knight: [0, 1]
 };
@@ -38,7 +36,6 @@ export const ANIM_PREFIX = {
   silverfish: "silverfish",
   vinemaiden: "vinemaiden",
   zombie: "zombiegirl",
-  bibaso_zombie: "bibaso_zombie",
   scarecrow: "scarecrow",
   rabbit_wizard: "rabbit",
   piglin_royal_knight: "piglin_royal_knight",
@@ -121,7 +118,6 @@ export const PRED_STATS = {
   silverfish: { swallow: 0.30, struggles: 7, difficulty: 0.10, acid: 2.2, acidMax: 18.8, acidIncr: 0.02, wg1: 1, wg2: 4 },
   vinemaiden: { swallow: 0.32, struggles: 7, difficulty: 0.15, acid: 3.0, acidMax: 15.0, acidIncr: 0.03, wg1: 1, wg2: 4 },
   zombie: { swallow: 0.12, struggles: 7, difficulty: 0.15, acid: 4.0, acidMax: 12.0, acidIncr: 0.04, wg1: 1, wg2: 4 },
-  bibaso_zombie: { swallow: 0.12, struggles: 7, difficulty: 0.15, acid: 4.0, acidMax: 12.0, acidIncr: 0.04, wg1: 1, wg2: 4 },
   scarecrow: { swallow: 0.34, struggles: 15, difficulty: 0.40, acid: 2.0, acidMax: 14.0, acidIncr: 0.01, wg1: 1, wg2: 4 },
   rabbit_wizard: { swallow: 0.15, struggles: 11, difficulty: 0.30, acid: 3.2, acidMax: 13.0, acidIncr: 0.04, wg1: 1, wg2: 4 },
   piglin_royal: { swallow: 0.30, struggles: 13, difficulty: 0.65, acid: 5.0, acidMax: 14.35, acidIncr: 0.055, wg1: 999, wg2: 999 },

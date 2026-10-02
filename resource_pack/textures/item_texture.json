@@ -95,9 +95,6 @@
     "pcraftrevorn_zombie_spawn_egg": {
       "textures": "textures/items/pcraftrevorn/zombie_spawn_egg"
     },
-    "pcraftrevorn_bibaso_zombie_spawn_egg": {
-      "textures": "textures/items/pcraftrevorn/bibaso_zombie_spawn_egg"
-    },
     "pcraftrevorn_piglin_royal_spawn_egg": {
       "textures": "textures/items/pcraftrevorn/piglin_royal_spawn_egg"
     },
@@ -145,6 +142,12 @@
     },
     "pcraftrevorn_lamia_spawn_egg": {
       "textures": "textures/items/pcraftrevorn/lamia_spawn_egg"
+    },
+    "pcraftrevorn_predatopia_v2_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/predatopia_v2_spawn_egg"
+    },
+    "pcraftrevorn_predatopia_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/predatopia_spawn_egg"
     },
     "pcraftrevorn_eevee_rabbit_spawn_egg": {
       "textures": "textures/items/pcraftrevorn/eevee_rabbit_spawn_egg"

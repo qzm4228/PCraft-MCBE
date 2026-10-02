@@ -58,9 +58,6 @@ const ENTITIES = [
   { id: 'vinemaiden', geo: 'vinemaiden', anim: 'vinemaiden', skins: /^vinemaiden(\d|_buried)/, kind: 'creature', hp: 30, speed: 0.3, dmg: 5, follow: 12, kbr: 0, size: [0.7, 1.9], hostile: true, families: ['vinemaiden', 'predator', 'monster'], pop: 'monster' },
   { id: 'vinemaiden_seedling', geo: 'vinemaiden_seedling', anim: 'vinemaiden_seedling', skins: /^vinemaiden_seedling/, kind: 'creature', hp: 8, speed: 0.3, dmg: 3, follow: 16, kbr: 0, size: [0.6, 1.8], hostile: false, families: ['vinemaiden', 'monster'], pop: 'monster' },
   { id: 'zombie', geo: 'zombiegirl', anim: 'zombiegirl', skins: /^zombie(\d|_girl)/, kind: 'monster', hp: 20, speed: 0.23, dmg: 3, follow: 35, kbr: 0, size: [0.6, 1.8], hostile: true, families: ['zombie', 'predator', 'undead', 'monster'], pop: 'monster', loot: 'zombie' },
-  // Bibaso zombie: formerly a selectable subpack, now a standalone predator.
-  // Reuses the mod's optimized zombiegirl model/textures (renamed to bibaso_*).
-  { id: 'bibaso_zombie', geo: 'bibaso_zombie', anim: 'bibaso_zombie', skins: /^zombie(\d|_girl)/, texPrefix: 'bibaso_', kind: 'monster', hp: 20, speed: 0.23, dmg: 3, follow: 35, kbr: 0, size: [0.6, 1.8], hostile: true, families: ['bibaso_zombie', 'predator', 'undead', 'monster'], pop: 'monster', loot: 'zombie' },
   { id: 'scarecrow', geo: 'scarecrow', anim: 'scarecrow', skins: /^scarecrow_(?!glow)/, kind: 'monster', hp: 50, speed: 0.3, dmg: 3, follow: 64, kbr: 0, size: [0.8, 2.4], hostile: true, families: ['scarecrow', 'predator', 'monster'], pop: 'monster' },
   { id: 'rabbit_wizard', geo: 'rabbit', anim: 'rabbit', skins: /^rabbit\d/, kind: 'creature', hp: 24, speed: 0.25, dmg: 3, follow: 16, kbr: 0, size: [0.6, 1.8], hostile: true, families: ['rabbit_wizard', 'predator', 'village_protector'], pop: 'animal' },
   { id: 'piglin_royal', geo: 'piglin_royalty', anim: 'piglin_royalty', skins: /^piglin_royal_(?!knight)/, kind: 'monster', hp: 150, speed: 0.3, dmg: 3, follow: 16, kbr: 1, size: [1.5, 3.4], hostile: false, families: ['piglin', 'piglin_royal', 'monster'], pop: 'monster', loot: 'piglin_royal' },
@@ -82,7 +79,7 @@ const INVISIBLE_TEX = 'textures/entity/pcraftrevorn/invisible';
 // preds that can be tamed (pcraftrevorn:tameable_preds tag)
 const TAMEABLE = new Set(['gilded_basaltmite', 'piglin_royal_knight', 'rabbit_wizard', 'scarecrow', 'vinemaiden']);
 // entities that ship a spawn egg item
-const SPAWN_EGG = new Set(['zombie', 'bibaso_zombie', 'piglin_royal', 'vinemaiden', 'piglin_royal_knight', 'silverfish', 'basaltmite', 'rabbit_wizard', 'gilded_basaltmite', 'scarecrow']);
+const SPAWN_EGG = new Set(['zombie', 'piglin_royal', 'vinemaiden', 'piglin_royal_knight', 'silverfish', 'basaltmite', 'rabbit_wizard', 'gilded_basaltmite', 'scarecrow']);
 // entities with a separate emissive glow texture (drawn as a 2nd render controller)
 const GLOW = { binding_ring: 'binding_ring_glow', shielding_ring: 'shielding_ring_glow', scarecrow: 'scarecrow_glow' };
 // entities whose original AI does NOT target players -> neutral (only retaliate)
@@ -94,7 +91,7 @@ const LOOP_ANIMS = new Set(['idle', 'walk', 'sprint', 'hidden']);
 // ---- helpers ----
 const texFiles = () => fs.readdirSync(SRC_TEX).filter(f => f.endsWith('.png')).map(f => f.slice(0, -4));
 // Resolve geometry/animation sources from the generated RP when present, so
-// entities whose files are renamed/derived (e.g. bibaso_zombie) work too.
+// entities whose files are renamed/derived (e.g. variant look-sets) work too.
 const geoIdent = (file) => {
   if (file === 'vinemaiden_seedling') return 'geometry.vinemaiden_seedling';
   const rp = path.join(RP, 'models', 'entity', file + '.geo.json');
@@ -550,29 +547,8 @@ function genAttachables() {
   writeJSON(path.join(RP, 'render_controllers', 'staffs.render_controllers.json'), { format_version: '1.10.0', render_controllers: rc });
 }
 
-// ---- Bibaso zombie (standalone entity) ----
-// Was a resource-pack subpack; now its own predator pcraftrevorn:bibaso_zombie.
-// Reuses the mod's optimized zombiegirl geo/anim/textures, renamed so it can
-// coexist with the classic pcraftrevorn:zombie.
-function genBibasoZombie() {
-  const geo = readJSON(path.join(SRC_GEO, 'zombiegirl.geo.json'));
-  geo['minecraft:geometry'][0].description.identifier = 'geometry.bibaso_zombie';
-  writeJSON(path.join(RP, 'models', 'entity', 'bibaso_zombie.geo.json'), geo);
-
-  const anim = convertAnimObject(readJSON(path.join(SRC_ANIM, 'zombiegirl.animation.json')));
-  const renamed = {};
-  for (const [k, v] of Object.entries(anim.animations || {})) {
-    renamed[k.replace(/^animation\.zombiegirl\./, 'animation.bibaso_zombie.')] = v;
-  }
-  anim.animations = renamed;
-  writeJSON(path.join(RP, 'animations', 'bibaso_zombie.animation.json'), anim);
-
-  for (const f of fs.readdirSync(SRC_TEX)) {
-    if (f.startsWith('zombie') && f.endsWith('.png')) {
-      copy(path.join(SRC_TEX, f), path.join(RP, 'textures', 'entity', 'pcraftrevorn', 'bibaso_' + f));
-    }
-  }
-}
+// ---- Bibaso zombie is now a selectable look-set on pcraftrevorn:zombie
+// (handled by generate_variants.js), not a standalone entity. ----
 
 function main() {
   if (!exists(MOD)) { console.error('Missing .work/mod. Run tools/extract.ps1 first.'); process.exit(1); }
@@ -587,7 +563,6 @@ function main() {
     path.join(RP, 'subpacks')
   ]) rmrf(d);
   genTextureAndGeometry();
-  genBibasoZombie();
   genMobs();
   genSpecial();
   genSpawnRules();

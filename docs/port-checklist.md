@@ -163,19 +163,19 @@ Bedrock 附加包**不支持 jigsaw 结构**，原 `royal_castle_remnant`（jigs
     Bibaso 的 `swallow/idle/walk/struggle*` 都引用这 4 个骨骼，故**面部表情不播放**（身体动画正常）。
   - `node tools/check.js` 会以 warning 形式列出这些，`PROBLEMS` 为 0。
 - **几何一致性**：`resource_pack` 的所有实体几何与原包逐骨骼一致；唯一差异是经典 `zombiegirl`（28 骨骼原版）
-  与独立 `bibaso_zombie`（76 骨骼），见 §2.3。
+  与可选外观集 Bibaso（76 骨骼），见 §2.3。
 
 ## 1.13 社区资源包接入（独立生物 / subpack）
 
 来源：`examples/resourcepacks.zip`（解包后复制到 `.work/community/`），生成器 `tools/generate_community.js`（由 `generate_entities.js` 末尾调用）。
 
 - **判定规则**：重做但**设定/性质不变** → subpack；**变成新设定/新萌物** → 独立生物。（同尺寸逐像素差 >10 像素仅作“确实重绘”的旁证。）
-- **独立生物（已接入 8 个）**：
-  - `cathyl_rabbit`（兔法师）、`plant_maiden`（藤娘）、`lamia`（僵尸）、`eevee_rabbit/scarecrow/silverfish/vinemaiden/zombie`。
+- **独立生物（已接入 10 个）**：
+  - `cathyl_rabbit`（兔法师）、`plant_maiden`（藤娘）、`lamia`（僵尸）、`predatopia` / `predatopia_v2`（僵尸换皮多掠食者）、`eevee_rabbit/scarecrow/silverfish/vinemaiden/zombie`。
   - 每个：geo/animation/贴图重命名 → BP 实体（predator + vore 组，按来源决定是否可驯服）+ client entity + render controller + 生成蛋；注册表写入 `scripts/pcraftrevorn/data/community.js`，由 `assign.js`/`vore.js`/`guide.js` 合并。
   - 贴图命名沿用 `buildSkinName`：`<base>[_male|_female]<variant>[_decor/health N][_wg|_wg2][_belly]`；`_decor`/`_health` 用 `pc:counter`（随机范围见 `COMMUNITY.counterMax`）。
   - 分辨率原样保留（2000² / 128×800）。
-- **重做型（已接入为“游戏内每生物变体”而非 subpack）**：predatopiaV2 / predatopiazombie（僵尸）、Royal Rump（猪灵王）、silverfish 重绘（蠹虫）、TasteTested（稻草人）。
+- **重做型（已接入为“游戏内每生物变体”而非 subpack）**：**Bibaso（僵尸）**、Royal Rump（猪灵王）、silverfish 重绘（蠹虫）、TasteTested（稻草人）。
   - 生成器 `tools/generate_variants.js` 把每个包作为对应生物的一组“外观集”：追加 geo（`geometry.<物种>.v_<id>`）、动画（`animation.<物种>.v_<id>.*`）、命名空间贴图（`pcv_<id>_*`）。
   - 客户端实体改为 `geometry = Array.geos[q.property('pcraftrevorn:set')]`，贴图数组拼接基础皮肤 + 各套皮肤，`scripts.animate` 用 `q.property('pcraftrevorn:set')` 门控各套 idle/walk。
   - BP 实体新增 `pcraftrevorn:set` 实体属性并加宽 `pcraftrevorn:skin` 范围；注册表 `data/variants.js`。
@@ -252,7 +252,8 @@ P2 精修：
 - [x] `_belly` 满腹贴图并入 skin 数组，脚本 `assignSkin(pred, true)` 联动
 - [x] 弹射物专用 `geometry.pcraftrevorn.projectile` + `cupid_arrow` 贴图
 - [x] 生成蛋改用**新版 `spawn_egg.texture`**（每实体独立纹理，非 base/overlay 颜色）
-- [x] Bibaso 僵尸由资源包 subpack 改为**独立掠食者** `pcraftrevorn:bibaso_zombie`：`geometry.bibaso_zombie`、`animation.bibaso_zombie.*`、贴图 `bibaso_zombie*`、自带生成蛋；原 `pcraftrevorn:zombie` 恢复经典 28 骨骼原版（`subpacks` 已删除）
+- [x] Bibaso 僵尸作为 `pcraftrevorn:zombie` 的**可选外观集**（变体集 `v_bibaso`：`geometry.zombie.v_bibaso` + `animation.zombie.v_bibaso.*` + 贴图 `pcv_bibaso_*`）；原 `pcraftrevorn:zombie` 默认经典 28 骨骼原版（`subpacks` 已删除）
+- [x] Predatopia / Predatopia V2 由「僵尸可选外观」改为**独立掠食者** `pcraftrevorn:predatopia` / `pcraftrevorn:predatopia_v2`（各 240 贴图、自带生成蛋）
 - [ ] 胃部骨骼显隐（`UpperStomach2..6`/`LowerStomach2..6`/`WGStomach*` 等）→ `part_visibility` + 属性（需逐状态核对，暂缓）
 
 ### 2.4 自定义状态效果（18）— ❌ 不可注册

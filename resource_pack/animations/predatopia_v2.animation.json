@@ -1,7 +1,7 @@
 {
   "format_version": "1.8.0",
   "animations": {
-    "animation.zombie.v_predatopiav2.swallow": {
+    "animation.predatopia_v2.swallow": {
       "animation_length": 6.375,
       "bones": {
         "VoreStomachMultiprey": {
@@ -34190,7 +34190,7 @@
       },
       "loop": false
     },
-    "animation.zombie.v_predatopiav2.idle": {
+    "animation.predatopia_v2.idle": {
       "loop": true,
       "animation_length": 2.9583,
       "bones": {
@@ -55147,7 +55147,7 @@
         }
       }
     },
-    "animation.zombie.v_predatopiav2.digest": {
+    "animation.predatopia_v2.digest": {
       "animation_length": 7,
       "bones": {
         "Stomach": {
@@ -113427,7 +113427,7 @@
       },
       "loop": false
     },
-    "animation.zombie.v_predatopiav2.walk": {
+    "animation.predatopia_v2.walk": {
       "loop": true,
       "animation_length": 1.6667,
       "bones": {
@@ -134777,7 +134777,7 @@
         }
       }
     },
-    "animation.zombie.v_predatopiav2.Running": {
+    "animation.predatopia_v2.Running": {
       "loop": true,
       "animation_length": 1.2083,
       "bones": {
@@ -156927,7 +156927,7 @@
         }
       }
     },
-    "animation.zombie.v_predatopiav2.attack": {
+    "animation.predatopia_v2.attack": {
       "animation_length": 0.625,
       "bones": {
         "RightArm": {
