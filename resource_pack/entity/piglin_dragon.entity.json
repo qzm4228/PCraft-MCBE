@@ -1,0 +1,55 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:piglin_dragon",
+      "min_engine_version": "1.8.0",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/piglin_dragon_female0",
+        "skin1": "textures/entity/pcraftrevorn/piglin_dragon_female0_belly",
+        "skin2": "textures/entity/pcraftrevorn/piglin_dragon_male0",
+        "skin3": "textures/entity/pcraftrevorn/piglin_dragon_male0_belly"
+      },
+      "geometry": {
+        "default": "geometry.piglin_dragon"
+      },
+      "animations": {
+        "swallow": "animation.piglin_dragon.swallow",
+        "struggleup": "animation.piglin_dragon.struggleup",
+        "struggledown": "animation.piglin_dragon.struggledown",
+        "struggleleft": "animation.piglin_dragon.struggleleft",
+        "struggleright": "animation.piglin_dragon.struggleright",
+        "struggleupleft": "animation.piglin_dragon.struggleupleft",
+        "struggledownleft": "animation.piglin_dragon.struggledownleft",
+        "struggleupright": "animation.piglin_dragon.struggleupright",
+        "struggledownright": "animation.piglin_dragon.struggledownright",
+        "struggleupdown": "animation.piglin_dragon.struggleupdown",
+        "struggleleftright": "animation.piglin_dragon.struggleleftright",
+        "strugglefail": "animation.piglin_dragon.strugglefail",
+        "idle": "animation.piglin_dragon.idle",
+        "digest": "animation.piglin_dragon.digest",
+        "walk": "animation.piglin_dragon.walk",
+        "stomp": "animation.piglin_dragon.stomp"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "idle": "1.0 - math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walk": "math.min(1.0, query.modified_move_speed * 4.0)"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.piglin_dragon"
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_piglin_dragon_spawn_egg"
+      }
+    }
+  }
+}

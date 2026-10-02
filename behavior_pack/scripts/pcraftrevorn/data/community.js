@@ -6,6 +6,7 @@ export const COMMUNITY = {
     "lamia": "lamia",
     "predatopia_v2": "predatopia_v2",
     "predatopia": "predatopia",
+    "piglin_dragon": "piglin_dragon",
     "eevee_rabbit": "eevee_rabbit",
     "eevee_scarecrow": "eevee_scarecrow",
     "eevee_silverfish": "eevee_silverfish",
@@ -16,6 +17,7 @@ export const COMMUNITY = {
     "lamia",
     "predatopia_v2",
     "predatopia",
+    "piglin_dragon",
     "eevee_scarecrow",
     "eevee_silverfish",
     "eevee_zombie"
@@ -61,6 +63,9 @@ export const COMMUNITY = {
       1,
       2,
       13
+    ],
+    "piglin_dragon": [
+      0
     ],
     "eevee_rabbit": [
       0,
@@ -111,6 +116,7 @@ export const COMMUNITY = {
     "lamia": "lamia",
     "predatopia_v2": "predatopia_v2",
     "predatopia": "predatopia",
+    "piglin_dragon": "piglin_dragon",
     "eevee_rabbit": "eevee_rabbit",
     "eevee_scarecrow": "eevee_scarecrow",
     "eevee_silverfish": "eevee_silverfish",
@@ -123,6 +129,7 @@ export const COMMUNITY = {
     "lamia": 5,
     "predatopia_v2": 5,
     "predatopia": 5,
+    "piglin_dragon": 1,
     "eevee_rabbit": 1,
     "eevee_scarecrow": 3,
     "eevee_silverfish": 1,
@@ -179,6 +186,16 @@ export const COMMUNITY = {
       "acidIncr": 0.04,
       "wg1": 1,
       "wg2": 4
+    },
+    "piglin_dragon": {
+      "swallow": 0.3,
+      "struggles": 13,
+      "difficulty": 0.65,
+      "acid": 5,
+      "acidMax": 14.35,
+      "acidIncr": 0.055,
+      "wg1": 999,
+      "wg2": 999
     },
     "eevee_rabbit": {
       "swallow": 0.15,
@@ -237,6 +254,7 @@ export const COMMUNITY = {
     "lamia": "拉米亚",
     "predatopia_v2": "Predatopia V2",
     "predatopia": "Predatopia",
+    "piglin_dragon": "龙娘猪灵王",
     "eevee_rabbit": "太阳伊布",
     "eevee_scarecrow": "水伊布",
     "eevee_silverfish": "月亮伊布",
@@ -249,6 +267,7 @@ export const COMMUNITY = {
     "lamia": "取代僵尸的蛇身掠食者，拥有多套装饰外观。",
     "predatopia_v2": "Predatopia 多掠食者包 V2 —— 由僵娘换皮而来的独立掠食者。",
     "predatopia": "Predatopia 多掠食者包 —— 由僵娘换皮而来的独立掠食者。",
+    "piglin_dragon": "PCraft 原版里被替换成“龙娘”的猪灵王模型，独立出来的掠食者。",
     "eevee_rabbit": "紫色宝可梦 · 太阳伊布（Espeon）——换皮的兔法师掠食者。",
     "eevee_scarecrow": "青蓝色宝可梦 · 水伊布（Vaporeon）——换皮的稻草人掠食者。",
     "eevee_silverfish": "黑色宝可梦 · 月亮伊布（Umbreon）——换皮的吞食蠹虫掠食者。",
@@ -261,6 +280,7 @@ export const COMMUNITY = {
     "lamia",
     "predatopia_v2",
     "predatopia",
+    "piglin_dragon",
     "eevee_rabbit",
     "eevee_scarecrow",
     "eevee_silverfish",
@@ -990,6 +1010,12 @@ export const COMMUNITY = {
       "predatopia_male2_decor4_wg2_belly": 238,
       "predatopia_male2_decor4_wg_belly": 239
     },
+    "piglin_dragon": {
+      "piglin_dragon_female0": 0,
+      "piglin_dragon_female0_belly": 1,
+      "piglin_dragon_male0": 2,
+      "piglin_dragon_male0_belly": 3
+    },
     "eevee_rabbit": {
       "eevee_rabbit0": 0,
       "eevee_rabbit0_belly": 1,
@@ -1409,6 +1435,7 @@ export const COMMUNITY = {
     "lamia": 117,
     "predatopia_v2": 239,
     "predatopia": 239,
+    "piglin_dragon": 3,
     "eevee_rabbit": 17,
     "eevee_scarecrow": 35,
     "eevee_silverfish": 11,

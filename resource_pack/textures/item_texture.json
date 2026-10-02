@@ -149,6 +149,9 @@
     "pcraftrevorn_predatopia_spawn_egg": {
       "textures": "textures/items/pcraftrevorn/predatopia_spawn_egg"
     },
+    "pcraftrevorn_piglin_dragon_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/piglin_dragon_spawn_egg"
+    },
     "pcraftrevorn_eevee_rabbit_spawn_egg": {
       "textures": "textures/items/pcraftrevorn/eevee_rabbit_spawn_egg"
     },

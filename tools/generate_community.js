@@ -143,7 +143,8 @@ const BASE_STATS = {
   vinemaiden: { swallow: 0.32, struggles: 7, difficulty: 0.15, acid: 3.0, acidMax: 15.0, acidIncr: 0.03, wg1: 1, wg2: 4 },
   zombie: { swallow: 0.12, struggles: 7, difficulty: 0.15, acid: 4.0, acidMax: 12.0, acidIncr: 0.04, wg1: 1, wg2: 4 },
   scarecrow: { swallow: 0.34, struggles: 15, difficulty: 0.40, acid: 2.0, acidMax: 14.0, acidIncr: 0.01, wg1: 1, wg2: 4 },
-  silverfish: { swallow: 0.30, struggles: 7, difficulty: 0.10, acid: 2.2, acidMax: 18.8, acidIncr: 0.02, wg1: 1, wg2: 4 }
+  silverfish: { swallow: 0.30, struggles: 7, difficulty: 0.10, acid: 2.2, acidMax: 18.8, acidIncr: 0.02, wg1: 1, wg2: 4 },
+  piglin_royal: { swallow: 0.30, struggles: 13, difficulty: 0.65, acid: 5.0, acidMax: 14.35, acidIncr: 0.055, wg1: 999, wg2: 999 }
 };
 
 // creature specs
@@ -169,6 +170,10 @@ const CREATURES = [
     variants: [0, 1, 2, 13], gendered: true, endKind: 'decor', counterMax: 5, egg: 'zombie',
     name: 'Predatopia', lore: 'Predatopia 多掠食者包 —— 由僵娘换皮而来的独立掠食者。',
     behavior: { hp: 20, speed: 0.23, dmg: 3, follow: 35, size: [0.6, 1.8], loot: 'zombie', tameable: false, baseStats: 'zombie', undead: true } },
+  { id: 'piglin_dragon', pack: 'piglin_dragon', srcMob: 'piglin_royal', texBase: 'piglin_dragon',
+    variants: [0], gendered: true, endKind: null, counterMax: 1, egg: 'piglin_royal',
+    name: '龙娘猪灵王', lore: 'PCraft 原版里被替换成“龙娘”的猪灵王模型，独立出来的掠食者。',
+    behavior: { hp: 150, speed: 0.3, dmg: 3, follow: 16, size: [1.5, 3.4], loot: 'piglin_royal', tameable: false, baseStats: 'piglin_royal', undead: false } },
   { id: 'eevee_rabbit', pack: 'eeveelution', srcMob: 'rabbit', texBase: 'eevee_rabbit',
     variants: [0, 1, 2], gendered: false, endKind: null, counterMax: 1, egg: 'rabbit_wizard', ball: 'dream_ball',
     name: '太阳伊布', lore: '紫色宝可梦 · 太阳伊布（Espeon）——换皮的兔法师掠食者。', behavior: { hp: 24, speed: 0.25, dmg: 3, follow: 16, size: [0.6, 1.8], loot: null, tameable: true, baseStats: 'rabbit_wizard', undead: false } },

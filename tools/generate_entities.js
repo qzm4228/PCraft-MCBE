@@ -186,6 +186,17 @@ function genTextureAndGeometry() {
       if (f.startsWith('zombie') && f.endsWith('.png')) copy(path.join(ORIG, 'textures', f), path.join(RP, 'textures', 'entity', 'pcraftrevorn', f));
     }
   }
+  // Use the ORIGINAL piglin king model (from the Salmonpred pack) as the base
+  // pcraftrevorn:piglin_royal model. The dragon-girl model (mod) instead becomes
+  // the independent creature pcraftrevorn:piglin_dragon (see generate_community).
+  const PORIG = path.join(ROOT, '.work', 'community', 'piglin_original', 'assets', 'pcraftrevorn');
+  if (exists(path.join(PORIG, 'geo', 'piglin_royalty.geo.json'))) {
+    writeJSON(path.join(RP, 'models', 'entity', 'piglin_royalty.geo.json'), readJSON(path.join(PORIG, 'geo', 'piglin_royalty.geo.json')));
+    writeJSON(path.join(RP, 'animations', 'piglin_royalty.animation.json'), convertAnimObject(readJSON(path.join(PORIG, 'animations', 'piglin_royalty.animation.json'))));
+    for (const f of fs.readdirSync(path.join(PORIG, 'textures', 'entities'))) {
+      if (/^piglin_royal_(female|male)0(_belly)?\.png$/.test(f)) copy(path.join(PORIG, 'textures', 'entities', f), path.join(RP, 'textures', 'entity', 'pcraftrevorn', f));
+    }
+  }
   // invisible placeholder texture + geometry
   writePng(path.join(RP, 'textures', 'entity', 'pcraftrevorn', 'invisible.png'), 16, 16, Buffer.alloc(16 * 16 * 4, 0));
   writeJSON(path.join(RP, 'models', 'entity', 'invisible.geo.json'), {

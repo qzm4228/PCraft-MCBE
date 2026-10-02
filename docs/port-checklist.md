@@ -254,6 +254,7 @@ P2 精修：
 - [x] 生成蛋改用**新版 `spawn_egg.texture`**（每实体独立纹理，非 base/overlay 颜色）
 - [x] Bibaso 僵尸作为 `pcraftrevorn:zombie` 的**可选外观集**（变体集 `v_bibaso`：`geometry.zombie.v_bibaso` + `animation.zombie.v_bibaso.*` + 贴图 `pcv_bibaso_*`）；原 `pcraftrevorn:zombie` 默认经典 28 骨骼原版（`subpacks` 已删除）
 - [x] Predatopia / Predatopia V2 由「僵尸可选外观」改为**独立掠食者** `pcraftrevorn:predatopia` / `pcraftrevorn:predatopia_v2`（各 240 贴图、自带生成蛋）
+- [x] 猪灵王默认改为**原始模型**（Salmonpred 36 骨骼，无翼/角）；原“龙娘”模型（69 骨骼，带翼）独立为 `pcraftrevorn:piglin_dragon`；Royal Rump 保留为 `piglin_royal` 可选外观
 - [ ] 胃部骨骼显隐（`UpperStomach2..6`/`LowerStomach2..6`/`WGStomach*` 等）→ `part_visibility` + 属性（需逐状态核对，暂缓）
 
 ### 2.4 自定义状态效果（18）— ❌ 不可注册
