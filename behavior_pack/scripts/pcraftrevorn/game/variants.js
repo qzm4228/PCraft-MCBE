@@ -8,7 +8,7 @@
 import { world, system } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import { VARIANTS } from "../data/variants.js";
-import { assignSkin, applyWorldSet } from "../skin/assign.js";
+import { assignSkin, applyWorldSet, getNum } from "../skin/assign.js";
 
 const DIMENSIONS = ["minecraft:overworld", "minecraft:nether", "minecraft:the_end"];
 const LABEL = { zombie: "吞食僵尸", piglin_royal: "猪灵王", silverfish: "吞食蠹虫", scarecrow: "稻草人" };
@@ -23,7 +23,7 @@ export function refreshSpecies(species) {
   for (const dimId of DIMENSIONS) {
     let list;
     try { list = world.getDimension(dimId).getEntities({ type: entityType(species) }); } catch { continue; }
-    for (const e of list) { applyWorldSet(e); assignSkin(e, false); }
+    for (const e of list) { applyWorldSet(e); assignSkin(e, getNum(e, "pc:full") === 1); }
   }
 }
 

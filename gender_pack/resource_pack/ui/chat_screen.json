@@ -114,6 +114,66 @@
             "100%sm",
             "100%sm"
           ],
+          "layer": 3,
+          "$button_mappings|default": [
+            {
+              "from_button_id": "button.menu_select",
+              "to_button_id": "button.keyboard_toggle",
+              "handle_select": true,
+              "handle_deselect": false,
+              "mapping_type": "pressed"
+            },
+            {
+              "from_button_id": "button.menu_select",
+              "to_button_id": "button.text_edit_box_selected",
+              "handle_select": false,
+              "handle_deselect": true,
+              "mapping_type": "pressed"
+            },
+            {
+              "from_button_id": "button.menu_cancel",
+              "to_button_id": "button.menu_select",
+              "handle_select": false,
+              "handle_deselect": true,
+              "mapping_type": "global"
+            }
+          ],
+          "button_mappings": "$button_mappings",
+          "variables": [
+            {
+              "requires": "$touch",
+              "$button_mappings": [
+                {
+                  "from_button_id": "button.menu_select",
+                  "to_button_id": "button.keyboard_toggle",
+                  "handle_select": true,
+                  "handle_deselect": false,
+                  "mapping_type": "pressed"
+                },
+                {
+                  "from_button_id": "button.menu_select",
+                  "to_button_id": "button.text_edit_box_selected",
+                  "handle_select": false,
+                  "handle_deselect": true,
+                  "mapping_type": "pressed"
+                },
+                {
+                  "from_button_id": "button.menu_ok",
+                  "to_button_id": "button.text_edit_box_selected",
+                  "handle_select": false,
+                  "handle_deselect": true,
+                  "mapping_type": "pressed"
+                },
+                {
+                  "from_button_id": "button.menu_cancel",
+                  "to_button_id": "button.menu_select",
+                  "handle_select": false,
+                  "handle_deselect": true,
+                  "mapping_type": "global"
+                }
+              ]
+            }
+          ],
           "selected": "#selected",
           "bindings": [
             {
@@ -142,13 +202,13 @@
                   {
                     "binding_type": "view",
                     "source_property_name": "((#text_content + ' ') + $command)",
-                    "ignored": "(not $is_chat_not_command)",
+                    "ignored": "$is_chat_not_command",
                     "target_property_name": "#item_name_with_command"
                   },
                   {
                     "binding_type": "view",
                     "source_property_name": "((#text_content + $command))",
-                    "ignored": "$is_chat_not_command",
+                    "ignored": "(not $is_chat_not_command)",
                     "target_property_name": "#item_name_with_command"
                   },
                   {

@@ -19,18 +19,18 @@
       "materials": [ { "*": "Material.default" } ],
       "textures": [ "Texture.default" ],
       "part_visibility": [
-        { "*": "query.scoreboard('pc_state') < 10" },
-        { "helmet": "variable.helmet_layer_visible && query.scoreboard('pc_state') < 10" },
-        { "leftLegging": "variable.leg_layer_visible && query.scoreboard('pc_state') < 10" },
-        { "rightLegging": "variable.leg_layer_visible && query.scoreboard('pc_state') < 10" },
-        { "leftBoot": "variable.boot_layer_visible && query.scoreboard('pc_state') < 10" },
-        { "rightBoot": "variable.boot_layer_visible && query.scoreboard('pc_state') < 10" },
-        { "leftSock": "variable.boot_layer_visible && variable.leg_layer_visible && query.scoreboard('pc_state') < 10" },
-        { "rightSock": "variable.boot_layer_visible && variable.leg_layer_visible && query.scoreboard('pc_state') < 10" },
-        { "bodyArmor": "variable.chest_layer_visible && !query.has_cape && query.scoreboard('pc_state') < 10" },
-        { "leftArmArmor": "variable.chest_layer_visible && !query.has_cape && query.scoreboard('pc_state') < 10" },
-        { "rightArmArmor": "variable.chest_layer_visible && !query.has_cape && query.scoreboard('pc_state') < 10" },
-        { "belt": "variable.chest_layer_visible && variable.leg_layer_visible && query.scoreboard('pc_state') < 10" }
+        { "*": true },
+        { "helmet": "variable.helmet_layer_visible" },
+        { "leftLegging": "variable.leg_layer_visible" },
+        { "rightLegging": "variable.leg_layer_visible" },
+        { "leftBoot": "variable.boot_layer_visible" },
+        { "rightBoot": "variable.boot_layer_visible" },
+        { "leftSock": "variable.boot_layer_visible && variable.leg_layer_visible" },
+        { "rightSock": "variable.boot_layer_visible && variable.leg_layer_visible" },
+        { "bodyArmor": "variable.chest_layer_visible && !query.has_cape" },
+        { "leftArmArmor": "variable.chest_layer_visible && !query.has_cape" },
+        { "rightArmArmor": "variable.chest_layer_visible && !query.has_cape" },
+        { "belt": "variable.chest_layer_visible && variable.leg_layer_visible" }
       ]
     },
 

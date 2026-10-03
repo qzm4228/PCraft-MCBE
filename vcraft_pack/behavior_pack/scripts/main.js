@@ -36,8 +36,25 @@ function objective() {
     return world.scoreboard.getObjective(BELLY_OBJ) ?? world.scoreboard.addObjective(BELLY_OBJ, "腹部");
   } catch { return undefined; }
 }
+// Plan B: belly visibility is driven per-player by a server-side /playanimation,
+// so every client sees it without depending on query.scoreboard.
+const BELLY_ANIM = ["animation.vcraft.belly.off", "animation.vcraft.belly.small", "animation.vcraft.belly.big"];
+const lastBelly = new Map();
+function playAnim(entity, anim) {
+  // Server-side only: client Molang can't read scoreboards here. Prefer the API.
+  try { entity.playAnimation(anim, { players: world.getAllPlayers(), blendOutTime: 999999 }); return; } catch { /* fallthrough */ }
+  try { entity.runCommand(`playanimation @s ${anim} none 999999`); } catch { /* ignore */ }
+}
+function applyBelly(player, n) {
+  const idx = Math.max(0, Math.min(2, n | 0));
+  if (lastBelly.get(player.id) === idx) return;
+  lastBelly.set(player.id, idx);
+  playAnim(player, BELLY_ANIM[idx]);
+}
 function setBelly(player, n) {
-  try { objective()?.setScore(player, Math.max(0, Math.min(2, n | 0))); } catch { /* ignore */ }
+  const v = Math.max(0, Math.min(2, n | 0));
+  try { objective()?.setScore(player, v); } catch { /* ignore */ }
+  applyBelly(player, v);
 }
 function entById(id) {
   try { return typeof id === "string" && id ? world.getEntity(id) : undefined; } catch { return undefined; }
@@ -434,34 +451,44 @@ function openPreyMenu(player) {
 }
 
 export function wireVcraft() {
-  const obj = objective();
-  if (obj) { try { world.scoreboard.setObjectiveAtDisplaySlot(DisplaySlotId.List, obj); } catch { /* ignore */ } }
+  // Belly rendering is command-driven (Plan B) and no longer uses query.scoreboard,
+  // so we must NOT claim a display slot here — that would clobber the gender pack's
+  // pc_state objective (still used for skin selection). The pc_belly objective is
+  // still created lazily by setBelly().
+  // /playanimation state resets on respawn / relog; drop the cache so it re-applies.
+  world.afterEvents.playerSpawn.subscribe((ev) => { lastBelly.delete(ev.player.id); });
+  world.afterEvents.playerLeave.subscribe((ev) => { lastBelly.delete(ev.playerId); });
 
   // Custom commands: /vcraft:swallow, /vcraft:release, /vcraft:prey
-  system.beforeEvents.startup.subscribe((init) => {
-    try {
-      const reg = (name, desc, fn) => init.customCommandRegistry.registerCommand(
-        { name, description: desc, permissionLevel: CommandPermissionLevel.Any, cheatsRequired: false },
-        (origin) => {
-          const p = origin.sourceEntity;
-          if (p?.typeId === "minecraft:player") { system.run(() => fn(p)); return { status: CustomCommandStatus.Success }; }
-          return { status: CustomCommandStatus.Failure, message: "只能由玩家执行。" };
-        }
-      );
-      reg("vcraft:swallow", "吞下附近的一只生物", swallow);
-      reg("vcraft:release", "放出胃袋里的所有猎物", releaseAll);
-      reg("vcraft:prey", "打开胃袋面板", openPreyMenu);
-      reg("vcraft:trinkets", "打开饰品面板", openTrinketMenu);
-      reg("vcraft:config", "打开 VCraft 设置", openConfigMenu);
-      reg("vcraft:menu", "打开 VCraft 主菜单", openMainMenu);
-    } catch { /* custom commands unsupported */ }
-  });
+  // Wrapped so a missing custom-command API can't abort the chat handler below.
+  try {
+    system.beforeEvents.startup.subscribe((init) => {
+      try {
+        const reg = (name, desc, fn) => init.customCommandRegistry.registerCommand(
+          { name, description: desc, permissionLevel: CommandPermissionLevel.Any, cheatsRequired: false },
+          (origin) => {
+            const p = origin.sourceEntity;
+            if (p?.typeId === "minecraft:player") { system.run(() => fn(p)); return { status: CustomCommandStatus.Success }; }
+            return { status: CustomCommandStatus.Failure, message: "只能由玩家执行。" };
+          }
+        );
+        reg("vcraft:swallow", "吞下附近的一只生物", swallow);
+        reg("vcraft:release", "放出胃袋里的所有猎物", releaseAll);
+        reg("vcraft:prey", "打开胃袋面板", openPreyMenu);
+        reg("vcraft:trinkets", "打开饰品面板", openTrinketMenu);
+        reg("vcraft:config", "打开 VCraft 设置", openConfigMenu);
+        reg("vcraft:menu", "打开 VCraft 主菜单", openMainMenu);
+      } catch { /* custom commands unsupported */ }
+    });
+  } catch { /* startup event unavailable on this version */ }
 
-  // Chat shortcuts.
-  world.beforeEvents.chatSend.subscribe((ev) => {
-    const m = (ev.message || "").trim().toLowerCase();
+  // Chat shortcuts (world.beforeEvents.chatSend is a Beta API; guard it).
+  try {
+  world.beforeEvents.chatSend?.subscribe((ev) => {
+    const raw = (ev.message || "").trim();
+    const m = raw.toLowerCase();
     if (!["?swallow", "?release", "?prey", "?肚子", "?胃", "?trinkets", "?饰品", "?vcraft", "?设置", "?config", "?vcraftmenu", "?菜单"].includes(m)) return;
-    ev.cancel();
+    ev.cancel = true;
     const player = ev.sender;
     system.runTimeout(() => {
       try {
@@ -474,6 +501,7 @@ export function wireVcraft() {
       } catch { /* ignore */ }
     }, 5);
   });
+  } catch { /* chatSend unavailable (Beta APIs off) */ }
 
   // Follow + hide + belly stage, every 2 ticks.
   system.runInterval(() => {

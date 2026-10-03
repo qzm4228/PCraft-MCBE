@@ -147,7 +147,7 @@ function generateVariants() {
       // geo + anim (sanitize illegal bone names consistently across both)
       const geo = readJSON(path.join(root, 'geo', s.geo + '.geo.json'));
       const anim = s.anim ? convertAnimObject(readJSON(path.join(root, 'animations', s.anim + '.animation.json'))) : null;
-      if (anim) sanitizeBones(geo, anim);
+      sanitizeBones(geo, anim); // always: a set with no animation can still carry illegal bone names (e.g. scarecrow "Head-neck")
       geo['minecraft:geometry'][0].description.identifier = `geometry.${sp.species}.v_${s.id}`;
       writeJSON(path.join(RP, 'models', 'entity', `${sp.species}.v_${s.id}.geo.json`), geo);
       desc.geometry[`v_${s.id}`] = `geometry.${sp.species}.v_${s.id}`;

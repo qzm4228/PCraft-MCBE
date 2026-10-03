@@ -1,9 +1,6 @@
 {
   "namespace": "crafting",
 
-  // Inject a small "菜单" button into the inventory screen. EXPERIMENTAL: it uses
-  // the hidden edit_box + button.send trick to push a token into the chat box;
-  // if #message_text_box is not available on this screen it will do nothing.
   "recipe_inventory_screen_content": {
     "modifications": [
       {
@@ -67,6 +64,24 @@
           "always_listening": true,
           "focus_enabled": true,
           "size": [ "100%sm", "100%sm" ],
+          "layer": 3,
+          "$button_mappings|default": [
+            { "from_button_id": "button.menu_select", "to_button_id": "button.keyboard_toggle", "handle_select": true, "handle_deselect": false, "mapping_type": "pressed" },
+            { "from_button_id": "button.menu_select", "to_button_id": "button.text_edit_box_selected", "handle_select": false, "handle_deselect": true, "mapping_type": "pressed" },
+            { "from_button_id": "button.menu_cancel", "to_button_id": "button.menu_select", "handle_select": false, "handle_deselect": true, "mapping_type": "global" }
+          ],
+          "button_mappings": "$button_mappings",
+          "variables": [
+            {
+              "requires": "$touch",
+              "$button_mappings": [
+                { "from_button_id": "button.menu_select", "to_button_id": "button.keyboard_toggle", "handle_select": true, "handle_deselect": false, "mapping_type": "pressed" },
+                { "from_button_id": "button.menu_select", "to_button_id": "button.text_edit_box_selected", "handle_select": false, "handle_deselect": true, "mapping_type": "pressed" },
+                { "from_button_id": "button.menu_ok", "to_button_id": "button.text_edit_box_selected", "handle_select": false, "handle_deselect": true, "mapping_type": "pressed" },
+                { "from_button_id": "button.menu_cancel", "to_button_id": "button.menu_select", "handle_select": false, "handle_deselect": true, "mapping_type": "global" }
+              ]
+            }
+          ],
           "selected": "#selected",
           "bindings": [
             { "binding_type": "view", "source_property_name": "(#selected or not #selected)", "target_property_name": "#selected" }
@@ -81,7 +96,9 @@
                 "property_bag": { "#property_field": "#item_name" },
                 "bindings": [
                   { "binding_type": "view", "source_control_name": "display_text", "source_property_name": "#item_name", "target_property_name": "#text_content" },
-                  { "binding_type": "view", "source_property_name": "((#text_content + $command))", "target_property_name": "#item_name" }
+                  { "binding_type": "view", "source_property_name": "((#text_content + ' ') + $command)", "ignored": "$is_chat_not_command", "target_property_name": "#item_name_with_command" },
+                  { "binding_type": "view", "source_property_name": "((#text_content + $command))", "ignored": "(not $is_chat_not_command)", "target_property_name": "#item_name_with_command" },
+                  { "binding_type": "view", "source_property_name": "#item_name_with_command", "target_property_name": "#item_name" }
                 ]
               }
             }
@@ -95,6 +112,7 @@
           "always_listen_to_input": true,
           "alpha": 0,
           "size": [ "100%sm", "100%sm" ],
+          "ignored": "$is_chat_not_command",
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "$button_text": "exit",

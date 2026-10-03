@@ -43,6 +43,81 @@ function writePng(file, w, h, rgba) {
   ensureDir(path.dirname(file));
   fs.writeFileSync(file, Buffer.concat([sig, pngChunk('IHDR', ihdr), pngChunk('IDAT', zlib.deflateSync(raw)), pngChunk('IEND', Buffer.alloc(0))]));
 }
+// ---- vanilla spawn-egg art (Java spawn_egg.png + overlay, tinted) ----
+function decodePngRgba(buf) {
+  if (buf.length < 8 || buf.readUInt32BE(0) !== 0x89504E47) return null;
+  let off = 8, w = 0, h = 0, bit = 0, color = 0, interlace = 0; const idat = [];
+  while (off < buf.length) {
+    const len = buf.readUInt32BE(off), type = buf.toString('ascii', off + 4, off + 8), d = buf.slice(off + 8, off + 8 + len);
+    if (type === 'IHDR') { w = d.readUInt32BE(0); h = d.readUInt32BE(4); bit = d[8]; color = d[9]; interlace = d[12]; }
+    else if (type === 'IDAT') idat.push(d); else if (type === 'IEND') break;
+    off += 12 + len;
+  }
+  if (bit !== 8 || interlace) return null;
+  const ch = { 2: 3, 6: 4 }[color]; if (!ch) return null;
+  const raw = zlib.inflateSync(Buffer.concat(idat)); const stride = w * ch; const out = Buffer.alloc(w * h * 4, 0); const prev = Buffer.alloc(stride); let p = 0;
+  for (let y = 0; y < h; y++) {
+    const ft = raw[p++]; const line = Buffer.from(raw.slice(p, p + stride)); p += stride;
+    for (let i = 0; i < stride; i++) {
+      const a = i >= ch ? line[i - ch] : 0, b = prev[i], c = i >= ch ? prev[i - ch] : 0; let v = line[i];
+      if (ft === 1) v = (v + a) & 255; else if (ft === 2) v = (v + b) & 255; else if (ft === 3) v = (v + ((a + b) >> 1)) & 255;
+      else if (ft === 4) { const pa = Math.abs(b - c), pb = Math.abs(a - c), pc = Math.abs(a + b - 2 * c); v = (v + (pa <= pb && pa <= pc ? a : pb <= pc ? b : c)) & 255; }
+      line[i] = v;
+    }
+    for (let x = 0; x < w; x++) { const o = (y * w + x) * 4, s = x * ch; if (color === 6) { out[o] = line[s]; out[o + 1] = line[s + 1]; out[o + 2] = line[s + 2]; out[o + 3] = line[s + 3]; } else { out[o] = line[s]; out[o + 1] = line[s + 1]; out[o + 2] = line[s + 2]; out[o + 3] = 255; } }
+    line.copy(prev);
+  }
+  return { w, h, data: out };
+}
+const EGG_DIR = path.join(ROOT, 'tools', 'assets', 'egg');
+const EGG_ART = (() => {
+  try {
+    const b = decodePngRgba(fs.readFileSync(path.join(EGG_DIR, 'spawn_egg.png')));
+    const o = decodePngRgba(fs.readFileSync(path.join(EGG_DIR, 'spawn_egg_overlay.png')));
+    if (b && o && b.w === o.w && b.h === o.h) return { base: b, overlay: o };
+  } catch { /* ignore */ }
+  return null;
+})();
+function eggRgba(base, overlay) {
+  const { w, h, data } = EGG_ART.base; const od = EGG_ART.overlay.data; const out = Buffer.alloc(w * h * 4, 0);
+  for (let i = 0; i < w * h * 4; i += 4) {
+    let r = data[i] * base.r / 255, g = data[i + 1] * base.g / 255, bl = data[i + 2] * base.b / 255, a = data[i + 3];
+    if (od[i + 3] > 0) {
+      const oa = od[i + 3] / 255;
+      r = od[i] * overlay.r / 255 * oa + r * (1 - oa);
+      g = od[i + 1] * overlay.g / 255 * oa + g * (1 - oa);
+      bl = od[i + 2] * overlay.b / 255 * oa + bl * (1 - oa);
+      a = Math.max(a, od[i + 3]);
+    }
+    out[i] = Math.round(r); out[i + 1] = Math.round(g); out[i + 2] = Math.round(bl); out[i + 3] = a;
+  }
+  return { w, h, data: out };
+}
+// most frequent opaque colours of a texture (4-bit buckets), most common first
+function mainColours(img) {
+  const buckets = new Map();
+  for (let i = 0; i < img.data.length; i += 4) {
+    if (img.data[i + 3] < 128) continue;
+    const r = img.data[i], g = img.data[i + 1], b = img.data[i + 2];
+    const key = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);
+    let e = buckets.get(key); if (!e) { e = { n: 0, r: 0, g: 0, b: 0 }; buckets.set(key, e); }
+    e.n++; e.r += r; e.g += g; e.b += b;
+  }
+  return [...buckets.values()].sort((a, b) => b.n - a.n).map((e) => ({ r: Math.round(e.r / e.n), g: Math.round(e.g / e.n), b: Math.round(e.b / e.n) }));
+}
+// build a vanilla-style egg tinted with the creature texture's dominant + accent colours
+function makeTextureEgg(file, texFile) {
+  let cols = null;
+  try { cols = mainColours(decodePngRgba(fs.readFileSync(texFile))); } catch { /* ignore */ }
+  if (!EGG_ART || !cols || !cols.length) return false;
+  const base = cols[0];
+  let over = cols.find((c) => (c.r - base.r) ** 2 + (c.g - base.g) ** 2 + (c.b - base.b) ** 2 > 6000);
+  if (!over) over = { r: Math.round(base.r * 0.45), g: Math.round(base.g * 0.45), b: Math.round(base.b * 0.45) };
+  const { w, h, data } = eggRgba(base, over);
+  writePng(file, w, h, data);
+  return true;
+}
+
 // Tracked Poké Ball sprites (from Cobblemon). Each creature can name its ball.
 const BALL_DIR = path.join(ROOT, 'tools', 'assets', 'balls');
 const BALL_SRC = [
@@ -151,11 +226,11 @@ const BASE_STATS = {
 const CREATURES = [
   { id: 'cathyl_rabbit', pack: 'CathylFunni', srcMob: 'rabbit', texBase: 'cathyl_rabbit',
     variants: [0, 1, 2], gendered: false, endKind: null, counterMax: 1, egg: 'rabbit_wizard',
-    name: 'Cathyl 兔', lore: '受委托重制的兔法师，外观与原版截然不同，仍是掠食者。',
+    name: '哞妮', lore: '受委托重制的兔法师，外观与原版截然不同，仍是掠食者。',
     behavior: { hp: 24, speed: 0.25, dmg: 3, follow: 16, size: [0.6, 1.8], loot: null, tameable: true, baseStats: 'rabbit_wizard', undead: false } },
   { id: 'plant_maiden', pack: 'plantPACK', srcMob: 'vinemaiden', texBase: 'plant_maiden',
     variants: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 31, 99], gendered: false, endKind: null, counterMax: 1, egg: 'vinemaiden',
-    name: '植物娘', lore: '藤娘的植物化变体，依然会埋伏与吞食。',
+    name: '猪笼草', lore: '藤娘的植物化变体，依然会埋伏与吞食。',
     behavior: { hp: 30, speed: 0.3, dmg: 5, follow: 12, size: [0.7, 1.9], loot: null, tameable: true, baseStats: 'vinemaiden', undead: false },
     skip: [/_buried/, /_seedling/] },
   { id: 'lamia', pack: 'lamia', srcMob: 'zombie', texBase: 'lamia',
@@ -164,15 +239,15 @@ const CREATURES = [
     behavior: { hp: 20, speed: 0.23, dmg: 3, follow: 35, size: [0.6, 1.8], loot: 'zombie', tameable: false, baseStats: 'zombie', undead: true } },
   { id: 'predatopia_v2', pack: 'v_predatopiaV2', srcMob: 'zombie', texBase: 'predatopia_v2',
     variants: [0, 1, 2, 13], gendered: true, endKind: 'decor', counterMax: 5, egg: 'zombie',
-    name: 'Predatopia V2', lore: 'Predatopia 多掠食者包 V2 —— 由僵娘换皮而来的独立掠食者。',
+    name: '人鱼', lore: 'Predatopia 多掠食者包 V2 —— 由僵娘换皮而来的独立掠食者。',
     behavior: { hp: 20, speed: 0.23, dmg: 3, follow: 35, size: [0.6, 1.8], loot: 'zombie', tameable: false, baseStats: 'zombie', undead: true } },
   { id: 'predatopia', pack: 'v_predatopiazombie', srcMob: 'zombie', texBase: 'predatopia',
     variants: [0, 1, 2, 13], gendered: true, endKind: 'decor', counterMax: 5, egg: 'zombie',
-    name: 'Predatopia', lore: 'Predatopia 多掠食者包 —— 由僵娘换皮而来的独立掠食者。',
+    name: '喵呜', lore: 'Predatopia 多掠食者包 —— 由僵娘换皮而来的独立掠食者。',
     behavior: { hp: 20, speed: 0.23, dmg: 3, follow: 35, size: [0.6, 1.8], loot: 'zombie', tameable: false, baseStats: 'zombie', undead: true } },
   { id: 'piglin_dragon', pack: 'piglin_dragon', srcMob: 'piglin_royal', texBase: 'piglin_dragon',
     variants: [0], gendered: true, endKind: null, counterMax: 1, egg: 'piglin_royal',
-    name: '龙娘猪灵王', lore: 'PCraft 原版里被替换成“龙娘”的猪灵王模型，独立出来的掠食者。',
+    name: '熄', lore: 'PCraft 原版里被替换成“龙娘”的猪灵王模型，独立出来的掠食者。',
     behavior: { hp: 150, speed: 0.3, dmg: 3, follow: 16, size: [1.5, 3.4], loot: 'piglin_royal', tameable: false, baseStats: 'piglin_royal', undead: false } },
   { id: 'eevee_rabbit', pack: 'eeveelution', srcMob: 'rabbit', texBase: 'eevee_rabbit',
     variants: [0, 1, 2], gendered: false, endKind: null, counterMax: 1, egg: 'rabbit_wizard', ball: 'dream_ball',
@@ -191,6 +266,14 @@ const CREATURES = [
     variants: [0, 1, 2, 13], gendered: true, endKind: 'decor', counterMax: 5, egg: 'zombie', ball: 'repeat_ball',
     name: '火伊布', lore: '橙红色宝可梦 · 火伊布（Flareon）——换皮的吞食僵尸掠食者。', behavior: { hp: 20, speed: 0.23, dmg: 3, follow: 35, size: [0.6, 1.8], loot: 'zombie', tameable: false, baseStats: 'zombie', undead: true } }
 ];
+
+// English display names for the community creatures (mirrors generate.js EN_* maps).
+const EN_COMMUNITY = {
+  cathyl_rabbit: 'Moony', plant_maiden: 'Nepenthes', lamia: 'Lamia',
+  predatopia: 'Meow', predatopia_v2: 'Siren', piglin_dragon: 'Extinguish',
+  eevee_rabbit: 'Espeon', eevee_scarecrow: 'Vaporeon', eevee_silverfish: 'Umbreon',
+  eevee_vinemaiden: 'Jolteon', eevee_zombie: 'Flareon'
+};
 
 const validSeg = (s) => /^[A-Za-z][A-Za-z0-9_.]*$/.test(s);
 
@@ -259,7 +342,7 @@ function generateCommunity() {
   const reg = { texBase: {}, gendered: [], variants: {}, endKind: {}, animPrefix: {}, counterMax: {}, stats: {}, names: {}, lore: {}, predatorIds: [], skins: {}, texMax: {} };
   const atlas = readJSON(path.join(RP, 'textures', 'item_texture.json'));
   const bpTexts = [path.join(BP, 'texts', 'en_US.lang'), path.join(BP, 'texts', 'zh_CN.lang')];
-  const extraLang = [];
+  const extraEn = [], extraZh = [];
 
   for (const c of CREATURES) {
     const root = path.join(COMM, c.pack, 'assets', 'pcraftrevorn');
@@ -333,7 +416,14 @@ function generateCommunity() {
     // spawn egg (Poké Ball for the eeveelution reskins)
     const itemId = c.id + '_spawn_egg';
     if (c.ball) ballPng(path.join(RP, 'textures', 'items', 'pcraftrevorn', itemId + '.png'), c.ball, 16);
-    else eggPng(c.id, c.egg);
+    else {
+      const skin = list.includes(c.texBase) ? c.texBase : list[0];
+      const ok = skin && makeTextureEgg(
+        path.join(RP, 'textures', 'items', 'pcraftrevorn', itemId + '.png'),
+        path.join(RP, 'textures', 'entity', 'pcraftrevorn', skin + '.png')
+      );
+      if (!ok) eggPng(c.id, c.egg);
+    }
     writeJSON(path.join(BP, 'items', itemId + '.json'), {
       format_version: '1.21.0',
       'minecraft:item': {
@@ -346,11 +436,21 @@ function generateCommunity() {
       }
     });
     atlas.texture_data[`${NS}_${itemId}`] = { textures: `textures/items/pcraftrevorn/${itemId}` };
-    extraLang.push(
+    const nameEn = EN_COMMUNITY[c.id] || c.name;
+    // Poké-Ball items are named after the Pokémon; other creatures get a spawn-egg name.
+    const eggEn = c.ball ? nameEn : nameEn + ' Spawn Egg';
+    const eggZh = c.ball ? c.name : c.name + '生成蛋';
+    extraEn.push(
+      `entity.${NS}:${c.id}.name=${nameEn}`,
+      `item.${NS}:${itemId}.name=${eggEn}`,
+      `item.${NS}:${itemId}=${eggEn}`,
+      `item.spawn_egg.entity.${NS}:${c.id}.name=${eggEn}`
+    );
+    extraZh.push(
       `entity.${NS}:${c.id}.name=${c.name}`,
-      `item.${NS}:${itemId}.name=${c.name}生成蛋`,
-      `item.${NS}:${itemId}=${c.name}生成蛋`,
-      `item.spawn_egg.entity.${NS}:${c.id}.name=${c.name}生成蛋`
+      `item.${NS}:${itemId}.name=${eggZh}`,
+      `item.${NS}:${itemId}=${eggZh}`,
+      `item.spawn_egg.entity.${NS}:${c.id}.name=${eggZh}`
     );
 
     // registry
@@ -369,8 +469,8 @@ function generateCommunity() {
     reg.texMax[c.id] = skinMax;
   }
 
-  writeText(path.join(BP, 'texts', 'en_US.lang'), fs.readFileSync(bpTexts[0], 'utf8').trimEnd() + '\n' + extraLang.join('\n') + '\n');
-  writeText(path.join(BP, 'texts', 'zh_CN.lang'), fs.readFileSync(bpTexts[1], 'utf8').trimEnd() + '\n' + extraLang.join('\n') + '\n');
+  writeText(path.join(BP, 'texts', 'en_US.lang'), fs.readFileSync(bpTexts[0], 'utf8').trimEnd() + '\n' + extraEn.join('\n') + '\n');
+  writeText(path.join(BP, 'texts', 'zh_CN.lang'), fs.readFileSync(bpTexts[1], 'utf8').trimEnd() + '\n' + extraZh.join('\n') + '\n');
   writeJSON(path.join(RP, 'textures', 'item_texture.json'), atlas);
 
   const js = '// AUTO-GENERATED by tools/generate_community.js. Community creature registries.\n'

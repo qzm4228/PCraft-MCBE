@@ -46,6 +46,15 @@
 				}
 			}
 		},
+		"animation.player.chest_off": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.1,
+			"bones": {
+				"b": {
+					"scale": 0
+				}
+			}
+		},
 	    "animation.player.hide": {
 			"loop": true,
 			"bones": {

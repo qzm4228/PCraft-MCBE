@@ -1,13 +1,13 @@
 {
   "format_version": 2,
   "header": {
-    "name": "PCraftRevorn 资源 §2砂墨§r §7· 261002-beta-2",
+    "name": "PCraftRevorn 资源 §2砂墨§r §7· 261003-beta-3",
     "description": "掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt",
     "uuid": "e9a8f5d4-a061-4dc4-af50-4d5e6f708192",
     "version": [
-      261002,
+      261003,
       0,
-      2
+      3
     ],
     "min_engine_version": [
       1,
@@ -20,9 +20,9 @@
       "type": "resources",
       "uuid": "fab9a6e5-b172-4ed5-b061-5e6f70819203",
       "version": [
-        261002,
+        261003,
         0,
-        2
+        3
       ]
     }
   ],

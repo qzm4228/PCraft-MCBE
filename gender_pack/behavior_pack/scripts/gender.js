@@ -65,8 +65,62 @@ function hasState(player) {
     return false;
   }
 }
+// Chest show/size is driven per-player by a server-side /playanimation on the
+// gender pack's own-skin chest model (Geometry.b / controller.render.b).
+// TEST BUILD: set FORCE_CHEST to 1..5 to force a size for everyone; null = normal.
+const FORCE_CHEST = null;
+const chestAnim = (sex, rot) => (sex > 0 ? `animation.pcraftrevorn.chest.size${Math.min(5, sex)}r${clamp(rot ?? 0, 0, 4)}` : "animation.pcraftrevorn.chest.off");
+// Animations must be driven server-side: client Molang (render/animation
+// controllers) cannot use query.scoreboard on this engine. Prefer the
+// playAnimation API (visible to every player); fall back to the /playanimation
+// command where that API is unavailable.
+// A huge blend-out time keeps the played animation from fading back to the
+// default pose (otherwise the chest flickers between the chosen size and size 3).
+const PERSIST_BLEND = 999999;
+function playAnim(entity, anim) {
+  try {
+    entity.playAnimation(anim, { players: world.getAllPlayers(), blendOutTime: PERSIST_BLEND });
+    return;
+  } catch { /* fall through */ }
+  try { entity.runCommand(`playanimation @s ${anim} none ${PERSIST_BLEND}`); } catch { /* ignore */ }
+}
+// Chest rotation angle (0..4), stored per player; applied on top of the size.
+const CHEST_ROT_PROP = "pcraftrevorn:chest_rot";
+function getRot(player) {
+  try { const v = player.getDynamicProperty(CHEST_ROT_PROP); return typeof v === "number" ? clamp(v, 0, 4) : 0; } catch { return 0; }
+}
+function setRot(player, n) {
+  const v = clamp(n, 0, 4);
+  try { player.setDynamicProperty(CHEST_ROT_PROP, v); } catch { /* ignore */ }
+  applyChest(player, getState(player));
+}
+function applyChest(player, state) {
+  const st = typeof state === "number" ? state : getState(player);
+  const sex = FORCE_CHEST === null ? sexOf(st) : FORCE_CHEST;
+  playAnim(player, chestAnim(sex, getRot(player)));
+}
+// The belly mesh is owned by this pack, but VCraft shows/hides it via pc_belly.
+// Keep it flat unless VCraft is showing it (score <= 0 / objective missing), so a
+// gender-only setup never shows a stuck belly and VCraft's small/big win otherwise.
+function ensureBelly(player) {
+  let n = 0;
+  try {
+    const o = world.scoreboard.getObjective("pc_belly");
+    const s = o?.getScore(player.scoreboardIdentity);
+    if (typeof s === "number") n = s;
+  } catch { /* ignore */ }
+  if (n <= 0) playAnim(player, "animation.vcraft.belly.off");
+}
+
+// ---- Belly (owned by this pack) -------------------------------------------
+// The belly mesh lives here but is hidden by default through the always-on
+// "belly_off" animation (player.entity.json); VCraft overrides it with
+// playAnimation when the belly needs to show. Client-side query.scoreboard is
+// not usable in render/animation controllers on this engine, so it is avoided.
 function setState(player, value) {
-  try { objective()?.setScore(player, clamp(value, 0, PRESET_COUNT * 10 + SEX_MAX)); } catch { /* ignore */ }
+  const v = clamp(value, 0, PRESET_COUNT * 10 + SEX_MAX);
+  try { objective()?.setScore(player, v); } catch { /* ignore */ }
+  applyChest(player, v);
 }
 
 function openSizeMenu(player) {
@@ -81,6 +135,22 @@ function openSizeMenu(player) {
     if (r.selection >= 0 && r.selection <= 4) {
       setState(player, encode(skinOf(st), r.selection + 1));
       system.run(() => openSizeMenu(player));
+    } else {
+      system.run(() => openGenderMenu(player));
+    }
+  }).catch(() => { /* ignore */ });
+}
+
+function openRotationMenu(player) {
+  const rot = getRot(player);
+  const form = new ActionFormData().title(title(true));
+  for (let i = 0; i <= 4; i++) form.button(`胸旋转 ${i}${i === rot ? " §a✔" : ""}`);
+  form.button("§7返回");
+  form.show(player).then((r) => {
+    if (r.canceled) return;
+    if (r.selection >= 0 && r.selection <= 4) {
+      setRot(player, r.selection);
+      system.run(() => openRotationMenu(player));
     } else {
       system.run(() => openGenderMenu(player));
     }
@@ -115,7 +185,7 @@ function openGenderMenu(player) {
   form.button(`性别 - ${female ? "§b女性" : "§7男性"}`); actions.push("gender");
   if (female) {
     form.button(`体型 - §b${size} / 4`); actions.push("size");
-    form.button(`皮肤预设 - ${skin === 0 ? "§7原版" : `§b预设 ${skin}`}`); actions.push("skin");
+    form.button(`胸旋转 - §b${getRot(player)} / 4`); actions.push("rot");
     form.button(`女性受伤音效 - ${soundsOn ? "§a开" : "§c关"}`); actions.push("sounds");
   }
   form.button("§7关闭"); actions.push("close");
@@ -130,8 +200,8 @@ function openGenderMenu(player) {
       case "size":
         system.run(() => openSizeMenu(player));
         break;
-      case "skin":
-        system.run(() => openSkinMenu(player));
+      case "rot":
+        system.run(() => openRotationMenu(player));
         break;
       case "sounds":
         try { soundsOn ? player.addTag(SOUNDS_OFF_TAG) : player.removeTag(SOUNDS_OFF_TAG); } catch { /* ignore */ }
@@ -144,36 +214,40 @@ function openGenderMenu(player) {
 }
 
 export function wireGender() {
-  const obj = objective();
-  // Show the objective so clients receive it for query.scoreboard.
-  if (obj) { try { world.scoreboard.setObjectiveAtDisplaySlot(DisplaySlotId.List, obj); } catch { /* ignore */ } }
+  // Ensure the pc_state objective exists (server-side state only; nothing queries it client-side now).
+  objective();
 
   const open = (player) => {
     system.runTimeout(() => { try { player.addTag(OPEN_TAG); } catch { /* ignore */ } }, 5);
   };
 
-  // Stable entry: custom command /gender.
-  system.beforeEvents.startup.subscribe((init) => {
-    try {
-      init.customCommandRegistry.registerCommand(
-        { name: "pcraftrevorn:gender", description: "打开性别 / 体型设置", permissionLevel: CommandPermissionLevel.Any, cheatsRequired: false },
-        (origin) => {
-          const p = origin.sourceEntity;
-          if (p?.typeId === "minecraft:player") { system.run(() => openGenderMenu(p)); return { status: CustomCommandStatus.Success }; }
-          return { status: CustomCommandStatus.Failure, message: "只能由玩家执行。" };
-        }
-      );
-    } catch { /* custom commands unsupported on this version */ }
-  });
+  // Stable entry: custom command /gender. Wrapped so a missing custom-command API
+  // can't abort the rest of the wiring (chat token + intervals).
+  try {
+    system.beforeEvents.startup.subscribe((init) => {
+      try {
+        init.customCommandRegistry.registerCommand(
+          { name: "pcraftrevorn:gender", description: "打开性别 / 体型设置", permissionLevel: CommandPermissionLevel.Any, cheatsRequired: false },
+          (origin) => {
+            const p = origin.sourceEntity;
+            if (p?.typeId === "minecraft:player") { system.run(() => openGenderMenu(p)); return { status: CustomCommandStatus.Success }; }
+            return { status: CustomCommandStatus.Failure, message: "只能由玩家执行。" };
+          }
+        );
+      } catch { /* custom commands unsupported on this version */ }
+    });
+  } catch { /* startup event unavailable on this version */ }
 
-  // Chat entries: the screen button token + typed shortcuts.
-  world.beforeEvents.chatSend.subscribe((ev) => {
-    const raw = (ev.message || "").trim();
-    const low = raw.toLowerCase();
-    if (!raw.includes(BUTTON_TOKEN) && low !== "?gender" && low !== "?性别" && low !== "?settingmenu") return;
-    ev.cancel();
-    open(ev.sender);
-  });
+  // Chat shortcuts (world.beforeEvents.chatSend is a Beta API; guard it).
+  try {
+    world.beforeEvents.chatSend?.subscribe((ev) => {
+      const raw = (ev.message || "").trim();
+      const low = raw.toLowerCase();
+      if (low !== "?gender" && low !== "?性别" && low !== "?settingmenu") return;
+      ev.cancel = true;
+      open(ev.sender);
+    });
+  } catch { /* chatSend unavailable */ }
 
   system.runInterval(() => {
     for (const player of world.getAllPlayers()) {
@@ -185,6 +259,18 @@ export function wireGender() {
       }
     }
   }, 10);
+
+  // /playanimation state is not persisted across respawn / relog / dimension travel,
+  // so re-apply on spawn and periodically as a safety net.
+  world.afterEvents.playerSpawn.subscribe((ev) => {
+    system.run(() => applyChest(ev.player, getState(ev.player)));
+  });
+  system.runInterval(() => {
+    for (const player of world.getAllPlayers()) {
+      applyChest(player, getState(player));
+      ensureBelly(player);
+    }
+  }, 3);
 
   // Wildfire female hurt sound (played at the player's position so nearby
   // players hear it as well).

@@ -87,7 +87,7 @@
           ]
         },
         {
-          "name": "Head-neck",
+          "name": "Head_neck",
           "parent": "Spine_1",
           "pivot": [
             0,
@@ -220,7 +220,7 @@
         },
         {
           "name": "Head",
-          "parent": "Head-neck",
+          "parent": "Head_neck",
           "pivot": [
             0,
             27.75,

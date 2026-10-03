@@ -249,12 +249,12 @@ export const COMMUNITY = {
     }
   },
   "names": {
-    "cathyl_rabbit": "Cathyl 兔",
-    "plant_maiden": "植物娘",
+    "cathyl_rabbit": "哞妮",
+    "plant_maiden": "猪笼草",
     "lamia": "拉米亚",
-    "predatopia_v2": "Predatopia V2",
-    "predatopia": "Predatopia",
-    "piglin_dragon": "龙娘猪灵王",
+    "predatopia_v2": "人鱼",
+    "predatopia": "喵呜",
+    "piglin_dragon": "熄",
     "eevee_rabbit": "太阳伊布",
     "eevee_scarecrow": "水伊布",
     "eevee_silverfish": "月亮伊布",

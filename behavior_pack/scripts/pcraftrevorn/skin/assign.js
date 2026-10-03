@@ -81,9 +81,21 @@ export function assignSkin(entity, belly = false) {
   // rework look-set selected: resolve by [variant|gender|counter|wg|belly]
   if (set > 0 && vs?.sets?.[set - 1]) {
     const by = vs.sets[set - 1].byState;
-    idx = by[`${variant}|${gender}|${counter}|${wg}|${belly ? 1 : 0}`]
+    const belly1 = belly ? 1 : 0;
+    idx = by[`${variant}|${gender}|${counter}|${wg}|${belly1}`]
       ?? by[`${variant}|${gender}|${counter}|${wg}|0`]
-      ?? by[`${variant}|${gender}|${counter}|0|0`];
+      ?? by[`${variant}|${gender}|${counter}|0|0`]
+      // gender-agnostic look-sets store '-' in the gender slot
+      ?? by[`${variant}|-|${counter}|${wg}|${belly1}`]
+      ?? by[`${variant}|-|${counter}|${wg}|0`]
+      ?? by[`${variant}|-|${counter}|0|0`];
+    // last resort: any skin that belongs to this set. Must stay inside the set,
+    // otherwise we fall back to a base skin whose resolution differs from the
+    // rework geometry (2000x2000) and the creature renders invisible.
+    if (idx === undefined) {
+      const vals = Object.values(by);
+      if (vals.length) idx = Math.min(...vals);
+    }
   }
   if (idx === undefined) {
     const name = buildSkinName(id, variant, gender, counter, wg, belly);

@@ -37,7 +37,7 @@
         ]
       },
       "minecraft:rideable": {
-        "seat_count": 5,
+        "seat_count": 20,
         "family_types": [
           "player", "mob", "animal", "monster", "undead", "arthropod", "illager",
           "piglin", "zombie", "skeleton", "creeper", "spider", "villager_v2",
@@ -49,7 +49,22 @@
           { "position": [ 0.3, 0.0, 0.0 ] },
           { "position": [ -0.3, 0.0, 0.0 ] },
           { "position": [ 0.0, 0.0, 0.3 ] },
-          { "position": [ 0.0, 0.0, -0.3 ] }
+          { "position": [ 0.0, 0.0, -0.3 ] },
+          { "position": [ 0.3, 0.0, 0.3 ] },
+          { "position": [ -0.3, 0.0, 0.3 ] },
+          { "position": [ 0.3, 0.0, -0.3 ] },
+          { "position": [ -0.3, 0.0, -0.3 ] },
+          { "position": [ 0.6, 0.0, 0.0 ] },
+          { "position": [ -0.6, 0.0, 0.0 ] },
+          { "position": [ 0.0, 0.0, 0.6 ] },
+          { "position": [ 0.0, 0.0, -0.6 ] },
+          { "position": [ 0.6, 0.0, 0.3 ] },
+          { "position": [ -0.6, 0.0, 0.3 ] },
+          { "position": [ 0.6, 0.0, -0.3 ] },
+          { "position": [ -0.6, 0.0, -0.3 ] },
+          { "position": [ 0.3, 0.0, 0.6 ] },
+          { "position": [ -0.3, 0.0, 0.6 ] },
+          { "position": [ 0.0, 0.3, 0.0 ] }
         ]
       }
     }

@@ -2,22 +2,12 @@
   "format_version": "1.8.0",
   "render_controllers": {
     "controller.render.b": {
-      "arrays": {
-        "textures": {
-          "Array.pc_skins": [
-            "Texture.default",
-            "Texture.preset1", "Texture.preset2", "Texture.preset3", "Texture.preset4",
-            "Texture.preset5", "Texture.preset6", "Texture.preset7", "Texture.preset8",
-            "Texture.preset9", "Texture.preset10", "Texture.preset11", "Texture.preset12"
-          ]
-        }
-      },
       "geometry": "Geometry.b",
       "materials": [ { "*": "Material.default" } ],
-      "textures": [ "Array.pc_skins[math.floor(query.scoreboard('pc_state') / 10)]" ],
+      "textures": [ "Texture.default" ],
       "part_visibility": [
         { "b": true },
-        { "bone2": true },
+        { "bone": true },
         { "toplayer": true }
       ]
     }
