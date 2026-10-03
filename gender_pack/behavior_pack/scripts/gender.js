@@ -77,12 +77,12 @@ const chestAnim = (sex, rot) => (sex > 0 ? `animation.pcraftrevorn.chest.size${M
 // A huge blend-out time keeps the played animation from fading back to the
 // default pose (otherwise the chest flickers between the chosen size and size 3).
 const PERSIST_BLEND = 999999;
-function playAnim(entity, anim) {
+function playAnim(entity, anim, controller) {
   try {
-    entity.playAnimation(anim, { players: world.getAllPlayers(), blendOutTime: PERSIST_BLEND });
+    entity.playAnimation(anim, { players: world.getAllPlayers(), blendOutTime: PERSIST_BLEND, controller });
     return;
   } catch { /* fall through */ }
-  try { entity.runCommand(`playanimation @s ${anim} none ${PERSIST_BLEND}`); } catch { /* ignore */ }
+  try { entity.runCommand(`playanimation @s ${anim} none ${PERSIST_BLEND} "0" ${controller}`); } catch { /* ignore */ }
 }
 // Chest rotation angle (0..4), stored per player; applied on top of the size.
 const CHEST_ROT_PROP = "pcraftrevorn:chest_rot";
@@ -97,7 +97,7 @@ function setRot(player, n) {
 function applyChest(player, state) {
   const st = typeof state === "number" ? state : getState(player);
   const sex = FORCE_CHEST === null ? sexOf(st) : FORCE_CHEST;
-  playAnim(player, chestAnim(sex, getRot(player)));
+  playAnim(player, chestAnim(sex, getRot(player)), "pcraftrevorn:chest");
 }
 // The belly mesh is owned by this pack, but VCraft shows/hides it via pc_belly.
 // Keep it flat unless VCraft is showing it (score <= 0 / objective missing), so a
@@ -109,7 +109,7 @@ function ensureBelly(player) {
     const s = o?.getScore(player.scoreboardIdentity);
     if (typeof s === "number") n = s;
   } catch { /* ignore */ }
-  if (n <= 0) playAnim(player, "animation.vcraft.belly.off");
+  if (n <= 0) playAnim(player, "animation.vcraft.belly.off", "pcraftrevorn:belly");
 }
 
 // ---- Belly (owned by this pack) -------------------------------------------

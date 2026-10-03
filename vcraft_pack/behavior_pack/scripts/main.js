@@ -8,6 +8,7 @@ import { world, system, DisplaySlotId, CommandPermissionLevel, CustomCommandStat
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 
 const GUT_ENTITY = "vcraft:gut";
+const MAW_ITEM = "vcraft:maw";   // hold + right-click to swallow what you aim at
 const GUT_PROP = "vcraft:gut";   // player dynamic property -> gut entity id
 const BELLY_OBJ = "pc_belly";    // 0..2
 const MAX_PREY = 5;
@@ -41,9 +42,11 @@ function objective() {
 const BELLY_ANIM = ["animation.vcraft.belly.off", "animation.vcraft.belly.small", "animation.vcraft.belly.big"];
 const lastBelly = new Map();
 function playAnim(entity, anim) {
-  // Server-side only: client Molang can't read scoreboards here. Prefer the API.
-  try { entity.playAnimation(anim, { players: world.getAllPlayers(), blendOutTime: 999999 }); return; } catch { /* fallthrough */ }
-  try { entity.runCommand(`playanimation @s ${anim} none 999999`); } catch { /* ignore */ }
+  // Server-side only: client Molang can't read scoreboards here. Use a dedicated
+  // controller so the belly animation stacks on top of the gender pack's chest
+  // animation instead of replacing it (one animation per controller).
+  try { entity.playAnimation(anim, { players: world.getAllPlayers(), blendOutTime: 999999, controller: "pcraftrevorn:belly" }); return; } catch { /* fallthrough */ }
+  try { entity.runCommand(`playanimation @s ${anim} none 999999 "0" pcraftrevorn:belly`); } catch { /* ignore */ }
 }
 function applyBelly(player, n) {
   const idx = Math.max(0, Math.min(2, n | 0));
@@ -77,6 +80,13 @@ function riders(gut) {
 }
 function isDead(e) {
   try { const hp = e.getComponent("minecraft:health"); return !!hp && hp.currentValue <= 0; } catch { return false; }
+}
+// True if the player is sneaking, read from both the entity state and the raw
+// input state (isSneaking can read false during the interact event).
+function sneakPressed(player) {
+  try { if (player.isSneaking) return true; } catch { /* ignore */ }
+  try { return String(player.inputInfo.getButtonState("Sneak")) === "Pressed"; } catch { /* ignore */ }
+  return false;
 }
 function aliveRiders(gut) {
   return riders(gut).filter((r) => !isDead(r));
@@ -246,8 +256,27 @@ function swallow(player, target) {
   player.sendMessage(`§d[VCraft] 吞入 §f${target.typeId.replace("minecraft:", "")}§d。`);
 }
 
-function digestTick() {
-  for (const player of world.getAllPlayers()) {
+function lookTarget(player, dist) {
+  try {
+    const hits = player.getEntitiesFromViewDirection({ maxDistance: dist });
+    for (const h of hits) {
+      const e = h?.entity;
+      if (e && e.id !== player.id && e.typeId !== GUT_ENTITY) return e;
+    }
+  } catch { /* ignore */ }
+  return undefined;
+}
+// Hold vcraft:maw and right-click to swallow whatever you are aiming at.
+function trySwallow(player) {
+  if (!player || player.typeId !== "minecraft:player") return;
+  const target = lookTarget(player, 5);
+  if (!target) { player.sendMessage("§7[VCraft] 没有对准可以吞的生物。"); return; }
+  if (target.typeId === "minecraft:player") { swallowPlayer(player, target); return; }
+  if (isPreyCandidate(target, player)) swallow(player, target);
+  else player.sendMessage("§7[VCraft] 这个目标不能吞。");
+}
+
+function digestTick() {  for (const player of world.getAllPlayers()) {
     const gut = getGut(player);
     if (!gut) continue;
     if (!cfgGet(player, CFG.digest, true)) continue;
@@ -458,7 +487,6 @@ export function wireVcraft() {
   // /playanimation state resets on respawn / relog; drop the cache so it re-applies.
   world.afterEvents.playerSpawn.subscribe((ev) => { lastBelly.delete(ev.player.id); });
   world.afterEvents.playerLeave.subscribe((ev) => { lastBelly.delete(ev.playerId); });
-
   // Custom commands: /vcraft:swallow, /vcraft:release, /vcraft:prey
   // Wrapped so a missing custom-command API can't abort the chat handler below.
   try {
@@ -536,14 +564,19 @@ export function wireVcraft() {
   // Player-as-prey struggle/digest.
   system.runInterval(playerPreyTick, 1);
 
-  // In-game trigger: sneak + right-click a creature to swallow it.
-  world.afterEvents.playerInteractWithEntity.subscribe((ev) => {
-    const player = ev.player;
-    const target = ev.target;
-    if (!player || !target || !player.isSneaking) return;
-    if (target.typeId === "minecraft:player") { swallowPlayer(player, target); return; }
-    if (isPreyCandidate(target, player)) swallow(player, target);
-  });
+  // In-game trigger: hold vcraft:maw and right-click to swallow what you aim at.
+  // itemUse covers right-click with the item; playerInteractWithEntity covers
+  // right-clicking a creature directly.
+  try {
+    world.afterEvents.itemUse.subscribe((ev) => {
+      try { if (ev.itemStack?.typeId === MAW_ITEM) trySwallow(ev.source); } catch { /* ignore */ }
+    });
+  } catch { /* itemUse unavailable */ }
+  try {
+    world.afterEvents.playerInteractWithEntity.subscribe((ev) => {
+      try { if (ev.itemStack?.typeId === MAW_ITEM) trySwallow(ev.player); } catch { /* ignore */ }
+    });
+  } catch { /* playerInteractWithEntity unavailable */ }
 
   // Cleanup when a player dies.
   world.afterEvents.entityDie.subscribe((ev) => {

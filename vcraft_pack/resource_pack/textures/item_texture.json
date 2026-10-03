@@ -2,11 +2,26 @@
   "resource_pack_name": "vcraft",
   "texture_name": "atlas.items",
   "texture_data": {
-    "vcraft_acid_ring": { "textures": "textures/vcraft/items/acid_ring" },
-    "vcraft_expansion_ring": { "textures": "textures/vcraft/items/expansion_ring" },
-    "vcraft_wither_pendant": { "textures": "textures/vcraft/items/wither_pendant" },
-    "vcraft_maxima": { "textures": "textures/vcraft/items/maxima" },
-    "vcraft_creativa": { "textures": "textures/vcraft/items/creativa" },
-    "vcraft_bone_bits": { "textures": "textures/vcraft/items/bone_bits" }
+    "vcraft_acid_ring": {
+      "textures": "textures/vcraft/items/acid_ring"
+    },
+    "vcraft_expansion_ring": {
+      "textures": "textures/vcraft/items/expansion_ring"
+    },
+    "vcraft_wither_pendant": {
+      "textures": "textures/vcraft/items/wither_pendant"
+    },
+    "vcraft_maxima": {
+      "textures": "textures/vcraft/items/maxima"
+    },
+    "vcraft_creativa": {
+      "textures": "textures/vcraft/items/creativa"
+    },
+    "vcraft_bone_bits": {
+      "textures": "textures/vcraft/items/bone_bits"
+    },
+    "vcraft_maw": {
+      "textures": "textures/vcraft/items/maw"
+    }
   }
 }

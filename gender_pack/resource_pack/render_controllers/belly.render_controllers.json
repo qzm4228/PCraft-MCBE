@@ -1,23 +1,11 @@
 {
   "format_version": "1.10.0",
   "render_controllers": {
-    "controller.render.vcraft_belly1": {
+    "controller.render.vcraft_belly": {
       "geometry": "Geometry.vcraft_belly",
       "materials": [ { "*": "Material.default" } ],
       "textures": [ "Texture.vcraft_belly" ],
-      "part_visibility": [
-        { "*": false },
-        { "vore1": true }
-      ]
-    },
-    "controller.render.vcraft_belly2": {
-      "geometry": "Geometry.vcraft_belly",
-      "materials": [ { "*": "Material.default" } ],
-      "textures": [ "Texture.vcraft_belly" ],
-      "part_visibility": [
-        { "*": false },
-        { "vore2": true }
-      ]
+      "part_visibility": [ { "*": true } ]
     }
   }
 }
