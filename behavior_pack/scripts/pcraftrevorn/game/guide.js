@@ -16,15 +16,15 @@ const NAMES = {
   piglin_royal_knight: "猪灵王骑士"
 };
 const LORE = {
-  basaltmite: "生活在下界玄武岩三角洲，能开采远古残骸，可喂食下界矿石驯养。",
-  gilded_basaltmite: "玄武岩虫的鎏金变种，可从矿石提炼黄金，可用金苹果取信。",
-  silverfish: "蠹虫的变异体，可从岩石中为你提取矿石。",
-  vinemaiden: "埋伏型掠食者，白天埋在地下，夜晚狩猎，可被驯服。",
-  zombie: "放弃追逐大脑，转而整只吞噬猎物的贪婪僵尸。",
-  scarecrow: "白天守护田地、加速周围作物生长，夜间外出狩猎。",
-  rabbit_wizard: "村庄的忠诚守护者，可用金胡萝卜赢得信任。",
-  piglin_royal: "贪婪的猪灵王者，尊重力量的象征，可与它交易。",
-  piglin_royal_knight: "猪灵王的卫兵，可用猪灵王护符赠予成为你的护卫。"
+  basaltmite: "住下界玄武岩三角洲的小矿工，闻到远古残骸就走不动路。喂几块矿石，它就把你当自己人。",
+  gilded_basaltmite: "玄武岩虫的金光闪闪版，能把矿石变成黄金。递个金苹果，它立马对你摇尾巴。",
+  silverfish: "从石头缝里钻出来的小家伙，会帮你把矿石叼出来。个头小，肚子可不小。",
+  vinemaiden: "白天把自己埋进土里装植物，天黑了才出来觅食。想跟她做朋友？多带点心，别站太近。",
+  zombie: "脑子？早就吃腻了。现在的它，连人带骨头囫囵吞下去。",
+  scarecrow: "白天下地干活，让周围作物蹭蹭长；太阳一落山，就换它出去觅食。",
+  rabbit_wizard: "村庄的老守卫，脾气有点傲。金胡萝卜是它的软肋。",
+  piglin_royal: "贪得无厌的猪灵之王。谁拳头硬它敬谁，也能坐下来跟你做买卖。",
+  piglin_royal_knight: "猪灵王的贴身护卫。递上猪灵王护符，它就跟着你走。"
 };
 
 Object.assign(NAMES, COMMUNITY.names ?? {});
@@ -35,7 +35,7 @@ export async function openGuide(player) {
   while (true) {
     const res = await showPcForm(player, {
       title: "掠食者指南",
-      body: "§7选择一种掠食者查看信息。",
+      body: "§7点一个名字，瞧瞧它是谁、爱吃什么、怎么哄。",
       level: 0,
       buttons: PRED_ORDER.map((id) => ({ id, label: `§f${NAMES[id]}` })).concat([{ id: "__options", label: "§b选项" }, { id: "__close", label: "§a关闭" }])
     });
@@ -47,7 +47,7 @@ export async function openGuide(player) {
 
 async function openDetail(player, id) {
   const variants = Object.keys(SKINS[id] || {}).length;
-  const body = [`§7名称：§f${NAMES[id]}`, `§7贴图变体：§f${variants}`, "", `§8${LORE[id] ?? ""}`].join("\n");
+  const body = [`§7名字：§f${NAMES[id]}`, `§7外观款式：§f${variants}`, "", `§8${LORE[id] ?? ""}`].join("\n");
   await showPcForm(player, {
     title: NAMES[id],
     body,

@@ -262,17 +262,17 @@ export const COMMUNITY = {
     "eevee_zombie": "火伊布"
   },
   "lore": {
-    "cathyl_rabbit": "受委托重制的兔法师，外观与原版截然不同，仍是掠食者。",
-    "plant_maiden": "藤娘的植物化变体，依然会埋伏与吞食。",
-    "lamia": "取代僵尸的蛇身掠食者，拥有多套装饰外观。",
-    "predatopia_v2": "Predatopia 多掠食者包 V2 —— 由僵娘换皮而来的独立掠食者。",
-    "predatopia": "Predatopia 多掠食者包 —— 由僵娘换皮而来的独立掠食者。",
-    "piglin_dragon": "PCraft 原版里被替换成“龙娘”的猪灵王模型，独立出来的掠食者。",
-    "eevee_rabbit": "紫色宝可梦 · 太阳伊布（Espeon）——换皮的兔法师掠食者。",
-    "eevee_scarecrow": "青蓝色宝可梦 · 水伊布（Vaporeon）——换皮的稻草人掠食者。",
-    "eevee_silverfish": "黑色宝可梦 · 月亮伊布（Umbreon）——换皮的吞食蠹虫掠食者。",
-    "eevee_vinemaiden": "黄色宝可梦 · 雷伊布（Jolteon）——换皮的藤娘掠食者。",
-    "eevee_zombie": "橙红色宝可梦 · 火伊布（Flareon）——换皮的吞食僵尸掠食者。"
+    "cathyl_rabbit": "沉稳从容的牧场大姐姐，轻声细语、气场十足。对她客气点——她可是会把你请进肚子里“做客”的。",
+    "plant_maiden": "一株会呼吸、会埋伏的食人植物。靠近它的人，最后都成了养分。",
+    "lamia": "半人半蛇的埋伏者，最爱装饰自己的尾巴。别盯着她的花纹看太久。",
+    "predatopia_v2": "游荡在水边的人鱼掠食者。歌声很好听，下场可不太好。",
+    "predatopia": "一只傲娇又挑食的猫系掠食者，胃口却不小。",
+    "piglin_dragon": "一头脾气火爆的龙娘。谁惹她，谁就进她肚子。",
+    "eevee_rabbit": "紫色阳光下的宝石猎人。温柔是伪装，獠牙是真的。",
+    "eevee_scarecrow": "青蓝色的水畔精灵，看着无害，靠近才知道什么叫做“水很深”。",
+    "eevee_silverfish": "月下的黑猫精灵，安静、敏锐，专挑落单的你下手。",
+    "eevee_vinemaiden": "黄色电光精灵，脾气比雷还快。别惹它。",
+    "eevee_zombie": "橙红色的火精灵，浑身暖烘烘——直到它决定把你当晚饭。"
   },
   "predatorIds": [
     "cathyl_rabbit",
