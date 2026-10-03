@@ -121,13 +121,12 @@
         "player_preview": {
           "type": "custom",
           "renderer": "paper_doll_renderer",
-          "layer": 1,
+          "layer": 2,
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [ 10, 30 ],
           "size": [ 64, 110 ],
-          "use_selected_skin": false,
-          "use_player_paperdoll": true,
+          "use_selected_skin": true,
           "use_skin_gui_scale": true
         }
       },
