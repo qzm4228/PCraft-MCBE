@@ -1,13 +1,13 @@
 {
   "format_version": 2,
   "header": {
-    "name": "PCraftRevorn 性别包 资源 §2砂墨§r §7· 261003-beta-3",
+    "name": "PCraftRevorn 性别包 资源 §2砂墨§r §7· 261004-beta-2",
     "description": "让每个人都能有自己独一无二的样子：性别、体型，还有那点小细节。你设好，别人也看得见。",
     "uuid": "1e2d3c4b-5a69-4877-9a8b-0123456789ab",
     "version": [
-      261003,
+      261004,
       0,
-      3
+      2
     ],
     "min_engine_version": [
       1,
@@ -20,9 +20,9 @@
       "type": "resources",
       "uuid": "2f3e4d5c-6b70-4988-ab9c-123456789abc",
       "version": [
-        261003,
+        261004,
         0,
-        3
+        2
       ]
     }
   ],
