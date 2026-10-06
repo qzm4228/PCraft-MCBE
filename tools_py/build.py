@@ -22,8 +22,8 @@ DIST = ROOT / "dist"
 PACKS = [
     ("PCraftRevorn_BP", ROOT / "behavior_pack"),
     ("PCraftRevorn_RP", ROOT / "resource_pack"),
-    ("PCraftRevornGender_BP", ROOT / "gender_pack" / "behavior_pack"),
-    ("PCraftRevornGender_RP", ROOT / "gender_pack" / "resource_pack"),
+    ("FemaleGenderMod_BP", ROOT / "gender_pack" / "behavior_pack"),
+    ("FemaleGenderMod_RP", ROOT / "gender_pack" / "resource_pack"),
     ("VCraft_BP", ROOT / "vcraft_pack" / "behavior_pack"),
     ("VCraft_RP", ROOT / "vcraft_pack" / "resource_pack"),
 ]

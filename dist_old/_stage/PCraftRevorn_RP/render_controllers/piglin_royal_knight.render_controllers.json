@@ -1,0 +1,94 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.pcraftrevorn.piglin_royal_knight": {
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.skin0",
+            "Texture.skin1",
+            "Texture.skin2",
+            "Texture.skin3",
+            "Texture.skin4",
+            "Texture.skin5",
+            "Texture.skin6",
+            "Texture.skin7",
+            "Texture.skin8",
+            "Texture.skin9",
+            "Texture.skin10",
+            "Texture.skin11",
+            "Texture.skin12",
+            "Texture.skin13",
+            "Texture.skin14",
+            "Texture.skin15",
+            "Texture.skin16",
+            "Texture.skin17",
+            "Texture.skin18",
+            "Texture.skin19",
+            "Texture.skin20",
+            "Texture.skin21",
+            "Texture.skin22",
+            "Texture.skin23",
+            "Texture.skin24",
+            "Texture.skin25",
+            "Texture.skin26",
+            "Texture.skin27",
+            "Texture.skin28",
+            "Texture.skin29",
+            "Texture.skin30",
+            "Texture.skin31",
+            "Texture.skin32",
+            "Texture.skin33",
+            "Texture.skin34",
+            "Texture.skin35",
+            "Texture.skin36",
+            "Texture.skin37",
+            "Texture.skin38",
+            "Texture.skin39",
+            "Texture.skin40",
+            "Texture.skin41",
+            "Texture.skin42",
+            "Texture.skin43",
+            "Texture.skin44",
+            "Texture.skin45",
+            "Texture.skin46",
+            "Texture.skin47",
+            "Texture.skin48",
+            "Texture.skin49",
+            "Texture.skin50",
+            "Texture.skin51",
+            "Texture.skin52",
+            "Texture.skin53",
+            "Texture.skin54",
+            "Texture.skin55",
+            "Texture.skin56",
+            "Texture.skin57",
+            "Texture.skin58",
+            "Texture.skin59",
+            "Texture.skin60",
+            "Texture.skin61",
+            "Texture.skin62",
+            "Texture.skin63",
+            "Texture.skin64",
+            "Texture.skin65",
+            "Texture.skin66",
+            "Texture.skin67",
+            "Texture.skin68",
+            "Texture.skin69",
+            "Texture.skin70",
+            "Texture.skin71"
+          ]
+        }
+      },
+      "textures": [
+        "Array.skins[q.property('pcraftrevorn:skin')]"
+      ]
+    }
+  }
+}

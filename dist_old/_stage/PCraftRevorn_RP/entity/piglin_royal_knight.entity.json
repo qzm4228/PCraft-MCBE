@@ -1,0 +1,123 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:piglin_royal_knight",
+      "min_engine_version": "1.8.0",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor0",
+        "skin1": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor0_belly",
+        "skin2": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor0_wg",
+        "skin3": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor0_wg2",
+        "skin4": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor0_wg2_belly",
+        "skin5": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor0_wg_belly",
+        "skin6": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor1",
+        "skin7": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor1_belly",
+        "skin8": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor1_wg",
+        "skin9": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor1_wg2",
+        "skin10": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor1_wg2_belly",
+        "skin11": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor1_wg_belly",
+        "skin12": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor2",
+        "skin13": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor2_belly",
+        "skin14": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor2_wg",
+        "skin15": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor2_wg2",
+        "skin16": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor2_wg2_belly",
+        "skin17": "textures/entity/pcraftrevorn/piglin_royal_knight_female0_armor2_wg_belly",
+        "skin18": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor0",
+        "skin19": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor0_belly",
+        "skin20": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor0_wg",
+        "skin21": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor0_wg2",
+        "skin22": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor0_wg2_belly",
+        "skin23": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor0_wg_belly",
+        "skin24": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor1",
+        "skin25": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor1_belly",
+        "skin26": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor1_wg",
+        "skin27": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor1_wg2",
+        "skin28": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor1_wg2_belly",
+        "skin29": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor1_wg_belly",
+        "skin30": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor2",
+        "skin31": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor2_belly",
+        "skin32": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor2_wg",
+        "skin33": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor2_wg2",
+        "skin34": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor2_wg2_belly",
+        "skin35": "textures/entity/pcraftrevorn/piglin_royal_knight_female1_armor2_wg_belly",
+        "skin36": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor0",
+        "skin37": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor0_belly",
+        "skin38": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor0_wg",
+        "skin39": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor0_wg2",
+        "skin40": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor0_wg2_belly",
+        "skin41": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor0_wg_belly",
+        "skin42": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor1",
+        "skin43": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor1_belly",
+        "skin44": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor1_wg",
+        "skin45": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor1_wg2",
+        "skin46": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor1_wg2_belly",
+        "skin47": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor1_wg_belly",
+        "skin48": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor2",
+        "skin49": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor2_belly",
+        "skin50": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor2_wg",
+        "skin51": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor2_wg2",
+        "skin52": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor2_wg2_belly",
+        "skin53": "textures/entity/pcraftrevorn/piglin_royal_knight_male0_armor2_wg_belly",
+        "skin54": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor0",
+        "skin55": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor0_belly",
+        "skin56": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor0_wg",
+        "skin57": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor0_wg2",
+        "skin58": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor0_wg2_belly",
+        "skin59": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor0_wg_belly",
+        "skin60": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor1",
+        "skin61": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor1_belly",
+        "skin62": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor1_wg",
+        "skin63": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor1_wg2",
+        "skin64": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor1_wg2_belly",
+        "skin65": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor1_wg_belly",
+        "skin66": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor2",
+        "skin67": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor2_belly",
+        "skin68": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor2_wg",
+        "skin69": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor2_wg2",
+        "skin70": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor2_wg2_belly",
+        "skin71": "textures/entity/pcraftrevorn/piglin_royal_knight_male1_armor2_wg_belly"
+      },
+      "geometry": {
+        "default": "geometry.piglin_royal_knight"
+      },
+      "animations": {
+        "swallow": "animation.piglin_royal_knight.swallow",
+        "struggleup": "animation.piglin_royal_knight.struggleup",
+        "struggledown": "animation.piglin_royal_knight.struggledown",
+        "struggleleft": "animation.piglin_royal_knight.struggleleft",
+        "struggleright": "animation.piglin_royal_knight.struggleright",
+        "struggleupleft": "animation.piglin_royal_knight.struggleupleft",
+        "struggledownleft": "animation.piglin_royal_knight.struggledownleft",
+        "struggleupright": "animation.piglin_royal_knight.struggleupright",
+        "struggledownright": "animation.piglin_royal_knight.struggledownright",
+        "struggleupdown": "animation.piglin_royal_knight.struggleupdown",
+        "struggleleftright": "animation.piglin_royal_knight.struggleleftright",
+        "strugglefail": "animation.piglin_royal_knight.strugglefail",
+        "idle": "animation.piglin_royal_knight.idle",
+        "digest": "animation.piglin_royal_knight.digest",
+        "walk": "animation.piglin_royal_knight.walk",
+        "attack": "animation.piglin_royal_knight.attack"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "idle": "1.0 - math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walk": "math.min(1.0, query.modified_move_speed * 4.0)"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.piglin_royal_knight"
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_piglin_royal_knight_spawn_egg"
+      }
+    }
+  }
+}

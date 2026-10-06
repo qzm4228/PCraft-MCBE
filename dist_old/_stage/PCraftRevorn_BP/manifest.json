@@ -1,0 +1,66 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "PCraftRevorn §2砂墨§r §7· 261003-beta-3",
+    "description": "掠食工艺 Bedrock 移植 · 二次修改作品 · 作者 砂墨SandMo（Bilibili: 砂墨）· 原创模组 MysticSummoner · 详见 README.txt",
+    "uuid": "b6f5c2a1-7d3e-4a91-9c2f-1a2b3c4d5e6f",
+    "version": [
+      261003,
+      0,
+      3
+    ],
+    "min_engine_version": [
+      1,
+      21,
+      100
+    ]
+  },
+  "modules": [
+    {
+      "type": "data",
+      "uuid": "c7e6d3b2-8e4f-4ba2-8d3e-2b3c4d5e6f70",
+      "version": [
+        261003,
+        0,
+        3
+      ]
+    },
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "d8f7e4c3-9f50-4cb3-9e4f-3c4d5e6f7081",
+      "entry": "scripts/main.js",
+      "version": [
+        261003,
+        0,
+        3
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "uuid": "e9a8f5d4-a061-4dc4-af50-4d5e6f708192",
+      "version": [
+        261003,
+        0,
+        3
+      ]
+    },
+    {
+      "module_name": "@minecraft/server",
+      "version": "2.0.0"
+    },
+    {
+      "module_name": "@minecraft/server-ui",
+      "version": "2.0.0"
+    }
+  ],
+  "metadata": {
+    "authors": [
+      "砂墨SandMo",
+      "Bilibili: 砂墨",
+      "原创: MysticSummoner"
+    ],
+    "license": "AFL-3.0"
+  }
+}

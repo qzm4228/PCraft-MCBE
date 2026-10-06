@@ -1,0 +1,11 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.vcraft_belly": {
+      "geometry": "Geometry.vcraft_belly",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Texture.vcraft_belly" ],
+      "part_visibility": [ { "*": true } ]
+    }
+  }
+}

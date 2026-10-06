@@ -1,0 +1,19 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:item": {
+    "description": {
+      "identifier": "pcraftrevorn:sugar_neutralizing_water",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:icon": {
+        "textures": {
+          "default": "pcraftrevorn_sugar_neutralizing_water"
+        }
+      },
+      "minecraft:max_stack_size": 1
+    }
+  }
+}

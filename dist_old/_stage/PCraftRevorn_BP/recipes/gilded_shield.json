@@ -1,0 +1,31 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "pcraftrevorn:gilded_shield"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "aaa",
+      "bcb",
+      " c "
+    ],
+    "key": {
+      "a": {
+        "item": "pcraftrevorn:gilded_basaltmite_scale"
+      },
+      "b": {
+        "item": "minecraft:leather"
+      },
+      "c": {
+        "tag": "pcraftrevorn:basaltmite_scale"
+      }
+    },
+    "result": {
+      "item": "pcraftrevorn:gilded_shield",
+      "count": 1
+    }
+  }
+}

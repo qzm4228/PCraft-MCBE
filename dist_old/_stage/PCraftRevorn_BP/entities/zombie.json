@@ -1,0 +1,180 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "pcraftrevorn:zombie",
+      "is_spawnable": true,
+      "is_summonable": true,
+      "properties": {
+        "pcraftrevorn:skin": {
+          "type": "int",
+          "range": [
+            0,
+            61
+          ],
+          "default": 0,
+          "client_sync": true
+        },
+        "pcraftrevorn:set": {
+          "type": "int",
+          "range": [
+            0,
+            1
+          ],
+          "default": 0,
+          "client_sync": true
+        }
+      }
+    },
+    "component_groups": {
+      "pcraftrevorn:aggressive": {
+        "minecraft:behavior.melee_attack": {
+          "priority": 1,
+          "speed_multiplier": 1.2
+        },
+        "minecraft:behavior.hurt_by_target": {
+          "priority": 2
+        },
+        "minecraft:behavior.nearest_attackable_target": {
+          "priority": 3,
+          "must_see": true,
+          "reselect_targets": true,
+          "within_radius": 35,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "player"
+              },
+              "max_dist": 35
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "villager"
+              },
+              "max_dist": 35
+            }
+          ]
+        }
+      },
+      "pcraftrevorn:prey_holder": {
+        "minecraft:rideable": {
+          "seat_count": 1,
+          "family_types": [
+            "player"
+          ],
+          "seats": [
+            {
+              "position": [
+                0,
+                0,
+                0
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": [
+          "zombie",
+          "predator",
+          "undead",
+          "monster"
+        ]
+      },
+      "minecraft:health": {
+        "value": 20,
+        "max": 20
+      },
+      "minecraft:movement": {
+        "value": 0.23
+      },
+      "minecraft:navigation.walk": {
+        "can_path_over_water": true,
+        "avoid_water": true
+      },
+      "minecraft:movement.basic": {},
+      "minecraft:jump.static": {},
+      "minecraft:physics": {},
+      "minecraft:collision_box": {
+        "width": 0.6,
+        "height": 1.8
+      },
+      "minecraft:pushable": {
+        "is_pushable": true,
+        "is_pushable_by_piston": true
+      },
+      "minecraft:breathable": {
+        "total_supply": 15,
+        "suffocate_time": 0
+      },
+      "minecraft:nameable": {},
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "cause": "fall",
+            "deals_damage": false
+          }
+        ]
+      },
+      "minecraft:attack": {
+        "damage": 3
+      },
+      "minecraft:follow_range": {
+        "value": 35,
+        "max": 35
+      },
+      "minecraft:behavior.float": {
+        "priority": 0
+      },
+      "minecraft:behavior.random_stroll": {
+        "priority": 4,
+        "speed_multiplier": 1
+      },
+      "minecraft:behavior.random_look_around": {
+        "priority": 5
+      },
+      "minecraft:loot": {
+        "table": "loot_tables/entities/zombie.json"
+      }
+    },
+    "events": {
+      "minecraft:entity_spawned": {
+        "add": {
+          "component_groups": [
+            "pcraftrevorn:aggressive"
+          ]
+        }
+      },
+      "pcraftrevorn:on_swallow": {
+        "remove": {
+          "component_groups": [
+            "pcraftrevorn:aggressive"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "pcraftrevorn:prey_holder"
+          ]
+        }
+      },
+      "pcraftrevorn:on_release": {
+        "add": {
+          "component_groups": [
+            "pcraftrevorn:aggressive"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "pcraftrevorn:prey_holder"
+          ]
+        }
+      }
+    }
+  }
+}

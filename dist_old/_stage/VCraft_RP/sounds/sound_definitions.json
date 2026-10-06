@@ -1,0 +1,24 @@
+{
+  "format_version": "1.14.0",
+  "sound_definitions": {
+    "vcraft.swallow": {
+      "category": "player",
+      "sounds": [ { "name": "sounds/vcraft/swallow" } ]
+    },
+    "vcraft.struggle": {
+      "category": "player",
+      "sounds": [
+        { "name": "sounds/vcraft/struggle_1" },
+        { "name": "sounds/vcraft/struggle_2" },
+        { "name": "sounds/vcraft/struggle_3" }
+      ]
+    },
+    "vcraft.burp": {
+      "category": "player",
+      "sounds": [
+        { "name": "sounds/vcraft/burp_1" },
+        { "name": "sounds/vcraft/burp_2" }
+      ]
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "pcraftrevorn:gold_bm_rec"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "aba",
+      "bcb",
+      "aba"
+    ],
+    "key": {
+      "a": {
+        "item": "minecraft:gold_nugget"
+      },
+      "b": {
+        "item": "minecraft:gold_ingot"
+      },
+      "c": {
+        "item": "minecraft:bone_meal"
+      }
+    },
+    "result": {
+      "item": "pcraftrevorn:golden_bone_meal",
+      "count": 1
+    }
+  }
+}

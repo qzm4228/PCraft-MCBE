@@ -1,0 +1,72 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "vcraft:gut",
+      "is_spawnable": false,
+      "is_summonable": true
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": [ "vcraft_gut" ]
+      },
+      "minecraft:health": {
+        "value": 100,
+        "max": 100
+      },
+      "minecraft:collision_box": {
+        "width": 0,
+        "height": 0
+      },
+      "minecraft:physics": {
+        "has_gravity": false,
+        "has_collision": false
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:fire_immune": {},
+      "minecraft:persistent": {},
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "on_damage": { "filters": { "test": "always", "value": true } },
+            "deals_damage": false
+          }
+        ]
+      },
+      "minecraft:rideable": {
+        "seat_count": 20,
+        "family_types": [
+          "player", "mob", "animal", "monster", "undead", "arthropod", "illager",
+          "piglin", "zombie", "skeleton", "creeper", "spider", "villager_v2",
+          "villager", "raider", "hoglin", "aquatic", "fish", "water_animal",
+          "amphibious"
+        ],
+        "seats": [
+          { "position": [ 0.0, 0.0, 0.0 ] },
+          { "position": [ 0.3, 0.0, 0.0 ] },
+          { "position": [ -0.3, 0.0, 0.0 ] },
+          { "position": [ 0.0, 0.0, 0.3 ] },
+          { "position": [ 0.0, 0.0, -0.3 ] },
+          { "position": [ 0.3, 0.0, 0.3 ] },
+          { "position": [ -0.3, 0.0, 0.3 ] },
+          { "position": [ 0.3, 0.0, -0.3 ] },
+          { "position": [ -0.3, 0.0, -0.3 ] },
+          { "position": [ 0.6, 0.0, 0.0 ] },
+          { "position": [ -0.6, 0.0, 0.0 ] },
+          { "position": [ 0.0, 0.0, 0.6 ] },
+          { "position": [ 0.0, 0.0, -0.6 ] },
+          { "position": [ 0.6, 0.0, 0.3 ] },
+          { "position": [ -0.6, 0.0, 0.3 ] },
+          { "position": [ 0.6, 0.0, -0.3 ] },
+          { "position": [ -0.6, 0.0, -0.3 ] },
+          { "position": [ 0.3, 0.0, 0.6 ] },
+          { "position": [ -0.3, 0.0, 0.6 ] },
+          { "position": [ 0.0, 0.3, 0.0 ] }
+        ]
+      }
+    }
+  }
+}

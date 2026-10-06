@@ -1,0 +1,82 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.player.first_person": {
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Texture.default" ],
+      "part_visibility": [
+        { "*": false },
+        { "rightArm": "query.get_equipped_item_name(0, 1) == '' || query.get_equipped_item_name(0, 1) == 'filled_map'" },
+        { "rightSleeve": "query.get_equipped_item_name(0, 1) == '' || query.get_equipped_item_name(0, 1) == 'filled_map'" },
+        { "leftArm": "(query.get_equipped_item_name(0, 1) == 'filled_map' && query.get_equipped_item_name('off_hand') != 'shield') || (query.get_equipped_item_name('off_hand') == 'filled_map' && !query.item_is_charged) || (!query.item_is_charged && (variable.item_use_normalized > 0 && variable.item_use_normalized < 1.0))" },
+        { "leftSleeve": "(query.get_equipped_item_name(0, 1) == 'filled_map' && query.get_equipped_item_name('off_hand') != 'shield') || (query.get_equipped_item_name('off_hand') == 'filled_map' && !query.item_is_charged) || (!query.item_is_charged && (variable.item_use_normalized > 0 && variable.item_use_normalized < 1.0))" }
+      ]
+    },
+
+    "controller.render.player.third_person": {
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Texture.default" ],
+      "part_visibility": [
+        { "*": true },
+        { "helmet": "variable.helmet_layer_visible" },
+        { "leftLegging": "variable.leg_layer_visible" },
+        { "rightLegging": "variable.leg_layer_visible" },
+        { "leftBoot": "variable.boot_layer_visible" },
+        { "rightBoot": "variable.boot_layer_visible" },
+        { "leftSock": "variable.boot_layer_visible && variable.leg_layer_visible" },
+        { "rightSock": "variable.boot_layer_visible && variable.leg_layer_visible" },
+        { "bodyArmor": "variable.chest_layer_visible && !query.has_cape" },
+        { "leftArmArmor": "variable.chest_layer_visible && !query.has_cape" },
+        { "rightArmArmor": "variable.chest_layer_visible && !query.has_cape" },
+        { "belt": "variable.chest_layer_visible && variable.leg_layer_visible" }
+      ]
+    },
+
+    "controller.render.player.first_person_spectator": {
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Texture.default" ],
+      "part_visibility": [
+        { "*": false }
+      ]
+    },
+    "controller.render.player.third_person_spectator": {
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.spectator" } ],
+      "textures": [ "Texture.default" ],
+      "part_visibility": [
+        { "*": false },
+        { "head": true },
+        { "hat": true },
+        { "helmet": "variable.helmet_layer_visible" }
+      ],
+      "color": { "r": "1.0f", "g": "1.0f", "b": "1.0f", "a": "0.3f" }
+    },
+    "controller.render.player.map": {
+      "geometry": "Geometry.default",
+      "materials": [ { "*": "Material.default" } ],
+      "textures": [ "Texture.default" ],
+      "part_visibility": [
+        { "*": false },
+        { "head": true },
+        { "hat": true },
+        { "helmet": true }
+      ]
+    },
+
+    "controller.render.pcskin1":  { "geometry": "Geometry.default", "materials": [ { "*": "Material.default" } ], "textures": [ "Texture.preset1" ],  "part_visibility": [ { "*": true } ] },
+    "controller.render.pcskin2":  { "geometry": "Geometry.default", "materials": [ { "*": "Material.default" } ], "textures": [ "Texture.preset2" ],  "part_visibility": [ { "*": true } ] },
+    "controller.render.pcskin3":  { "geometry": "Geometry.default", "materials": [ { "*": "Material.default" } ], "textures": [ "Texture.preset3" ],  "part_visibility": [ { "*": true } ] },
+    "controller.render.pcskin4":  { "geometry": "Geometry.default", "materials": [ { "*": "Material.default" } ], "textures": [ "Texture.preset4" ],  "part_visibility": [ { "*": true } ] },
+    "controller.render.pcskin5":  { "geometry": "Geometry.default", "materials": [ { "*": "Material.default" } ], "textures": [ "Texture.preset5" ],  "part_visibility": [ { "*": true } ] },
+    "controller.render.pcskin6":  { "geometry": "Geometry.default", "materials": [ { "*": "Material.default" } ], "textures": [ "Texture.preset6" ],  "part_visibility": [ { "*": true } ] },
+    "controller.render.pcskin7":  { "geometry": "Geometry.default", "materials": [ { "*": "Material.default" } ], "textures": [ "Texture.preset7" ],  "part_visibility": [ { "*": true } ] },
+    "controller.render.pcskin8":  { "geometry": "Geometry.default", "materials": [ { "*": "Material.default" } ], "textures": [ "Texture.preset8" ],  "part_visibility": [ { "*": true } ] },
+    "controller.render.pcskin9":  { "geometry": "Geometry.default", "materials": [ { "*": "Material.default" } ], "textures": [ "Texture.preset9" ],  "part_visibility": [ { "*": true } ] },
+    "controller.render.pcskin10": { "geometry": "Geometry.default", "materials": [ { "*": "Material.default" } ], "textures": [ "Texture.preset10" ], "part_visibility": [ { "*": true } ] },
+    "controller.render.pcskin11": { "geometry": "Geometry.default", "materials": [ { "*": "Material.default" } ], "textures": [ "Texture.preset11" ], "part_visibility": [ { "*": true } ] },
+    "controller.render.pcskin12": { "geometry": "Geometry.default", "materials": [ { "*": "Material.default" } ], "textures": [ "Texture.preset12" ], "part_visibility": [ { "*": true } ] }
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "resource_pack_name": "pcraftrevorn",
+  "texture_name": "atlas.items",
+  "texture_data": {
+    "pcraftrevorn_attuned_binding_ring": {
+      "textures": "textures/items/pcraftrevorn/attuned_binding_ring"
+    },
+    "pcraftrevorn_basaltmite_plated_soles": {
+      "textures": "textures/items/pcraftrevorn/basaltmite_plated_soles"
+    },
+    "pcraftrevorn_basaltmite_scale": {
+      "textures": "textures/items/pcraftrevorn/basaltmite_scale"
+    },
+    "pcraftrevorn_bejeweled_upgrade_kit": {
+      "textures": "textures/items/pcraftrevorn/jeweled_upgrade_template"
+    },
+    "pcraftrevorn_carbonated_water_bottle": {
+      "textures": "textures/items/pcraftrevorn/carbonated_water_bottle"
+    },
+    "pcraftrevorn_cupids_arrow": {
+      "textures": "textures/items/pcraftrevorn/cupid_arrow"
+    },
+    "pcraftrevorn_fermented_glowberry_juice_bottle": {
+      "textures": "textures/items/pcraftrevorn/fermented_glowberry_bottle"
+    },
+    "pcraftrevorn_gilded_basaltmite_scale": {
+      "textures": "textures/items/pcraftrevorn/basaltmite_plate_gilded"
+    },
+    "pcraftrevorn_gilded_shield": {
+      "textures": "textures/items/pcraftrevorn/gilded_shield"
+    },
+    "pcraftrevorn_glowberry_juice_bottle": {
+      "textures": "textures/items/pcraftrevorn/glowberry_bottle"
+    },
+    "pcraftrevorn_golden_bone_meal": {
+      "textures": "textures/items/pcraftrevorn/golden_bone_meal"
+    },
+    "pcraftrevorn_golden_piglin_armor_kit": {
+      "textures": "textures/items/pcraftrevorn/golden_piglin_armor_kit"
+    },
+    "pcraftrevorn_hyperdense_porkchop": {
+      "textures": "textures/items/pcraftrevorn/hyperdense_porkchop"
+    },
+    "pcraftrevorn_netherite_piglin_armor_kit": {
+      "textures": "textures/items/pcraftrevorn/netherite_piglin_armor_kit"
+    },
+    "pcraftrevorn_neutralizing_water": {
+      "textures": "textures/items/pcraftrevorn/neutralizing_water_bottle"
+    },
+    "pcraftrevorn_peculiar_mirror": {
+      "textures": "textures/items/pcraftrevorn/peculiar_mirror"
+    },
+    "pcraftrevorn_piglin_might_talisman": {
+      "textures": "textures/items/pcraftrevorn/piglin_might_talisman"
+    },
+    "pcraftrevorn_piglin_royal_talisman": {
+      "textures": "textures/items/pcraftrevorn/piglin_royal_talisman"
+    },
+    "pcraftrevorn_pred_guidebook_item": {
+      "textures": "textures/items/pcraftrevorn/pred_guidebook"
+    },
+    "pcraftrevorn_rabbit_staff": {
+      "textures": "textures/items/pcraftrevorn/rabbit_staff0"
+    },
+    "pcraftrevorn_rabbit_staff_bloodlust": {
+      "textures": "textures/items/pcraftrevorn/rabbit_staff2"
+    },
+    "pcraftrevorn_rabbit_staff_gold": {
+      "textures": "textures/items/pcraftrevorn/rabbit_staff1"
+    },
+    "pcraftrevorn_silverfish_plate": {
+      "textures": "textures/items/pcraftrevorn/silverfish_scale"
+    },
+    "pcraftrevorn_silverfish_plating_helmet": {
+      "textures": "textures/items/pcraftrevorn/silverfish_plating_helmet"
+    },
+    "pcraftrevorn_silverfish_plating_chestplate": {
+      "textures": "textures/items/pcraftrevorn/silverfish_plating_chestplate"
+    },
+    "pcraftrevorn_silverfish_plating_leggings": {
+      "textures": "textures/items/pcraftrevorn/silverfish_plating_leggings"
+    },
+    "pcraftrevorn_silverfish_plating_boots": {
+      "textures": "textures/items/pcraftrevorn/silverfish_plating_boots"
+    },
+    "pcraftrevorn_sugar_glass_bottle": {
+      "textures": "textures/items/pcraftrevorn/sugar_glass_bottle"
+    },
+    "pcraftrevorn_sugar_neutralizing_water": {
+      "textures": "textures/items/pcraftrevorn/neutralizing_sugar_bottle"
+    },
+    "pcraftrevorn_vibrant_elixir": {
+      "textures": "textures/items/pcraftrevorn/vibrant_tonic"
+    },
+    "pcraftrevorn_zombie_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/zombie_spawn_egg"
+    },
+    "pcraftrevorn_piglin_royal_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/piglin_royal_spawn_egg"
+    },
+    "pcraftrevorn_vinemaiden_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/vinemaiden_spawn_egg"
+    },
+    "pcraftrevorn_piglin_royal_knight_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/piglin_royal_knight_spawn_egg"
+    },
+    "pcraftrevorn_silverfish_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/silverfish_spawn_egg"
+    },
+    "pcraftrevorn_basaltmite_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/basaltmite_spawn_egg"
+    },
+    "pcraftrevorn_rabbit_wizard_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/rabbit_wizard_spawn_egg"
+    },
+    "pcraftrevorn_gilded_basaltmite_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/gilded_basaltmite_spawn_egg"
+    },
+    "pcraftrevorn_scarecrow_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/scarecrow_spawn_egg"
+    },
+    "pcraftrevorn_fragrance_potion": {
+      "textures": "textures/items/pcraftrevorn/fragrance_potion"
+    },
+    "pcraftrevorn_stench_potion": {
+      "textures": "textures/items/pcraftrevorn/stench_potion"
+    },
+    "pcraftrevorn_fortitude_potion": {
+      "textures": "textures/items/pcraftrevorn/fortitude_potion"
+    },
+    "pcraftrevorn_pacifying_potion": {
+      "textures": "textures/items/pcraftrevorn/pacifying_potion"
+    },
+    "pcraftrevorn_rotten_stench_potion": {
+      "textures": "textures/items/pcraftrevorn/rotten_stench_potion"
+    },
+    "pcraftrevorn_cathyl_rabbit_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/cathyl_rabbit_spawn_egg"
+    },
+    "pcraftrevorn_plant_maiden_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/plant_maiden_spawn_egg"
+    },
+    "pcraftrevorn_lamia_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/lamia_spawn_egg"
+    },
+    "pcraftrevorn_predatopia_v2_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/predatopia_v2_spawn_egg"
+    },
+    "pcraftrevorn_predatopia_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/predatopia_spawn_egg"
+    },
+    "pcraftrevorn_piglin_dragon_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/piglin_dragon_spawn_egg"
+    },
+    "pcraftrevorn_eevee_rabbit_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/eevee_rabbit_spawn_egg"
+    },
+    "pcraftrevorn_eevee_scarecrow_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/eevee_scarecrow_spawn_egg"
+    },
+    "pcraftrevorn_eevee_silverfish_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/eevee_silverfish_spawn_egg"
+    },
+    "pcraftrevorn_eevee_vinemaiden_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/eevee_vinemaiden_spawn_egg"
+    },
+    "pcraftrevorn_eevee_zombie_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/eevee_zombie_spawn_egg"
+    }
+  }
+}

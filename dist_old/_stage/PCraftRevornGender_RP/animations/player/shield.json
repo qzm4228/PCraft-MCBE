@@ -1,0 +1,17 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.player.shield_off_blocking" : {
+			"loop" : true,
+			"bones" : {
+				"leftarm" : {
+					"rotation" : [ -20.0, 20.0, 20.0 ]
+				},
+				"leftitem" : {
+					"position" : [ "(!variable.fishing_rod ? 1.0 + query.item_is_charged * 1.5)", "(!variable.fishing_rod ? -3.0 + query.item_is_charged)", 0.0 ],
+					"rotation" : [ "(!variable.fishing_rod ? query.item_is_charged * 30.0)", "(!variable.fishing_rod ? 70.0 - query.item_is_charged * 60.0)", "(!variable.fishing_rod ? 65.0 - query.item_is_charged * 15.0)" ]
+				}
+			}
+		}
+	}
+}

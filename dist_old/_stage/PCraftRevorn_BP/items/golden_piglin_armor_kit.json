@@ -1,0 +1,19 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:item": {
+    "description": {
+      "identifier": "pcraftrevorn:golden_piglin_armor_kit",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:icon": {
+        "textures": {
+          "default": "pcraftrevorn_golden_piglin_armor_kit"
+        }
+      },
+      "minecraft:max_stack_size": 1
+    }
+  }
+}

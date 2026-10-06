@@ -1,0 +1,62 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:gilded_basaltmite",
+      "min_engine_version": "1.8.0",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/gilded_basaltmite_female0_scale0_wg2",
+        "skin1": "textures/entity/pcraftrevorn/gilded_basaltmite_female0_scale0_wg2_belly",
+        "skin2": "textures/entity/pcraftrevorn/gilded_basaltmite_female0_scale1_wg2",
+        "skin3": "textures/entity/pcraftrevorn/gilded_basaltmite_female0_scale1_wg2_belly",
+        "skin4": "textures/entity/pcraftrevorn/gilded_basaltmite_male0_scale0_wg2",
+        "skin5": "textures/entity/pcraftrevorn/gilded_basaltmite_male0_scale0_wg2_belly",
+        "skin6": "textures/entity/pcraftrevorn/gilded_basaltmite_male0_scale1_wg2",
+        "skin7": "textures/entity/pcraftrevorn/gilded_basaltmite_male0_scale1_wg2_belly"
+      },
+      "geometry": {
+        "default": "geometry.basaltmite"
+      },
+      "animations": {
+        "swallow": "animation.basaltmite.swallow",
+        "struggleup": "animation.basaltmite.struggleup",
+        "struggledown": "animation.basaltmite.struggledown",
+        "struggleleft": "animation.basaltmite.struggleleft",
+        "struggleright": "animation.basaltmite.struggleright",
+        "struggleupleft": "animation.basaltmite.struggleupleft",
+        "struggledownleft": "animation.basaltmite.struggledownleft",
+        "struggleupright": "animation.basaltmite.struggleupright",
+        "struggledownright": "animation.basaltmite.struggledownright",
+        "struggleupdown": "animation.basaltmite.struggleupdown",
+        "struggleleftright": "animation.basaltmite.struggleleftright",
+        "strugglefail": "animation.basaltmite.strugglefail",
+        "idle": "animation.basaltmite.idle",
+        "digest": "animation.basaltmite.digest",
+        "walk": "animation.basaltmite.walk",
+        "sprint": "animation.basaltmite.sprint",
+        "attack": "animation.basaltmite.attack",
+        "eat": "animation.basaltmite.eat",
+        "no": "animation.basaltmite.no"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "idle": "1.0 - math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walk": "math.min(1.0, query.modified_move_speed * 4.0)"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.gilded_basaltmite"
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_gilded_basaltmite_spawn_egg"
+      }
+    }
+  }
+}

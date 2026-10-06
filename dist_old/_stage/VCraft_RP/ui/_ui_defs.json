@@ -1,0 +1,7 @@
+{
+  "ui_defs": [
+    "ui/inventory_screen.json",
+    "ui/hud_screen.json",
+    "ui/chat_screen.json"
+  ]
+}

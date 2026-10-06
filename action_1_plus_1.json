@@ -1,0 +1,69 @@
+{
+  "action_id": "action_1_plus_1",
+  "action_name": "1+1生活",
+  "description": "从10月4日开始体验1+1生活的action",
+  "start_date": "2024-10-04",
+  "schedule": {
+    "monday": {
+      "morning": "锻炼 + 冥想",
+      "afternoon": "工作 + 阅读",
+      "evening": "运动 + 休息"
+    },
+    "tuesday": {
+      "morning": "瑜伽 + 早餐准备",
+      "afternoon": "学习 + 写日记",
+      "evening": "散步 + 听音乐"
+    },
+    "wednesday": {
+      "morning": "跑步 + 冥想",
+      "afternoon": "项目 + 休息",
+      "evening": "做饭 + 放松"
+    },
+    "thursday": {
+      "morning": "健身 + 阅读",
+      "afternoon": "咖啡 + 编程",
+      "evening": "散步 + 音乐"
+    },
+    "friday": {
+      "morning": "锻炼 + 中饭",
+      "afternoon": "社交 + 学习",
+      "evening": "电影 + 休闲"
+    },
+    "saturday": {
+      "morning": "购物 + 早餐",
+      "afternoon": "户外活动 + 朋友聚会",
+      "evening": "晚餐 + 娱乐"
+    },
+    "sunday": {
+      "morning": "休息 + 计划",
+      "afternoon": "兴趣项目 + 整理",
+      "evening": "放松 + 准备"
+    }
+  },
+  "activities": [
+    {
+      "type": "physical",
+      "name": "晨练",
+      "duration": "30分钟",
+      "frequency": "每日"
+    },
+    {
+      "type": "mental",
+      "name": "冥想",
+      "duration": "15分钟",
+      "frequency": "每日"
+    },
+    {
+      "type": "social",
+      "name": "朋友交流",
+      "duration": "1小时",
+      "frequency": "每周"
+    },
+    {
+      "type": "learning",
+      "name": "阅读",
+      "duration": "30分钟",
+      "frequency": "每日"
+    }
+  ]
+}

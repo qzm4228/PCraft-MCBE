@@ -1,0 +1,64 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:piglin_royal",
+      "min_engine_version": "1.8.0",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/piglin_royal_female0",
+        "skin1": "textures/entity/pcraftrevorn/piglin_royal_female0_belly",
+        "skin2": "textures/entity/pcraftrevorn/piglin_royal_male0",
+        "skin3": "textures/entity/pcraftrevorn/piglin_royal_male0_belly",
+        "skin4": "textures/entity/pcraftrevorn/pcv_royalrump_piglin_royal_female0",
+        "skin5": "textures/entity/pcraftrevorn/pcv_royalrump_piglin_royal_female0_belly",
+        "skin6": "textures/entity/pcraftrevorn/pcv_royalrump_piglin_royal_male0",
+        "skin7": "textures/entity/pcraftrevorn/pcv_royalrump_piglin_royal_male0_belly"
+      },
+      "geometry": {
+        "default": "geometry.piglin_royalty",
+        "v_royalrump": "geometry.piglin_royal.v_royalrump"
+      },
+      "animations": {
+        "swallow": "animation.piglin_royalty.swallow",
+        "struggleup": "animation.piglin_royalty.struggleup",
+        "struggledown": "animation.piglin_royalty.struggledown",
+        "struggleleft": "animation.piglin_royalty.struggleleft",
+        "struggleright": "animation.piglin_royalty.struggleright",
+        "struggleupleft": "animation.piglin_royalty.struggleupleft",
+        "struggledownleft": "animation.piglin_royalty.struggledownleft",
+        "struggleupright": "animation.piglin_royalty.struggleupright",
+        "struggledownright": "animation.piglin_royalty.struggledownright",
+        "struggleupdown": "animation.piglin_royalty.struggleupdown",
+        "struggleleftright": "animation.piglin_royalty.struggleleftright",
+        "strugglefail": "animation.piglin_royalty.strugglefail",
+        "idle": "animation.piglin_royalty.idle",
+        "digest": "animation.piglin_royalty.digest",
+        "walk": "animation.piglin_royalty.walk",
+        "stomp": "animation.piglin_royalty.stomp",
+        "royalrump_idle": "animation.piglin_royal.v_royalrump.idle"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "idle": "q.property('pcraftrevorn:set') == 0 ? (1.0 - math.min(1.0, query.modified_move_speed * 4.0)) : 0.0"
+          },
+          {
+            "walk": "q.property('pcraftrevorn:set') == 0 ? math.min(1.0, query.modified_move_speed * 4.0) : 0.0"
+          },
+          {
+            "royalrump_idle": "q.property('pcraftrevorn:set') == 1 ? (1.0 - math.min(1.0, query.modified_move_speed * 4.0)) : 0.0"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.piglin_royal"
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_piglin_royal_spawn_egg"
+      }
+    }
+  }
+}
