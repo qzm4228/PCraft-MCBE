@@ -119,15 +119,23 @@
       },
       {
         "player_preview": {
-          "type": "custom",
-          "renderer": "paper_doll_renderer",
-          "layer": 2,
+          "type": "panel",
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "offset": [ 10, 30 ],
-          "size": [ 64, 110 ],
-          "use_selected_skin": true,
-          "use_skin_gui_scale": true
+          "offset": [ 10, 0 ],
+          "size": [ 58, 99 ],
+          "controls": [
+            {
+              "player_renderer": {
+                "type": "custom",
+                "renderer": "live_player_renderer",
+                "property_bag": { "#look_at_cursor": true },
+                "layer": 8,
+                "anchor_from": "center",
+                "anchor_to": "center"
+              }
+            }
+          ]
         }
       },
       {
