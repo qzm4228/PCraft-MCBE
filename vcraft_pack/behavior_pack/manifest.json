@@ -1,11 +1,11 @@
 {
   "format_version": 2,
   "header": {
-    "name": "VCraft §2砂墨§r §7· 261004-beta-2",
-    "description": "把猎物囫囵吞下，慢慢消化，把营养留在肚子里。吃得越多，你就越能装。",
+    "name": "pack.name",
+    "description": "pack.description",
     "uuid": "7f1e2d3c-4b5a-4697-88a9-0b1c2d3e4f50",
     "version": [
-      261004,
+      261007,
       0,
       2
     ],
@@ -22,7 +22,7 @@
       "uuid": "8a2f3e4d-5c6b-47a8-99ba-1c2d3e4f5061",
       "entry": "scripts/main.js",
       "version": [
-        261004,
+        261007,
         0,
         2
       ]
@@ -32,7 +32,7 @@
     {
       "uuid": "9b3a4f5e-6d7c-48b9-aabb-2d3e4f506172",
       "version": [
-        261004,
+        261007,
         0,
         2
       ]
@@ -40,7 +40,7 @@
     {
       "uuid": "1e2d3c4b-5a69-4877-9a8b-0123456789ab",
       "version": [
-        261004,
+        261007,
         0,
         2
       ]

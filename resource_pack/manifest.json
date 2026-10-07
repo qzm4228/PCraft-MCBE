@@ -1,11 +1,11 @@
 {
   "format_version": 2,
   "header": {
-    "name": "PCraftRevorn 资源 §2砂墨§r §7· 261004-beta-2",
-    "description": "荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。",
+    "name": "pack.name",
+    "description": "pack.description",
     "uuid": "e9a8f5d4-a061-4dc4-af50-4d5e6f708192",
     "version": [
-      261004,
+      261007,
       0,
       2
     ],
@@ -20,7 +20,7 @@
       "type": "resources",
       "uuid": "fab9a6e5-b172-4ed5-b061-5e6f70819203",
       "version": [
-        261004,
+        261007,
         0,
         2
       ]
