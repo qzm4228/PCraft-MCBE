@@ -100,16 +100,14 @@ function applyChest(player, state) {
   playAnim(player, chestAnim(sex, getRot(player)), "pcraftrevorn:chest");
 }
 // The belly mesh is owned by this pack, but VCraft shows/hides it via pc_belly.
-// Keep it flat unless VCraft is showing it (score <= 0 / objective missing), so a
-// gender-only setup never shows a stuck belly and VCraft's small/big win otherwise.
+// Once VCraft is running (it lazily creates the pc_belly objective) it drives the
+// belly itself, including the grow/shrink transitions — so we only hide the belly
+// ourselves while no pc_belly objective exists yet. Otherwise our always-on "off"
+// would stomp VCraft's shrink and make the belly vanish as soon as the count hits 0.
 function ensureBelly(player) {
-  let n = 0;
-  try {
-    const o = world.scoreboard.getObjective("pc_belly");
-    const s = o?.getScore(player.scoreboardIdentity);
-    if (typeof s === "number") n = s;
-  } catch { /* ignore */ }
-  if (n <= 0) playAnim(player, "animation.vcraft.belly.off", "pcraftrevorn:belly");
+  let owned = false;
+  try { owned = !!world.scoreboard.getObjective("pc_belly"); } catch { owned = false; }
+  if (!owned) playAnim(player, "animation.vcraft.belly.off", "pcraftrevorn:belly");
 }
 
 // ---- Belly (owned by this pack) -------------------------------------------

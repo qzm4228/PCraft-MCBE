@@ -3,14 +3,14 @@
 // Gut design (Bedrock-friendly): an invisible, player-following carrier entity
 // (vcraft:gut) with 5 seats. Swallowed mobs are made invisible and ride it.
 // The belly mesh (owned by the gender pack's minecraft:player) is driven by the
-// pc_belly scoreboard (0 = flat, 1 = small, 2 = big), derived from prey count.
+// pc_belly scoreboard (0 = flat .. 8 = full), derived from the prey's health.
 import { world, system, DisplaySlotId, CommandPermissionLevel, CustomCommandStatus, ItemStack, EntityDamageCause } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 
 const GUT_ENTITY = "vcraft:gut";
 const MAW_ITEM = "vcraft:maw";   // hold + right-click to swallow what you aim at
 const GUT_PROP = "vcraft:gut";   // player dynamic property -> gut entity id
-const BELLY_OBJ = "pc_belly";    // 0..2
+const BELLY_OBJ = "pc_belly";    // 0..BELLY_MAX (continuous belly level)
 const MAX_PREY = 5;
 const PREY_TAG = "vcraft_prey";
 const DIGEST_PROP = "vcraft:digest"; // 0..100 progress toward digesting one prey
@@ -39,8 +39,14 @@ function objective() {
 }
 // Plan B: belly visibility is driven per-player by a server-side /playanimation,
 // so every client sees it without depending on query.scoreboard.
-const BELLY_ANIM = ["animation.vcraft.belly.off", "animation.vcraft.belly.small", "animation.vcraft.belly.big"];
-const lastBelly = new Map();
+//
+// Original VCraft drives the belly from a *continuous* `bellySize` value and
+// scrubs the CPM animation with it. Bedrock cannot scrub a player animation from
+// a variable, so the CPM belly is sampled into BELLY_MAX static poses with
+// matching grow/up/down transitions (see gender_pack .../vcraft_belly.animation.json).
+const BELLY_MAX = 8;
+const BELLY_OFF = "animation.vcraft.belly.off";
+const bellyPose = (k) => `animation.vcraft.belly.s${k}`;
 function playAnim(entity, anim) {
   // Server-side only: client Molang can't read scoreboards here. Use a dedicated
   // controller so the belly animation stacks on top of the gender pack's chest
@@ -48,16 +54,95 @@ function playAnim(entity, anim) {
   try { entity.playAnimation(anim, { players: world.getAllPlayers(), blendOutTime: 999999, controller: "pcraftrevorn:belly" }); return; } catch { /* fallthrough */ }
   try { entity.runCommand(`playanimation @s ${anim} none 999999 "0" pcraftrevorn:belly`); } catch { /* ignore */ }
 }
-function applyBelly(player, n) {
-  const idx = Math.max(0, Math.min(2, n | 0));
-  if (lastBelly.get(player.id) === idx) return;
-  lastBelly.set(player.id, idx);
-  playAnim(player, BELLY_ANIM[idx]);
+const lastBelly = new Map();
+// Safety net: the very first /playanimation after a spawn/relog is sometimes
+// dropped by the client, which used to leave an empty belly visible forever
+// (applyBelly caches its state and never retries). Track when the level last
+// changed so bellyRefresh() can re-assert the settled state periodically.
+let bellyTick = 0;
+const bellySettle = new Map();
+function applyBelly(player, n, force) {
+  const k = Math.max(0, Math.min(BELLY_MAX, n | 0));
+  const prev = lastBelly.get(player.id);
+  if (prev === k && !force) return;
+  lastBelly.set(player.id, k);
+  bellySettle.set(player.id, bellyTick);
+  // scoreboard mirrors the *displayed* level (not the target) so nothing else
+  // tries to hide the belly while it is still shrinking.
+  try { objective()?.setScore(player, k); } catch { /* ignore */ }
+  let anim;
+  if (k <= 0) anim = prev === 1 ? "animation.vcraft.belly.down0" : BELLY_OFF; // shrink out, don't snap
+  else if (prev === undefined || prev === 0) anim = `animation.vcraft.belly.grow${k}`;
+  else if (k === prev + 1) anim = `animation.vcraft.belly.up${k}`;
+  else if (k === prev - 1) anim = `animation.vcraft.belly.down${k}`;
+  else anim = bellyPose(k); // multi-step jump: snap to the new pose
+  playAnim(player, anim);
 }
+const bellyTarget = new Map();
 function setBelly(player, n) {
-  const v = Math.max(0, Math.min(2, n | 0));
-  try { objective()?.setScore(player, v); } catch { /* ignore */ }
-  applyBelly(player, v);
+  const v = Math.max(0, Math.min(BELLY_MAX, n | 0));
+  bellyTarget.set(player.id, v);
+  // First time we see this player, snap straight to the level. After that the
+  // ease interval walks the belly one step at a time (see bellyEase).
+  if (!lastBelly.has(player.id)) applyBelly(player, v);
+}
+// Walk the displayed belly level toward the target one step at a time, so a jump
+// of several levels (capacity change / several prey at once) still animates
+// instead of snapping.
+function bellyEase() {
+  for (const player of world.getAllPlayers()) {
+    if (rubbing.has(player.id)) continue;
+    const target = bellyTarget.get(player.id);
+    if (target === undefined) continue;
+    const cur = lastBelly.get(player.id) ?? 0;
+    if (cur === target) continue;
+    applyBelly(player, cur + Math.sign(target - cur));
+  }
+}
+// Re-assert the settled belly state every couple of seconds (see bellySettle).
+// This is what guarantees an empty belly is actually hidden after joining.
+function bellyRefresh() {
+  for (const player of world.getAllPlayers()) {
+    if (rubbing.has(player.id)) continue;
+    const cur = lastBelly.get(player.id);
+    if (cur === undefined) continue;
+    if (cur !== (bellyTarget.get(player.id) ?? 0)) continue; // mid-ease
+    if (bellyTick - (bellySettle.get(player.id) ?? 0) < 40) continue; // last transition may still be running
+    playAnim(player, cur <= 0 ? BELLY_OFF : bellyPose(cur));
+    bellySettle.set(player.id, bellyTick);
+  }
+}
+// belly size comes from the total health of the prey: every HP_PER_STEP health
+// of swallowed mobs = one belly step (a chicken is 4 HP = half a step, a cow
+// 10 HP, an iron golem 100 HP).
+const HP_PER_STEP = 8;
+function bellyLevel(totalHp) {
+  if (totalHp <= 0) return 0;
+  return Math.max(1, Math.min(BELLY_MAX, Math.round(totalHp / HP_PER_STEP)));
+}
+function preyHealth(e) {
+  try { const hp = e.getComponent("minecraft:health"); return hp && hp.effectiveMax > 0 ? hp.effectiveMax : 1; } catch { return 1; }
+}
+// Belly rub (ported from BellyRubProcedure): empty hands + sneaking + looking
+// down >50 deg -> play a wobbling belly + apply nausea. Rubbing also slows the
+// swallow rate (bellyRubModifier 0.65 in the original).
+const rubbing = new Set();
+const rubLevel = new Map();
+function updateRub(player, level) {
+  const rubbingNow = level > 0 && sneakPressed(player) && viewPitch(player) > 50 && handsEmpty(player);
+  const was = rubbing.has(player.id);
+  if (rubbingNow) {
+    if (!was || rubLevel.get(player.id) !== level) {
+      rubbing.add(player.id);
+      rubLevel.set(player.id, level);
+      playAnim(player, `animation.vcraft.belly.rub${level}`);
+    }
+    try { player.addEffect("nausea", 20, { amplifier: 2, showParticles: false }); } catch { /* ignore */ }
+  } else if (was) {
+    rubbing.delete(player.id);
+    rubLevel.delete(player.id);
+    applyBelly(player, level, true); // restore the held pose
+  }
 }
 function entById(id) {
   try { return typeof id === "string" && id ? world.getEntity(id) : undefined; } catch { return undefined; }
@@ -87,6 +172,18 @@ function sneakPressed(player) {
   try { if (player.isSneaking) return true; } catch { /* ignore */ }
   try { return String(player.inputInfo.getButtonState("Sneak")) === "Pressed"; } catch { /* ignore */ }
   return false;
+}
+// View pitch in degrees, positive = looking down (matches MC Java getXRot()).
+function viewPitch(player) {
+  try { return Math.asin(Math.max(-1, Math.min(1, -player.getViewDirection().y))) * (180 / Math.PI); } catch { return 0; }
+}
+// Both hands empty (the belly-rub gesture requires it, as in the original).
+function handsEmpty(player) {
+  try {
+    const eq = player.getComponent("minecraft:equippable");
+    if (!eq) return false;
+    return !eq.getEquipment("Mainhand") && !eq.getEquipment("Offhand");
+  } catch { return false; }
 }
 function aliveRiders(gut) {
   return riders(gut).filter((r) => !isDead(r));
@@ -266,14 +363,47 @@ function lookTarget(player, dist) {
   } catch { /* ignore */ }
   return undefined;
 }
-// Hold vcraft:maw and right-click to swallow whatever you are aiming at.
-function trySwallow(player) {
+// Hold vcraft:maw and right-click to start swallowing whatever you are aiming at.
+// Ported from the original: swallowing is a timed progress (0..60) that fills at
+// a rate depending on where you look (SwallowCalcProcedure) and on your rings.
+const SWALLOW_NEEDED = 60;
+const swallowState = new Map(); // playerId -> { targetId, progress }
+function swallowRate(player) {
+  // (0.2 + 0.8 * |pitch + (-90)| / 180) * swallowSpeed * ringSwallowModifier
+  const pitch = viewPitch(player);
+  const ring = hasEquipped(player, "vcraft:maxima") ? 1.6 : hasEquipped(player, "vcraft:expansion_ring") ? 1.3 : 1.0;
+  const rub = rubbing.has(player.id) ? 0.65 : 1.0;
+  return (0.2 + 0.8 * (Math.abs(pitch - 90) / 180)) * 2.5 * ring * rub;
+}
+function beginSwallow(player) {
   if (!player || player.typeId !== "minecraft:player") return;
+  if (swallowState.has(player.id)) return;
   const target = lookTarget(player, 5);
   if (!target) { player.sendMessage("§7[VCraft] 没有对准可以吞的生物。"); return; }
-  if (target.typeId === "minecraft:player") { swallowPlayer(player, target); return; }
-  if (isPreyCandidate(target, player)) swallow(player, target);
-  else player.sendMessage("§7[VCraft] 这个目标不能吞。");
+  if (target.typeId !== "minecraft:player" && !isPreyCandidate(target, player)) { player.sendMessage("§7[VCraft] 这个目标不能吞。"); return; }
+  swallowState.set(player.id, { targetId: target.id, progress: 0 });
+}
+function swallowTick() {
+  if (swallowState.size === 0) return;
+  for (const [pid, s] of swallowState) {
+    const player = entById(pid);
+    if (!player) { swallowState.delete(pid); continue; }
+    const target = entById(s.targetId);
+    const looked = lookTarget(player, 5);
+    if (!target || !looked || looked.id !== target.id || (target.typeId !== "minecraft:player" && !isPreyCandidate(target, player))) {
+      swallowState.delete(pid);
+      try { player.onScreenDisplay.setActionBar(" "); } catch { /* ignore */ }
+      continue;
+    }
+    s.progress += swallowRate(player);
+    if (s.progress >= SWALLOW_NEEDED) {
+      swallowState.delete(pid);
+      if (target.typeId === "minecraft:player") swallowPlayer(player, target);
+      else swallow(player, target);
+      continue;
+    }
+    try { player.onScreenDisplay.setActionBar(`§d吞咽 §f${Math.round((s.progress / SWALLOW_NEEDED) * 100)}% §7· 看向目标`); } catch { /* ignore */ }
+  }
 }
 
 function digestTick() {  for (const player of world.getAllPlayers()) {
@@ -484,9 +614,16 @@ export function wireVcraft() {
   // so we must NOT claim a display slot here — that would clobber the gender pack's
   // pc_state objective (still used for skin selection). The pc_belly objective is
   // still created lazily by setBelly().
-  // /playanimation state resets on respawn / relog; drop the cache so it re-applies.
-  world.afterEvents.playerSpawn.subscribe((ev) => { lastBelly.delete(ev.player.id); });
-  world.afterEvents.playerLeave.subscribe((ev) => { lastBelly.delete(ev.playerId); });
+  // /playanimation state resets on respawn / relog; drop the cache so it re-applies,
+  // and force a re-apply shortly after spawn once the client is likely ready.
+  world.afterEvents.playerSpawn.subscribe((ev) => {
+    lastBelly.delete(ev.player.id);
+    bellySettle.delete(ev.player.id);
+    system.runTimeout(() => {
+      try { applyBelly(ev.player, bellyTarget.get(ev.player.id) ?? 0, true); } catch { /* ignore */ }
+    }, 20);
+  });
+  world.afterEvents.playerLeave.subscribe((ev) => { lastBelly.delete(ev.playerId); bellySettle.delete(ev.playerId); });
   // Custom commands: /vcraft:swallow, /vcraft:release, /vcraft:prey
   // Wrapped so a missing custom-command API can't abort the chat handler below.
   try {
@@ -547,7 +684,9 @@ export function wireVcraft() {
       for (const r of rs) hide(r);
       // mark a digesting hunter so other hunters won't *prey on* it (attacks still land)
       try { if (rs.length > 0) player.addTag("vore_digesting"); else player.removeTag("vore_digesting"); } catch { /* ignore */ }
-      setBelly(player, (cfgGet(player, CFG.belly, true) && rs.length > 0) ? (rs.length <= 2 ? 1 : 2) : 0);
+      const bellyHp = rs.reduce((sum, r) => sum + preyHealth(r), 0);
+      setBelly(player, (cfgGet(player, CFG.belly, true) && bellyHp > 0) ? bellyLevel(bellyHp) : 0);
+      updateRub(player, lastBelly.get(player.id) ?? 0);
       if (rs.length > 0) {
         let d = 0; try { const v = player.getDynamicProperty(DIGEST_PROP); d = typeof v === "number" ? v : 0; } catch { /* ignore */ }
         try { player.onScreenDisplay.setActionBar(`§d腹部 ${rs.length}/${capacity(player)} §7· 消化 §f${Math.round(d)}%`); } catch { /* ignore */ }
@@ -557,24 +696,31 @@ export function wireVcraft() {
 
   // Digestion: slowly digest one prey at a time.
   system.runInterval(digestTick, 20);
+  // Smooth belly level easing (one step every 0.3s).
+  system.runInterval(bellyEase, 6);
+  // Ticker + safety net that re-asserts the settled belly state.
+  system.runInterval(() => { bellyTick++; }, 1);
+  system.runInterval(bellyRefresh, 40);
   // Ambient: struggle sounds + wither pendant aura + escape attempts.
   system.runInterval(ambientTick, 40);
   // Overwhelmed debuffs.
   system.runInterval(overwhelmTick, 40);
   // Player-as-prey struggle/digest.
   system.runInterval(playerPreyTick, 1);
+  // Swallow progress (maw charge).
+  system.runInterval(swallowTick, 1);
 
   // In-game trigger: hold vcraft:maw and right-click to swallow what you aim at.
   // itemUse covers right-click with the item; playerInteractWithEntity covers
   // right-clicking a creature directly.
   try {
     world.afterEvents.itemUse.subscribe((ev) => {
-      try { if (ev.itemStack?.typeId === MAW_ITEM) trySwallow(ev.source); } catch { /* ignore */ }
+      try { if (ev.itemStack?.typeId === MAW_ITEM) beginSwallow(ev.source); } catch { /* ignore */ }
     });
   } catch { /* itemUse unavailable */ }
   try {
     world.afterEvents.playerInteractWithEntity.subscribe((ev) => {
-      try { if (ev.itemStack?.typeId === MAW_ITEM) trySwallow(ev.player); } catch { /* ignore */ }
+      try { if (ev.itemStack?.typeId === MAW_ITEM) beginSwallow(ev.player); } catch { /* ignore */ }
     });
   } catch { /* playerInteractWithEntity unavailable */ }
 
@@ -608,7 +754,7 @@ export function wireVcraft() {
       case "vcraft:belly": {
         const n = Number(ev.message) || 0;
         setBelly(p, n);
-        p.sendMessage(`§d[VCraft] 腹部阶段 = ${Math.max(0, Math.min(2, n))} (0=平,1=小,2=大)`);
+        p.sendMessage(`§d[VCraft] 腹部阶段 = ${Math.max(0, Math.min(BELLY_MAX, n))} (0=平, ${BELLY_MAX}=满)`);
         break;
       }
       default: break;
