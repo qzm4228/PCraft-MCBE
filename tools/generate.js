@@ -33,6 +33,37 @@ function writeJSON(file, obj) { writeText(file, JSON.stringify(obj, null, 2) + '
 function readJSON(file) { return JSON.parse(fs.readFileSync(file, 'utf8')); }
 function exists(p) { return fs.existsSync(p); }
 function rmrf(p) { if (exists(p)) fs.rmSync(p, { recursive: true, force: true }); }
+
+// dist.json + version variants survive the generator's clean step
+function walkFiles(dir) {
+  const out = [];
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) out.push(...walkFiles(p)); else out.push(p);
+  }
+  return out;
+}
+function isDistFile(p) {
+  const n = path.basename(p).toLowerCase();
+  return n === 'dist.json' || n.endsWith('.x') || n.includes('.x.');
+}
+function preserveDist(dirs) {
+  const stash = [];
+  for (const d of dirs) {
+    if (!exists(d)) continue;
+    for (const f of walkFiles(d)) {
+      if (isDistFile(f)) stash.push([d, path.relative(d, f), fs.readFileSync(f)]);
+    }
+  }
+  return stash;
+}
+function restoreDist(stash) {
+  for (const [d, rel, data] of stash) {
+    const p = path.join(d, rel);
+    fs.mkdirSync(path.dirname(p), { recursive: true });
+    fs.writeFileSync(p, data);
+  }
+}
 function copy(src, dst) { ensureDir(path.dirname(dst)); fs.copyFileSync(src, dst); }
 function rgb(javaInt) { const n = (javaInt >>> 0) & 0xFFFFFF; return '#' + n.toString(16).padStart(6, '0'); }
 
@@ -652,12 +683,12 @@ const UUID = {
   rpRes: 'fab9a6e5-b172-4ed5-b061-5e6f70819203'
 };
 // Build version: date-based beta. Bedrock v2 manifests require an integer triple,
-// so "261007-beta-17" is encoded as [261002, 0, 1] with the label kept in the name.
-const PACK_VERSION = [261007, 0, 17];
+// so "261010-beta-1" is encoded as [261002, 0, 1] with the label kept in the name.
+const PACK_VERSION = [261010, 0, 1];
 function genManifests() {
   writeJSON(path.join(BP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn §2砂墨§r §7· 261007-beta-17', description: '荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。', uuid: UUID.bpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
+    header: { name: 'PCraftRevorn §2砂墨§r §7· 261010-beta-1', description: '荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。', uuid: UUID.bpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
     modules: [
       { type: 'data', uuid: UUID.bpData, version: PACK_VERSION },
       { type: 'script', language: 'javascript', uuid: UUID.bpScript, entry: 'scripts/main.js', version: PACK_VERSION }
@@ -671,7 +702,7 @@ function genManifests() {
   });
   writeJSON(path.join(RP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn 资源 §2砂墨§r §7· 261007-beta-17', description: '荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。', uuid: UUID.rpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
+    header: { name: 'PCraftRevorn 资源 §2砂墨§r §7· 261010-beta-1', description: '荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。', uuid: UUID.rpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
     modules: [{ type: 'resources', uuid: UUID.rpRes, version: PACK_VERSION }],
     metadata: { authors: ['砂墨SandMo', 'Bilibili: 砂墨', '原创: MysticSummoner'], license: 'AFL-3.0' }
   });
@@ -683,16 +714,19 @@ function genManifests() {
 // ---------------------------------------------------------------- main
 function main() {
   if (!exists(MOD)) { console.error('Missing .work/mod. Extract the jar first (tools/extract.ps1).'); process.exit(1); }
-  // clean owned output so stale files never linger
-  for (const d of [
+  // clean owned output so stale files never linger (keep dist.json + version variants)
+  const owned = [
     path.join(BP, 'blocks'), path.join(BP, 'items'), path.join(BP, 'recipes'),
     path.join(BP, 'loot_tables'), path.join(BP, 'texts'),
     path.join(RP, 'textures', 'items', 'pcraftrevorn'),
     path.join(RP, 'textures', 'blocks', 'pcraftrevorn'),
     path.join(RP, 'textures', 'models', 'armor'),
     path.join(RP, 'models', 'blocks'),
-    path.join(RP, 'sounds'), path.join(RP, 'texts')
-  ]) rmrf(d);
+    path.join(RP, 'sounds'), path.join(RP, 'texts'),
+  ];
+  const stash = preserveDist(owned);
+  for (const d of owned) rmrf(d);
+  restoreDist(stash);
   genItems();
   genPotions();
   genBlocks();

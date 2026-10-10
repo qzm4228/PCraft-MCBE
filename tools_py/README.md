@@ -24,8 +24,54 @@ python tools_py\pipeline.py 261005-beta-1 261005 0 1
 | `generate_variants.js` | `generate_variants.py` |
 | `nbt_to_data.js` | `nbt_to_data.py` |
 | `build.ps1` | `build.py` |
+| `build.js` | `build_config.py` |
+| `dist_resolver.js` | `dist_resolver.py` |
 | （无） | `pipeline.py`（总控 + 版本号统一） |
 | （无） | `_common.py`（共享小工具） |
+| （无） | `check_dist.py` / `test_dist.py`（一致性校验/单测） |
+
+## 多版本产出（dist.json）
+
+工程里每个目录都可以放一个 `dist.json`，描述该目录下**哪些文件在打包时按目标版本替换**：
+
+```json
+{
+  "menu.json": {
+    "1.21.80.x": true,                   // 值省略 -> 读同目录的 menu.json.1.21.80.x
+    "<=1.21.100": "menu.old.json",        // 区间键
+    "1.26.x": "menu.new.json"             // 通配键
+  },
+  "sub/thing.json": { "1.26.x": true }
+}
+```
+
+规则：
+
+- 键是**输出文件名**（相对本目录）；值是**变体源文件**（相对本目录），写成 `true` 时默认取 `<输出名>.<版本键>`。
+- 没出现在任何 `dist.json` 里的文件 → 原样产出（通用版）。
+- 命中了版本键 → 用变体内容、**以原文件名**写出；**没命中 → 用原文件本身兜底**（该文件必须存在）。
+- 作为变体源出现的文件**不会单独打包**；`dist.json` 自身不打包。
+- 版本键两种写法都支持：
+  - **序列/通配**：`1.21.100.x`、`1.26.x`（`x` 任意；末尾 `x` 可省；字面前缀越长越优先）。
+  - **区间**：`<=1.21.100`、`>=1.21.60`、`<1.26.0`、`>1.21.80`。
+  - 多个命中时：序列键（按字面段数）优先于区间键，再按数值从高到低。
+
+目标清单在 `config/targets.json`（`min_engine_version` + `@minecraft/server(-ui)` 版本）。打包后每个目标一套产物，平铺带后缀：
+
+```
+dist/VCraft_RP_1.21.100.mcpack
+dist/PCraftRevorn_<version>_1.21.100.mcaddon
+```
+
+```bat
+python tools_py\build_config.py                    :: 全部目标
+python tools_py\build_config.py --target 1.26.0    :: 单个目标（可重复）
+python tools_py\build_config.py --list             :: 只看目标 + 每个文件命中的变体
+node tools\build.js --target 1.26.0                :: Node 版等价命令
+python tools_py\check_dist.py                      :: 校验两套工具产出逐条目一致
+python tools_py\test_dist.py                        :: dist.json 解析单测
+```
+
 
 ## 等价性
 

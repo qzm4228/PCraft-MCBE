@@ -3,17 +3,13 @@
     "output_name": "PCraftRevorn_BP",
     "folder_name": "PCraftRevorn_BP",
     "display_name": {
-      "en_US": "PCraftRevorn BP",
-      "zh_CN": "PCraftRevorn 行为包",
-      "zh_TW": "PCraftRevorn 行為包"
+      "en_US": "PCraftRevorn BP"
     },
     "description": {
-      "en_US": "PCraftRevorn Behavior Pack - Custom entities and mechanics for your world.",
-      "zh_CN": "PCraftRevorn 行为包 - 为您的世界引入新的实体和机制。",
-      "zh_TW": "PCraftRevorn 行為包 - 為您的世界引入新的實體和機制。"
+      "en_US": "PCraftRevorn Behavior Pack - Custom entities and mechanics for your world."
     },
     "base_dir": "behavior_pack",
-    "version": "261007-beta-17",
+    "version": "261010-beta-1",
     "uuid": "b6f5c2a1-7d3e-4a91-9c2f-1a2b3c4d5e6f",
     "min_engine_version": [
       1,
@@ -25,17 +21,13 @@
     "output_name": "PCraftRevorn_RP",
     "folder_name": "PCraftRevorn_RP",
     "display_name": {
-      "en_US": "PCraftRevorn RP",
-      "zh_CN": "PCraftRevorn 资源包",
-      "zh_TW": "PCraftRevorn 資源包"
+      "en_US": "PCraftRevorn RP"
     },
     "description": {
-      "en_US": "PCraftRevorn Resource Pack - Custom textures and sounds for your world.",
-      "zh_CN": "PCraftRevorn 资源包 - 为您的世界提供自定义纹理和声音。",
-      "zh_TW": "PCraftRevorn 資源包 - 為您的世界提供自定義紋理和聲音。"
+      "en_US": "PCraftRevorn Resource Pack - Custom textures and sounds for your world."
     },
     "base_dir": "resource_pack",
-    "version": "261007-beta-17",
+    "version": "261010-beta-1",
     "uuid": "e9a8f5d4-a061-4dc4-af50-4d5e6f708192",
     "min_engine_version": [
       1,
@@ -47,17 +39,13 @@
     "output_name": "FemaleGenderMod_BP",
     "folder_name": "FemaleGenderMod_BP",
     "display_name": {
-      "en_US": "Female Gender Mod [Bedrock]",
-      "zh_CN": "女装模因模组 [Bedrock]",
-      "zh_TW": "女裝模因模組 [Bedrock]"
+      "en_US": "Female Gender Mod [Bedrock]"
     },
     "description": {
-      "en_US": "Allows unique character appearance settings: gender, body type, and small details.",
-      "zh_CN": "让每个人都能有自己独一无二的样子：性别、体型，还有那点小细节。",
-      "zh_TW": "讓每個人都有自己獨一無二的外觀：性別、體型，還有那點小細節。"
+      "en_US": "Allows unique character appearance settings: gender, body type, and small details."
     },
     "base_dir": "gender_pack/behavior_pack",
-    "version": "261007-beta-17",
+    "version": "261010-beta-1",
     "uuid": "3a4f5e6d-7c81-4a99-bcad-23456789abcd",
     "min_engine_version": [
       1,
@@ -69,17 +57,13 @@
     "output_name": "FemaleGenderMod_RP",
     "folder_name": "FemaleGenderMod_RP",
     "display_name": {
-      "en_US": "Female Gender Mod [Bedrock] RP",
-      "zh_CN": "女装模因模组 [Bedrock] 资源包",
-      "zh_TW": "女裝模因模組 [Bedrock] 資源包"
+      "en_US": "Female Gender Mod [Bedrock] RP"
     },
     "description": {
-      "en_US": "Female Gender Mod Resource Pack - Visual changes for the gender mod.",
-      "zh_CN": "女装模因模组资源包 - 为性别模组提供视觉更改。",
-      "zh_TW": "女裝模因模組資源包 - 為性別模組提供視覺更改。"
+      "en_US": "Female Gender Mod Resource Pack - Visual changes for the gender mod."
     },
     "base_dir": "gender_pack/resource_pack",
-    "version": "261007-beta-17",
+    "version": "261010-beta-1",
     "uuid": "1e2d3c4b-5a69-4877-9a8b-0123456789ab",
     "min_engine_version": [
       1,
@@ -91,17 +75,13 @@
     "output_name": "VCraft_BP",
     "folder_name": "VCraft_BP",
     "display_name": {
-      "en_US": "VCraft [Bedrock]",
-      "zh_CN": "VCraft [Bedrock]",
-      "zh_TW": "VCraft [Bedrock]"
+      "en_US": "VCraft [Bedrock]"
     },
     "description": {
-      "en_US": "Swallow prey whole, digest slowly, keep the nutrition. The more you eat, the more you can hold.",
-      "zh_CN": "把猎物囫囵吞下，慢慢消化，把营养留在肚子里。吃得越多，你就越能装。",
-      "zh_TW": "把獵物囫圇吞下，慢慢消化，把營養留在肚子裡。吃得越多，你就越能裝。"
+      "en_US": "Swallow prey whole, digest slowly, keep the nutrition. The more you eat, the more you can hold."
     },
     "base_dir": "vcraft_pack/behavior_pack",
-    "version": "261007-beta-17",
+    "version": "261010-beta-1",
     "uuid": "7f1e2d3c-4b5a-4697-88a9-0b1c2d3e4f50",
     "min_engine_version": [
       1,
@@ -113,17 +93,13 @@
     "output_name": "VCraft_RP",
     "folder_name": "VCraft_RP",
     "display_name": {
-      "en_US": "VCraft [Bedrock] RP",
-      "zh_CN": "VCraft [Bedrock] 资源包",
-      "zh_TW": "VCraft [Bedrock] 資源包"
+      "en_US": "VCraft [Bedrock] RP"
     },
     "description": {
-      "en_US": "VCraft Resource Pack - visuals and sounds for the vore system.",
-      "zh_CN": "VCraft 资源包 - 为吞食系统提供视觉与音效。",
-      "zh_TW": "VCraft 資源包 - 為吞食系統提供視覺與音效。"
+      "en_US": "VCraft Resource Pack - visuals and sounds for the vore system."
     },
     "base_dir": "vcraft_pack/resource_pack",
-    "version": "261007-beta-17",
+    "version": "261010-beta-1",
     "uuid": "9b3a4f5e-6d7c-48b9-aabb-2d3e4f506172",
     "min_engine_version": [
       1,

@@ -1,0 +1,70 @@
+{
+  "_comment": "Build targets. Each target gets its own package; `dist.json` files select per-target file variants. min_engine_version + script module versions are applied to every manifest for that target. Module versions are the stable versions available at that engine version; a lower stable version is always safe on a newer engine.",
+  "default_target": "1.21.100",
+  "targets": [
+    {
+      "id": "1.21.80",
+      "min_engine_version": [1, 21, 80],
+      "modules": {
+        "@minecraft/server": "1.19.0",
+        "@minecraft/server-ui": "1.3.0"
+      }
+    },
+    {
+      "id": "1.21.100",
+      "min_engine_version": [1, 21, 100],
+      "modules": {
+        "@minecraft/server": "2.0.0",
+        "@minecraft/server-ui": "2.0.0"
+      }
+    },
+    {
+      "id": "1.26.0",
+      "min_engine_version": [1, 26, 0],
+      "modules": {
+        "@minecraft/server": "2.0.0",
+        "@minecraft/server-ui": "2.0.0"
+      }
+    },
+    {
+      "id": "1.26.10",
+      "min_engine_version": [1, 26, 10],
+      "modules": {
+        "@minecraft/server": "2.0.0",
+        "@minecraft/server-ui": "2.0.0"
+      }
+    },
+    {
+      "id": "1.26.20",
+      "min_engine_version": [1, 26, 20],
+      "modules": {
+        "@minecraft/server": "2.0.0",
+        "@minecraft/server-ui": "2.0.0"
+      }
+    },
+    {
+      "id": "1.26.30",
+      "min_engine_version": [1, 26, 30],
+      "modules": {
+        "@minecraft/server": "2.0.0",
+        "@minecraft/server-ui": "2.0.0"
+      }
+    },
+    {
+      "id": "1.26.40",
+      "min_engine_version": [1, 26, 40],
+      "modules": {
+        "@minecraft/server": "2.0.0",
+        "@minecraft/server-ui": "2.0.0"
+      }
+    },
+    {
+      "id": "1.26.50",
+      "min_engine_version": [1, 26, 50],
+      "modules": {
+        "@minecraft/server": "2.0.0",
+        "@minecraft/server-ui": "2.0.0"
+      }
+    }
+  ]
+}

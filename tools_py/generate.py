@@ -31,6 +31,33 @@ from _common import ROOT, NS, ensure_dir, write_text, read_json, exists, rmrf, c
 from _common import write_json as _raw_write_json
 
 
+def _is_dist_file(p) -> bool:
+    """True for dist.json and version-variant files (e.g. menu.json.1.21.80.x)."""
+    n = p.name.lower()
+    return n == "dist.json" or n.endswith(".x") or ".x." in n
+
+
+def _preserve_dist(dirs):
+    """Snapshot dist.json + variant files so the clean step can not delete them."""
+    stash = []
+    for d in dirs:
+        d = Path(d)
+        if not d.exists():
+            continue
+        for f in sorted(d.rglob("*")):
+            if f.is_file() and _is_dist_file(f):
+                stash.append((d, f.relative_to(d), f.read_bytes()))
+    return stash
+
+
+def _restore_dist(stash) -> None:
+    for d, rel, data in stash:
+        p = Path(d) / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_bytes(data)
+
+
+
 # Faithful JSON emission: JavaScript's JSON.stringify has no int/float
 # distinction (3.0 prints as "3"), and V8 lists array-index object keys in
 # ascending numeric order before all other keys regardless of insertion order.
@@ -933,14 +960,14 @@ UUID = {
     "rpRes": "fab9a6e5-b172-4ed5-b061-5e6f70819203",
 }
 # Build version: date-based beta. Bedrock v2 manifests require an integer triple,
-# so "261007-beta-17" is encoded as [261002, 0, 1] with the label kept in the name.
-PACK_VERSION = [261007, 0, 17]
+# so "261010-beta-1" is encoded as [261002, 0, 1] with the label kept in the name.
+PACK_VERSION = [261010, 0, 1]
 
 
 def gen_manifests() -> None:
     write_json(BP / "manifest.json", {
         "format_version": 2,
-        "header": {"name": "PCraftRevorn §2砂墨§r §7· 261007-beta-17", "description": "荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。", "uuid": UUID["bpHeader"], "version": PACK_VERSION, "min_engine_version": [1, 21, 100]},
+        "header": {"name": "PCraftRevorn §2砂墨§r §7· 261010-beta-1", "description": "荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。", "uuid": UUID["bpHeader"], "version": PACK_VERSION, "min_engine_version": [1, 21, 100]},
         "modules": [
             {"type": "data", "uuid": UUID["bpData"], "version": PACK_VERSION},
             {"type": "script", "language": "javascript", "uuid": UUID["bpScript"], "entry": "scripts/main.js", "version": PACK_VERSION},
@@ -954,7 +981,7 @@ def gen_manifests() -> None:
     })
     write_json(RP / "manifest.json", {
         "format_version": 2,
-        "header": {"name": "PCraftRevorn 资源 §2砂墨§r §7· 261007-beta-17", "description": "荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。", "uuid": UUID["rpHeader"], "version": PACK_VERSION, "min_engine_version": [1, 21, 100]},
+        "header": {"name": "PCraftRevorn 资源 §2砂墨§r §7· 261010-beta-1", "description": "荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。", "uuid": UUID["rpHeader"], "version": PACK_VERSION, "min_engine_version": [1, 21, 100]},
         "modules": [{"type": "resources", "uuid": UUID["rpRes"], "version": PACK_VERSION}],
         "metadata": {"authors": ["砂墨SandMo", "Bilibili: 砂墨", "原创: MysticSummoner"], "license": "AFL-3.0"},
     })
@@ -970,8 +997,8 @@ def main() -> None:
     if not exists(MOD):
         print("Missing .work/mod. Extract the jar first (tools/extract.ps1).", file=sys.stderr)
         sys.exit(1)
-    # clean owned output so stale files never linger
-    for d in [
+    # clean owned output so stale files never linger (keep dist.json + version variants)
+    owned = [
         BP / "blocks", BP / "items", BP / "recipes",
         BP / "loot_tables", BP / "texts",
         RP / "textures" / "items" / "pcraftrevorn",
@@ -979,8 +1006,11 @@ def main() -> None:
         RP / "textures" / "models" / "armor",
         RP / "models" / "blocks",
         RP / "sounds", RP / "texts",
-    ]:
+    ]
+    stash = _preserve_dist(owned)
+    for d in owned:
         rmrf(d)
+    _restore_dist(stash)
     gen_items()
     gen_potions()
     gen_blocks()
