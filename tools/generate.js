@@ -200,9 +200,10 @@ const ITEMS = [
   ['piglin_might_talisman', 'piglin_might_talisman', 1, 'equipment'],
   ['piglin_royal_talisman', 'piglin_royal_talisman', 1, 'equipment'],
   ['pred_guidebook_item', 'pred_guidebook', 1, 'items'],
-  ['rabbit_staff', 'rabbit_staff0', 1, 'equipment'],
-  ['rabbit_staff_bloodlust', 'rabbit_staff2', 1, 'equipment'],
-  ['rabbit_staff_gold', 'rabbit_staff1', 1, 'equipment'],
+  // rabbit staff line: hidden from the creative menu (still giveable with /give)
+  ['rabbit_staff', 'rabbit_staff0', 1, 'none'],
+  ['rabbit_staff_bloodlust', 'rabbit_staff2', 1, 'none'],
+  ['rabbit_staff_gold', 'rabbit_staff1', 1, 'none'],
   ['silverfish_plate', 'silverfish_scale', 64, 'items'],
   ['silverfish_plating_helmet', 'silverfish_plating_helmet', 1, 'equipment'],
   ['silverfish_plating_chestplate', 'silverfish_plating_chestplate', 1, 'equipment'],
