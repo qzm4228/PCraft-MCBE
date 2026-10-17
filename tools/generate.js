@@ -721,12 +721,12 @@ const UUID = {
   rpRes: 'fab9a6e5-b172-4ed5-b061-5e6f70819203'
 };
 // Build version: date-based beta. Bedrock v2 manifests require an integer triple,
-// so "261010-beta-1" is encoded as [261002, 0, 1] with the label kept in the name.
-const PACK_VERSION = [261010, 0, 1];
+// so "10.17.1" is encoded as [261002, 0, 1] with the label kept in the name.
+const PACK_VERSION = [10, 17, 1];
 function genManifests() {
   writeJSON(path.join(BP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn §2砂墨§r §7· 261010-beta-1', description: '荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。', uuid: UUID.bpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
+    header: { name: 'PCraftRevorn §2砂墨§r §7· 10.17.1', description: '荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。', uuid: UUID.bpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
     modules: [
       { type: 'data', uuid: UUID.bpData, version: PACK_VERSION },
       { type: 'script', language: 'javascript', uuid: UUID.bpScript, entry: 'scripts/main.js', version: PACK_VERSION }
@@ -740,7 +740,7 @@ function genManifests() {
   });
   writeJSON(path.join(RP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn 资源 §2砂墨§r §7· 261010-beta-1', description: '荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。', uuid: UUID.rpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
+    header: { name: 'PCraftRevorn 资源 §2砂墨§r §7· 10.17.1', description: '荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。', uuid: UUID.rpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
     modules: [{ type: 'resources', uuid: UUID.rpRes, version: PACK_VERSION }],
     metadata: { authors: ['砂墨SandMo', 'Bilibili: 砂墨', '原创: MysticSummoner'], license: 'AFL-3.0' }
   });

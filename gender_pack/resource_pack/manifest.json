@@ -5,8 +5,8 @@
     "description": "pack.description",
     "uuid": "1e2d3c4b-5a69-4877-9a8b-0123456789ab",
     "version": [
-      261010,
-      0,
+      10,
+      17,
       1
     ],
     "min_engine_version": [
@@ -20,8 +20,8 @@
       "type": "resources",
       "uuid": "2f3e4d5c-6b70-4988-ab9c-123456789abc",
       "version": [
-        261010,
-        0,
+        10,
+        17,
         1
       ]
     }

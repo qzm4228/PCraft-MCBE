@@ -9,7 +9,7 @@
       "en_US": "PCraft+Internalised Behavior Pack - Custom entities and mechanics for your world."
     },
     "base_dir": "behavior_pack",
-    "version": "261010-beta-1",
+    "version": "10.17.1",
     "uuid": "b6f5c2a1-7d3e-4a91-9c2f-1a2b3c4d5e6f",
     "min_engine_version": [
       1,
@@ -27,7 +27,7 @@
       "en_US": "PCraft+Internalised Resource Pack - Custom textures and sounds for your world."
     },
     "base_dir": "resource_pack",
-    "version": "261010-beta-1",
+    "version": "10.17.1",
     "uuid": "e9a8f5d4-a061-4dc4-af50-4d5e6f708192",
     "min_engine_version": [
       1,
@@ -45,7 +45,7 @@
       "en_US": "Allows unique character appearance settings: gender, body type, and small details."
     },
     "base_dir": "gender_pack/behavior_pack",
-    "version": "261010-beta-1",
+    "version": "10.17.1",
     "uuid": "3a4f5e6d-7c81-4a99-bcad-23456789abcd",
     "min_engine_version": [
       1,
@@ -63,7 +63,7 @@
       "en_US": "Female Gender Mod Resource Pack - Visual changes for the gender mod."
     },
     "base_dir": "gender_pack/resource_pack",
-    "version": "261010-beta-1",
+    "version": "10.17.1",
     "uuid": "1e2d3c4b-5a69-4877-9a8b-0123456789ab",
     "min_engine_version": [
       1,
@@ -81,7 +81,7 @@
       "en_US": "Swallow prey whole, digest slowly, keep the nutrition. The more you eat, the more you can hold."
     },
     "base_dir": "vcraft_pack/behavior_pack",
-    "version": "261010-beta-1",
+    "version": "10.17.1",
     "uuid": "7f1e2d3c-4b5a-4697-88a9-0b1c2d3e4f50",
     "min_engine_version": [
       1,
@@ -99,7 +99,7 @@
       "en_US": "VCraft Resource Pack - visuals and sounds for the vore system."
     },
     "base_dir": "vcraft_pack/resource_pack",
-    "version": "261010-beta-1",
+    "version": "10.17.1",
     "uuid": "9b3a4f5e-6d7c-48b9-aabb-2d3e4f506172",
     "min_engine_version": [
       1,
