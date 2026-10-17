@@ -601,8 +601,6 @@ def _gen_projectiles(extra_en: list, extra_zh: list) -> dict:
                     },
                     "minecraft:physics": {},
                     "minecraft:pushable": {"is_pushable": False, "is_pushable_by_piston": False},
-                    "minecraft:damage_sensor": {"triggers": [
-                        {"cause": "all", "deals_damage": False}]},
                 },
             },
         })
