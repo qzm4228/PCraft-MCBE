@@ -178,6 +178,24 @@
     },
     "pcraftrevorn_eevee_zombie_spawn_egg": {
       "textures": "textures/items/pcraftrevorn/eevee_zombie_spawn_egg"
+    },
+    "pcraftrevorn_bat_girl_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/bat_girl_spawn_egg"
+    },
+    "pcraftrevorn_bunny_girl_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/bunny_girl_spawn_egg"
+    },
+    "pcraftrevorn_cat_girl_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/cat_girl_spawn_egg"
+    },
+    "pcraftrevorn_druid_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/druid_spawn_egg"
+    },
+    "pcraftrevorn_lamia_vcm_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/lamia_vcm_spawn_egg"
+    },
+    "pcraftrevorn_slime_girl_spawn_egg": {
+      "textures": "textures/items/pcraftrevorn/slime_girl_spawn_egg"
     }
   }
 }

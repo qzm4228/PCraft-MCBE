@@ -22,6 +22,7 @@ import {
 } from "./prey_items.js";
 import { buildHudBus } from "../constants.js";
 import { COMMUNITY } from "../data/community.js";
+import { VCM } from "../data/vcm.js";
 
 export const CONFIG = {
   digestTicksToKill: 3000,
@@ -71,6 +72,7 @@ const PREDATORS = new Set([
   "pcraftrevorn:rabbit_wizard", "pcraftrevorn:piglin_royal_knight"
 ]);
 for (const id of COMMUNITY.predatorIds ?? []) PREDATORS.add(`pcraftrevorn:${id}`);
+for (const id of VCM.predatorIds ?? []) PREDATORS.add(`pcraftrevorn:${id}`);
 const isPredator = (entity) => !!entity && PREDATORS.has(entity.typeId);
 export { isPredator };
 
@@ -611,7 +613,15 @@ const PREY_FAMILIES = {
   eevee_silverfish: SILVERFISH_PREY,
   cathyl_rabbit: ["monster"],
   eevee_rabbit: ["monster"],
-  eevee_scarecrow: ["monster"]
+  eevee_scarecrow: ["monster"],
+  // VCM import: the girls go for villagers and animals (players come through the
+  // attack/struggle path), the druid only hunts hostile monsters.
+  bat_girl: ["villager", "animal"],
+  bunny_girl: ["villager", "animal"],
+  cat_girl: ["villager", "animal"],
+  slime_girl: ["villager", "animal"],
+  lamia_vcm: ["villager", "animal"],
+  druid: ["monster"]
 };
 // anything not listed (the community creatures) keeps hunting whatever mob is around
 const DEFAULT_PREY_FAMILIES = ["animal", "monster", "villager"];

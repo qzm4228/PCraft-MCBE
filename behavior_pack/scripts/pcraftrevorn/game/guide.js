@@ -2,6 +2,7 @@
 import { showPcForm } from "../ui/forms.js";
 import { SKINS } from "../data/skins.js";
 import { COMMUNITY } from "../data/community.js";
+import { VCM } from "../data/vcm.js";
 import { openOptions } from "./config.js";
 
 const NAMES = {
@@ -29,6 +30,8 @@ const LORE = {
 
 Object.assign(NAMES, COMMUNITY.names ?? {});
 Object.assign(LORE, COMMUNITY.lore ?? {});
+Object.assign(NAMES, VCM.names ?? {});
+Object.assign(LORE, VCM.lore ?? {});
 const PRED_ORDER = Object.keys(NAMES);
 
 export async function openGuide(player) {

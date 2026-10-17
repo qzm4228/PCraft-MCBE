@@ -3,6 +3,7 @@
 // the render controller.
 import { SKINS } from "../data/skins.js";
 import { COMMUNITY } from "../data/community.js";
+import { VCM } from "../data/vcm.js";
 import { VARIANTS as VARIANT_SETS } from "../data/variants.js";
 import { world } from "@minecraft/server";
 
@@ -49,6 +50,14 @@ for (const id of COMMUNITY.gendered ?? []) GENDERED.add(id);
 Object.assign(VARIANTS, COMMUNITY.variants ?? {});
 Object.assign(END_KIND, COMMUNITY.endKind ?? {});
 Object.assign(ANIM_PREFIX, COMMUNITY.animPrefix ?? {});
+
+// ---- VCM (Internalised) import: same machinery, merged pack ----
+Object.assign(SKINS, VCM.skins ?? {});
+Object.assign(TEX_BASE, VCM.texBase ?? {});
+for (const id of VCM.gendered ?? []) GENDERED.add(id);
+Object.assign(VARIANTS, VCM.variants ?? {});
+Object.assign(END_KIND, VCM.endKind ?? {});
+Object.assign(ANIM_PREFIX, VCM.animPrefix ?? {});
 
 export const localId = (typeId) => (typeId.includes(":") ? typeId.split(":")[1] : typeId);
 
@@ -103,6 +112,9 @@ export function assignSkin(entity, belly = false) {
     idx = map[name] ?? map[fallback] ?? 0;
   }
   try { entity.setProperty("pcraftrevorn:skin", idx); } catch { /* property out of range / unsupported */ }
+  // VCM creatures declare a client-synced belly flag that swaps in their *_full
+  // animations. Other predators do not declare it, hence the try/catch.
+  try { entity.setProperty("pcraftrevorn:belly", !!belly); } catch { /* not declared */ }
 }
 
 export function getSet(entity) {
@@ -136,6 +148,7 @@ export const PRED_STATS = {
   piglin_royal_knight: { swallow: 0.28, struggles: 9, difficulty: 0.23, acid: 4.4, acidMax: 13.6, acidIncr: 0.04, wg1: 1, wg2: 4 }
 };
 Object.assign(PRED_STATS, COMMUNITY.stats ?? {});
+Object.assign(PRED_STATS, VCM.stats ?? {});
 
 export function initPredator(entity) {
   const id = localId(entity.typeId);

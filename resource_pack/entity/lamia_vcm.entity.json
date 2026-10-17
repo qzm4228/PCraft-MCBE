@@ -1,0 +1,47 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:lamia_vcm",
+      "min_engine_version": "1.8.0",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/lamia_vcm0",
+        "skin1": "textures/entity/pcraftrevorn/lamia_vcm0_belly"
+      },
+      "geometry": {
+        "default": "geometry.lamia_vcm"
+      },
+      "animations": {
+        "walkfull": "animation.lamia_vcm.walkfull",
+        "walk": "animation.lamia_vcm.walk",
+        "idle": "animation.lamia_vcm.idle",
+        "idlefull": "animation.lamia_vcm.idlefull"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "idle": "(1.0 - query.property('pcraftrevorn:belly')) * (1.0 - math.min(1.0, query.modified_move_speed * 4.0))"
+          },
+          {
+            "idlefull": "query.property('pcraftrevorn:belly') * (1.0 - math.min(1.0, query.modified_move_speed * 4.0))"
+          },
+          {
+            "walk": "(1.0 - query.property('pcraftrevorn:belly')) * math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walkfull": "query.property('pcraftrevorn:belly') * math.min(1.0, query.modified_move_speed * 4.0)"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.lamia_vcm"
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_lamia_vcm_spawn_egg"
+      }
+    }
+  }
+}

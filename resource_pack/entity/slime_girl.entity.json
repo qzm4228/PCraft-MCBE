@@ -1,0 +1,45 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:slime_girl",
+      "min_engine_version": "1.8.0",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/slime_girl0",
+        "skin1": "textures/entity/pcraftrevorn/slime_girl1",
+        "skin2": "textures/entity/pcraftrevorn/slime_girl2",
+        "skin3": "textures/entity/pcraftrevorn/slime_girl3",
+        "skin4": "textures/entity/pcraftrevorn/slime_girl4",
+        "skin5": "textures/entity/pcraftrevorn/slime_girl5"
+      },
+      "geometry": {
+        "default": "geometry.slime_girl"
+      },
+      "animations": {
+        "idle": "animation.slime_girl.idle",
+        "idle2": "animation.slime_girl.idle2",
+        "idle3": "animation.slime_girl.idle3",
+        "idle4": "animation.slime_girl.idle4"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "idle": "(1.0 - query.property('pcraftrevorn:belly'))"
+          },
+          {
+            "idle2": "query.property('pcraftrevorn:belly')"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.slime_girl"
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_slime_girl_spawn_egg"
+      }
+    }
+  }
+}

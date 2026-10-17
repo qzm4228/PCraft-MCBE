@@ -108,11 +108,13 @@ for (const f of list(path.join(BP, 'entities'), '.json')) {
 const vore = fs.readFileSync(path.join(BP, 'scripts', 'pcraftrevorn', 'vore', 'vore.js'), 'utf8');
 const predBlock = vore.match(/PREDATORS = new Set\(\[([\s\S]*?)\]\)/);
 const scriptPreds = new Set((predBlock?.[1] || '').match(/"[^"]+"/g)?.map((s) => s.replace(/"/g, '')) || []);
-// community-imported predators are merged at runtime from data/community.js
-const commPath = path.join(BP, 'scripts', 'pcraftrevorn', 'data', 'community.js');
-if (fs.existsSync(commPath)) {
-  const cm = fs.readFileSync(commPath, 'utf8').match(/"predatorIds":\s*\[([\s\S]*?)\]/);
-  for (const s of (cm?.[1] || '').match(/"[^"]+"/g) || []) scriptPreds.add(`pcraftrevorn:${s.replace(/"/g, '')}`);
+// imported predators are merged at runtime from the data/*.js registries
+// (community.js = resource-pack imports, vcm.js = the Internalised merge)
+for (const reg of ['community.js', 'vcm.js']) {
+  const regPath = path.join(BP, 'scripts', 'pcraftrevorn', 'data', reg);
+  if (!fs.existsSync(regPath)) continue;
+  const rm = fs.readFileSync(regPath, 'utf8').match(/"predatorIds":\s*\[([\s\S]*?)\]/);
+  for (const s of (rm?.[1] || '').match(/"[^"]+"/g) || []) scriptPreds.add(`pcraftrevorn:${s.replace(/"/g, '')}`);
 }
 const eventPreds = new Set(hostiles);
 for (const p of scriptPreds) if (!eventPreds.has(p)) problems.push(`script PREDATORS has ${p} but it has no aggressive group/events`);

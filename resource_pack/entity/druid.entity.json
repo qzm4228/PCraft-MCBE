@@ -1,0 +1,55 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:druid",
+      "min_engine_version": "1.8.0",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/druid0",
+        "skin1": "textures/entity/pcraftrevorn/druid0_belly",
+        "skin2": "textures/entity/pcraftrevorn/druid1",
+        "skin3": "textures/entity/pcraftrevorn/druid1_belly",
+        "skin4": "textures/entity/pcraftrevorn/druid2",
+        "skin5": "textures/entity/pcraftrevorn/druid2_belly",
+        "skin6": "textures/entity/pcraftrevorn/druid3",
+        "skin7": "textures/entity/pcraftrevorn/druid3_belly"
+      },
+      "geometry": {
+        "default": "geometry.druid"
+      },
+      "animations": {
+        "idle": "animation.druid.idle",
+        "idlefull": "animation.druid.idlefull",
+        "walk": "animation.druid.walk",
+        "walkfull": "animation.druid.walkfull",
+        "attack": "animation.druid.attack",
+        "attackfull": "animation.druid.attackfull"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "idle": "(1.0 - query.property('pcraftrevorn:belly')) * (1.0 - math.min(1.0, query.modified_move_speed * 4.0))"
+          },
+          {
+            "idlefull": "query.property('pcraftrevorn:belly') * (1.0 - math.min(1.0, query.modified_move_speed * 4.0))"
+          },
+          {
+            "walk": "(1.0 - query.property('pcraftrevorn:belly')) * math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walkfull": "query.property('pcraftrevorn:belly') * math.min(1.0, query.modified_move_speed * 4.0)"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.druid"
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_druid_spawn_egg"
+      }
+    }
+  }
+}

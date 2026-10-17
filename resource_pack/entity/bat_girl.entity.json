@@ -1,0 +1,53 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:bat_girl",
+      "min_engine_version": "1.8.0",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/bat_girl0",
+        "skin1": "textures/entity/pcraftrevorn/bat_girl0_belly",
+        "skin2": "textures/entity/pcraftrevorn/bat_girl1",
+        "skin3": "textures/entity/pcraftrevorn/bat_girl1_belly",
+        "skin4": "textures/entity/pcraftrevorn/bat_girl2",
+        "skin5": "textures/entity/pcraftrevorn/bat_girl2_belly"
+      },
+      "geometry": {
+        "default": "geometry.bat_girl"
+      },
+      "animations": {
+        "walk": "animation.bat_girl.walk",
+        "walkfull": "animation.bat_girl.walkfull",
+        "idle": "animation.bat_girl.idle",
+        "idlefull": "animation.bat_girl.idlefull",
+        "sit": "animation.bat_girl.sit",
+        "sitfull": "animation.bat_girl.sitfull"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "idle": "(1.0 - query.property('pcraftrevorn:belly')) * (1.0 - math.min(1.0, query.modified_move_speed * 4.0))"
+          },
+          {
+            "idlefull": "query.property('pcraftrevorn:belly') * (1.0 - math.min(1.0, query.modified_move_speed * 4.0))"
+          },
+          {
+            "walk": "(1.0 - query.property('pcraftrevorn:belly')) * math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walkfull": "query.property('pcraftrevorn:belly') * math.min(1.0, query.modified_move_speed * 4.0)"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.bat_girl"
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_bat_girl_spawn_egg"
+      }
+    }
+  }
+}

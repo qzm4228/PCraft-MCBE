@@ -1,0 +1,49 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:cat_girl",
+      "min_engine_version": "1.8.0",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/cat_girl0",
+        "skin1": "textures/entity/pcraftrevorn/cat_girl0_belly"
+      },
+      "geometry": {
+        "default": "geometry.cat_girl"
+      },
+      "animations": {
+        "idle": "animation.cat_girl.idle",
+        "idlefull": "animation.cat_girl.idlefull",
+        "walk": "animation.cat_girl.walk",
+        "walkfull": "animation.cat_girl.walkfull",
+        "sit": "animation.cat_girl.sit",
+        "sitfull": "animation.cat_girl.sitfull"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "idle": "(1.0 - query.property('pcraftrevorn:belly')) * (1.0 - math.min(1.0, query.modified_move_speed * 4.0))"
+          },
+          {
+            "idlefull": "query.property('pcraftrevorn:belly') * (1.0 - math.min(1.0, query.modified_move_speed * 4.0))"
+          },
+          {
+            "walk": "(1.0 - query.property('pcraftrevorn:belly')) * math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walkfull": "query.property('pcraftrevorn:belly') * math.min(1.0, query.modified_move_speed * 4.0)"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.cat_girl"
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_cat_girl_spawn_egg"
+      }
+    }
+  }
+}

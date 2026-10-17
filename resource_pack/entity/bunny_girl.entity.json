@@ -1,0 +1,47 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:bunny_girl",
+      "min_engine_version": "1.8.0",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "skin0": "textures/entity/pcraftrevorn/bunny_girl0",
+        "skin1": "textures/entity/pcraftrevorn/bunny_girl0_belly"
+      },
+      "geometry": {
+        "default": "geometry.bunny_girl"
+      },
+      "animations": {
+        "idle": "animation.bunny_girl.idle",
+        "idlefull": "animation.bunny_girl.idlefull",
+        "walk": "animation.bunny_girl.walk",
+        "walkfull": "animation.bunny_girl.walkfull"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "idle": "(1.0 - query.property('pcraftrevorn:belly')) * (1.0 - math.min(1.0, query.modified_move_speed * 4.0))"
+          },
+          {
+            "idlefull": "query.property('pcraftrevorn:belly') * (1.0 - math.min(1.0, query.modified_move_speed * 4.0))"
+          },
+          {
+            "walk": "(1.0 - query.property('pcraftrevorn:belly')) * math.min(1.0, query.modified_move_speed * 4.0)"
+          },
+          {
+            "walkfull": "query.property('pcraftrevorn:belly') * math.min(1.0, query.modified_move_speed * 4.0)"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.bunny_girl"
+      ],
+      "spawn_egg": {
+        "texture": "pcraftrevorn_bunny_girl_spawn_egg"
+      }
+    }
+  }
+}

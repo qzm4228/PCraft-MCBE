@@ -312,7 +312,9 @@ function behavior(c, skinMax) {
     'minecraft:behavior.random_look_around': { priority: 5 }
   };
   if (b.loot) components['minecraft:loot'] = { table: `loot_tables/entities/${b.loot}.json` };
-  const targets = TARGETS_BY_BASE[b.baseStats] ?? DEFAULT_TARGETS;
+  // an explicit per-creature list wins over the base-creature lookup (the VCM
+  // import has no pcraftrevorn base to inherit from)
+  const targets = b.targets ?? TARGETS_BY_BASE[b.baseStats] ?? DEFAULT_TARGETS;
   const groups = {
     'pcraftrevorn:aggressive': {
       'minecraft:behavior.melee_attack': { priority: 1, speed_multiplier: 1.2 },

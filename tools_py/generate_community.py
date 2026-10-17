@@ -514,7 +514,9 @@ def behavior(c, skin_max: int):
     }
     if b["loot"]:
         components["minecraft:loot"] = {"table": f"loot_tables/entities/{b['loot']}.json"}
-    targets = TARGETS_BY_BASE.get(b["baseStats"], DEFAULT_TARGETS)
+    # an explicit per-creature list wins over the base-creature lookup (the VCM
+    # import has no pcraftrevorn base to inherit from)
+    targets = b.get("targets") or TARGETS_BY_BASE.get(b.get("baseStats"), DEFAULT_TARGETS)
     groups = {
         "pcraftrevorn:aggressive": {
             "minecraft:behavior.melee_attack": {"priority": 1, "speed_multiplier": 1.2},

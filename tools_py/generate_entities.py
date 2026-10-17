@@ -56,6 +56,12 @@ except Exception:  # noqa: BLE001
     except Exception:  # noqa: BLE001
         generateVariants = None
 
+# VCM (Internalised) import - merged into the PCraftRevorn packs.
+try:  # pragma: no cover - depends on the extracted jar assets
+    from generate_vcm import generate_vcm as generateVcm
+except Exception:  # noqa: BLE001
+    generateVcm = None
+
 MOD = ROOT / ".work" / "mod"
 SRC_GEO = MOD / "assets" / "pcraftrevorn" / "geo"
 SRC_ANIM = MOD / "assets" / "pcraftrevorn" / "animations"
@@ -695,6 +701,10 @@ def main():
         generateVariants()
     else:
         print("warning: generate_variants module not found; skipping generateVariants()", file=sys.stderr)
+    if generateVcm is not None:
+        generateVcm()
+    else:
+        print("warning: generate_vcm module not found; skipping generateVcm()", file=sys.stderr)
     print("Phase 2 entities generated.")
 
 
