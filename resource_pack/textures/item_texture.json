@@ -92,6 +92,18 @@
     "pcraftrevorn_vibrant_elixir": {
       "textures": "textures/items/pcraftrevorn/vibrant_tonic"
     },
+    "pcraftrevorn_struggle_up": {
+      "textures": "textures/ui/pcraftrevorn/struggle_up"
+    },
+    "pcraftrevorn_struggle_down": {
+      "textures": "textures/ui/pcraftrevorn/struggle_down"
+    },
+    "pcraftrevorn_struggle_left": {
+      "textures": "textures/ui/pcraftrevorn/struggle_left"
+    },
+    "pcraftrevorn_struggle_right": {
+      "textures": "textures/ui/pcraftrevorn/struggle_right"
+    },
     "pcraftrevorn_zombie_spawn_egg": {
       "textures": "textures/items/pcraftrevorn/zombie_spawn_egg"
     },

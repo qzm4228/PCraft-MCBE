@@ -1,5 +1,6 @@
 {
   "ui_defs": [
-    "ui/pcraftrevorn_forms.json"
+    "ui/pcraftrevorn_forms.json",
+    "ui/pcraftrevorn_hud.json"
   ]
 }

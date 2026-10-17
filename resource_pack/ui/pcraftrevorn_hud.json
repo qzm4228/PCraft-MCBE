@@ -1,0 +1,295 @@
+{
+  "namespace": "hud",
+
+  // PCraftRevorn vore HUD.
+  //
+  // Bedrock cannot script the HUD, so this rides the boss bar of the
+  // `pcraftrevorn:digestion_bar` entity the vore script spawns next to a swallowed
+  // prey:
+  //   * the bar's FILL comes from that entity's health (acid progress)
+  //   * its NAMETAG is the struggle state bus (scripts/pcraftrevorn/constants.js)
+  //   * vanilla boss bars (wither, dragon, raids) are untouched: every element
+  //     below is only visible while `#bossName` carries the PCraftRevorn marker.
+  //
+  // The bar art is the original mod's `acid_indicator.png` plus its 100 acid
+  // segments pre-composited into one strip that `#progress_percentage` clips, so
+  // the bar darkens as it fills exactly like the source screens do.
+  "boss_health_panel": {
+    "modifications": [
+      {
+        "operation": "insert_after",
+        "control_name": "progress_bar_for_collections",
+        "value": [
+          { "pcr_boss_hud_instance@hud.pcr_boss_hud": {} }
+        ]
+      }
+    ]
+  },
+
+  "pcr_boss_hud": {
+    "type": "panel",
+    "size": [ 320, 32 ],
+    "anchor_from": "top_middle",
+    "anchor_to": "top_middle",
+    "offset": [ 0, 0 ],
+    "property_bag": { "#pcr_boss_name": "" },
+    "bindings": [
+      {
+        "binding_name": "#bossName",
+        "binding_name_override": "#pcr_boss_name",
+        "binding_type": "collection",
+        "binding_collection_name": "boss_bars"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "(not ((#pcr_boss_name - '§0§r§1§r') = #pcr_boss_name))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        // covers the vanilla boss bar: our frame is not fully opaque, so without
+        // this the vanilla bar would peek through it
+        "pcr_plate": {
+          "type": "image",
+          "texture": "textures/ui/Black",
+          "size": [ 182, 12 ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [ 0, 9 ],
+          "layer": 1
+        }
+      },
+      {
+        "pcr_frame": {
+          "type": "image",
+          "texture": "textures/ui/pcraftrevorn/hud/acid_indicator",
+          "size": [ 320, 32 ],
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "layer": 2
+        }
+      },
+      {
+        "pcr_fill": {
+          "type": "image",
+          "texture": "textures/ui/pcraftrevorn/hud/acid_bar_fill",
+          "size": [ 300, 8 ],
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [ 1, 12 ],
+          "layer": 3,
+          "clip_direction": "left",
+          "bindings": [
+            {
+              "binding_name": "#progress_percentage",
+              "binding_name_override": "#clip_ratio",
+              "binding_type": "collection",
+              "binding_collection_name": "boss_bars"
+            }
+          ]
+        }
+      },
+      {
+        // The original draws all four arrows in one 48x48 box: each sprite keeps
+        // its arrow against its own edge, so the four read as a cross.
+        "pcr_arrows": {
+          "type": "panel",
+          "size": [ 48, 48 ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [ 0, 34 ],
+          "layer": 4,
+          "controls": [
+            { "pcr_up_off@hud.pcr_arrow_up_off": {} },
+            { "pcr_up_idle@hud.pcr_arrow_up_idle": {} },
+            { "pcr_up_correct@hud.pcr_arrow_up_correct": {} },
+            { "pcr_up_incorrect@hud.pcr_arrow_up_incorrect": {} },
+            { "pcr_down_off@hud.pcr_arrow_down_off": {} },
+            { "pcr_down_idle@hud.pcr_arrow_down_idle": {} },
+            { "pcr_down_correct@hud.pcr_arrow_down_correct": {} },
+            { "pcr_down_incorrect@hud.pcr_arrow_down_incorrect": {} },
+            { "pcr_left_off@hud.pcr_arrow_left_off": {} },
+            { "pcr_left_idle@hud.pcr_arrow_left_idle": {} },
+            { "pcr_left_correct@hud.pcr_arrow_left_correct": {} },
+            { "pcr_left_incorrect@hud.pcr_arrow_left_incorrect": {} },
+            { "pcr_right_off@hud.pcr_arrow_right_off": {} },
+            { "pcr_right_idle@hud.pcr_arrow_right_idle": {} },
+            { "pcr_right_correct@hud.pcr_arrow_right_correct": {} },
+            { "pcr_right_incorrect@hud.pcr_arrow_right_incorrect": {} }
+          ]
+        }
+      }
+    ]
+  },
+
+  // --- direction sprites -----------------------------------------------------
+  // One marker per direction/state: PROGRESS_MARKER + progressCode(dir*4 + state)
+  //   up    off/idle/correct/incorrect = 0 1 2 3
+  //   down                             = 4 5 6 7
+  //   left                             = 8 9 a b
+  //   right                            = c d e f
+  "pcr_arrow_up_off": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_up_off",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§0§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+  "pcr_arrow_up_idle": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_up_idle",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§1§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+  "pcr_arrow_up_correct": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_up_correct",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§2§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+  "pcr_arrow_up_incorrect": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_up_incorrect",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§3§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+
+  "pcr_arrow_down_off": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_down_off",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§4§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+  "pcr_arrow_down_idle": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_down_idle",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§5§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+  "pcr_arrow_down_correct": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_down_correct",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§6§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+  "pcr_arrow_down_incorrect": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_down_incorrect",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§7§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+
+  "pcr_arrow_left_off": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_left_off",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§8§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+  "pcr_arrow_left_idle": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_left_idle",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§9§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+  "pcr_arrow_left_correct": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_left_correct",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§a§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+  "pcr_arrow_left_incorrect": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_left_incorrect",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§b§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+
+  "pcr_arrow_right_off": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_right_off",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§c§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+  "pcr_arrow_right_idle": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_right_idle",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§d§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+  "pcr_arrow_right_correct": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_right_correct",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§e§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  },
+  "pcr_arrow_right_incorrect": {
+    "type": "image",
+    "size": [ 48, 48 ],
+    "texture": "textures/ui/pcraftrevorn/hud/struggle_right_incorrect",
+    "property_bag": { "#pcr_arrow_name": "" },
+    "bindings": [
+      { "binding_name": "#bossName", "binding_name_override": "#pcr_arrow_name", "binding_type": "collection", "binding_collection_name": "boss_bars" },
+      { "binding_type": "view", "source_property_name": "(not ((#pcr_arrow_name - '§2§r§f§r') = #pcr_arrow_name))", "target_property_name": "#visible" }
+    ]
+  }
+}

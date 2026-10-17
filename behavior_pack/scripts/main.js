@@ -1,7 +1,8 @@
 import { system, world } from "@minecraft/server";
 import { showPcForm } from "./pcraftrevorn/ui/forms.js";
 import { initPredator, localId } from "./pcraftrevorn/skin/assign.js";
-import { wireVoreEvents, isPredator, startSwallow, release } from "./pcraftrevorn/vore/vore.js";
+import { wireVoreEvents, isPredator, startSwallow, release, strugglePress } from "./pcraftrevorn/vore/vore.js";
+import { dirOfItem } from "./pcraftrevorn/vore/prey_items.js";
 import { wireInteractEvents } from "./pcraftrevorn/game/interact.js";
 import { wireFermentEvents } from "./pcraftrevorn/game/ferment.js";
 import { wireBaubles } from "./pcraftrevorn/game/baubles.js";
@@ -81,6 +82,14 @@ function consumeHeld(player) {
   if (item.amount > 1) { item.amount -= 1; inv.setItem(slot, item); }
   else inv.setItem(slot, undefined);
 }
+
+// Struggle keys: the prey escapes by *using* the direction item the HUD asks for.
+world.afterEvents.itemUse.subscribe((ev) => {
+  const player = ev.source;
+  if (player?.typeId !== "minecraft:player") return;
+  const dir = dirOfItem(ev.itemStack);
+  if (dir && strugglePress(player, dir)) return;
+});
 
 world.afterEvents.itemUse.subscribe((ev) => {
   const player = ev.source;

@@ -25,6 +25,22 @@
         },
         "minecraft:behavior.hurt_by_target": {
           "priority": 2
+        },
+        "minecraft:behavior.nearest_attackable_target": {
+          "priority": 3,
+          "must_see": true,
+          "reselect_targets": true,
+          "within_radius": 16,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "magma_cube"
+              },
+              "max_dist": 16
+            }
+          ]
         }
       },
       "pcraftrevorn:prey_holder": {

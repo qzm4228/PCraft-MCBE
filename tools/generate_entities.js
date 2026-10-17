@@ -82,9 +82,20 @@ const TAMEABLE = new Set(['gilded_basaltmite', 'piglin_royal_knight', 'rabbit_wi
 const SPAWN_EGG = new Set(['zombie', 'piglin_royal', 'vinemaiden', 'piglin_royal_knight', 'silverfish', 'basaltmite', 'rabbit_wizard', 'gilded_basaltmite', 'scarecrow']);
 // entities with a separate emissive glow texture (drawn as a 2nd render controller)
 const GLOW = { binding_ring: 'binding_ring_glow', shielding_ring: 'shielding_ring_glow', scarecrow: 'scarecrow_glow' };
-// entities whose original AI does NOT target players -> neutral (only retaliate)
-// or target a different family. Others default to player+villager.
-const TARGETS = { basaltmite: [], gilded_basaltmite: [], scarecrow: ['monster'] };
+// Per-predator target lists, taken from the original entity goals
+// (net/mcreator/pcraftrevorn/entity/*Entity.java -> NearestAttackableTargetGoal).
+// Anything not listed keeps the port default (players + villagers).
+const TARGETS = {
+  basaltmite: ['magma_cube'],            // magma cubes only
+  gilded_basaltmite: ['magma_cube'],
+  // cow, sheep, pig, goat, wolf, (mod) zombie, pillager, vindicator + player
+  vinemaiden: ['cow', 'sheep', 'pig', 'goat', 'wolf', 'zombie', 'pillager', 'vindicator', 'player'],
+  zombie: ['villager', 'player'],
+  silverfish: ['player', 'villager', 'pillager', 'vindicator', 'witch'],
+  scarecrow: ['monster'],
+  rabbit_wizard: ['monster', 'player'],
+  piglin_royal_knight: ['monster', 'player']
+};
 // temporary/loop animations (short name): only these loop, the rest play once
 const LOOP_ANIMS = new Set(['idle', 'walk', 'sprint', 'hidden']);
 

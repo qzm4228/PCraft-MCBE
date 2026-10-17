@@ -420,6 +420,18 @@ BASE_STATS = {
     "piglin_royal": {"swallow": 0.30, "struggles": 13, "difficulty": 0.65, "acid": 5, "acidMax": 14.35, "acidIncr": 0.055, "wg1": 999, "wg2": 999},
 }
 
+# target families per source creature (mirrors generate_entities.TARGETS); imports
+# whose base has no source data keep the port default (players + villagers)
+TARGETS_BY_BASE = {
+    "rabbit_wizard": ["monster", "player"],
+    "vinemaiden": ["cow", "sheep", "pig", "goat", "wolf", "zombie", "pillager", "vindicator", "player"],
+    "zombie": ["villager", "player"],
+    "silverfish": ["player", "villager", "pillager", "vindicator", "witch"],
+    "scarecrow": ["monster"],
+    "piglin_royal_knight": ["monster", "player"],
+}
+DEFAULT_TARGETS = ["player", "villager"]
+
 # creature specs
 SKIP_BURIED = re.compile(r"_buried")
 SKIP_SEEDLING = re.compile(r"_seedling")
@@ -502,6 +514,7 @@ def behavior(c, skin_max: int):
     }
     if b["loot"]:
         components["minecraft:loot"] = {"table": f"loot_tables/entities/{b['loot']}.json"}
+    targets = TARGETS_BY_BASE.get(b["baseStats"], DEFAULT_TARGETS)
     groups = {
         "pcraftrevorn:aggressive": {
             "minecraft:behavior.melee_attack": {"priority": 1, "speed_multiplier": 1.2},
@@ -509,8 +522,8 @@ def behavior(c, skin_max: int):
             "minecraft:behavior.nearest_attackable_target": {
                 "priority": 3, "must_see": True, "reselect_targets": True, "within_radius": b["follow"],
                 "entity_types": [
-                    {"filters": {"test": "is_family", "subject": "other", "value": "player"}, "max_dist": b["follow"]},
-                    {"filters": {"test": "is_family", "subject": "other", "value": "villager"}, "max_dist": b["follow"]},
+                    {"filters": {"test": "is_family", "subject": "other", "value": t}, "max_dist": b["follow"]}
+                    for t in targets
                 ],
             },
         },

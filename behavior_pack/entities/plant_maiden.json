@@ -36,7 +36,7 @@
               "filters": {
                 "test": "is_family",
                 "subject": "other",
-                "value": "player"
+                "value": "cow"
               },
               "max_dist": 12
             },
@@ -44,7 +44,63 @@
               "filters": {
                 "test": "is_family",
                 "subject": "other",
-                "value": "villager"
+                "value": "sheep"
+              },
+              "max_dist": 12
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "pig"
+              },
+              "max_dist": 12
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "goat"
+              },
+              "max_dist": 12
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "wolf"
+              },
+              "max_dist": 12
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "zombie"
+              },
+              "max_dist": 12
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "pillager"
+              },
+              "max_dist": 12
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "vindicator"
+              },
+              "max_dist": 12
+            },
+            {
+              "filters": {
+                "test": "is_family",
+                "subject": "other",
+                "value": "player"
               },
               "max_dist": 12
             }

@@ -226,6 +226,33 @@ const POTIONS = [
 ];
 
 // ---------------------------------------------------------------- items
+// Bedrock addons cannot register keybinds, so the escape interaction ships as four
+// hotbar items (one per direction) that the prey *uses* (right-click / tap). The
+// server listens for item use and resolves the struggle prompt from the item id.
+// Icons live in textures/ui/pcraftrevorn (not the wiped textures/items dir) so
+// tools/extract_hud_art.ps1 owns them.
+const STRUGGLE_DIRS = ['up', 'down', 'left', 'right'];
+const STRUGGLE_ZH = { up: '上', down: '下', left: '左', right: '右' };
+
+function genStruggleItems(textureData) {
+  for (const d of STRUGGLE_DIRS) {
+    const name = 'struggle_' + d;
+    const texKey = 'pcraftrevorn_' + name;
+    textureData[texKey] = { textures: 'textures/ui/pcraftrevorn/' + name };
+    writeJSON(path.join(BP, 'items', name + '.json'), {
+      format_version: '1.21.0',
+      'minecraft:item': {
+        // hidden from the creative menu: the server hands these out
+        description: { identifier: `${NS}:${name}`, menu_category: { category: 'none' } },
+        components: {
+          'minecraft:icon': { textures: { default: texKey } },
+          'minecraft:max_stack_size': 1
+        }
+      }
+    });
+  }
+}
+
 function genItems() {
   const textureData = {};
   for (const [name, tex, stack, category, tags, vanillaTex] of ITEMS) {
@@ -259,6 +286,8 @@ function genItems() {
     };
     writeJSON(path.join(BP, 'items', name + '.json'), def);
   }
+  // struggle keys (the prey's escape items)
+  genStruggleItems(textureData);
   // spawn eggs
   for (const [name, s] of Object.entries(SPAWN_EGGS)) {
     genSpawnEgg(name, s, textureData);
@@ -606,6 +635,14 @@ function genLang() {
       const n = k.slice('effect.pcraftrevorn.'.length);
       emit(bpEn, k, EN_EFFECT[n] || cv); emit(bpZh, k, cv); // consumed by scripts later
     }
+  }
+  // struggle keys: not in the source lang, so emit them explicitly
+  for (const d of STRUGGLE_DIRS) {
+    const n = 'struggle_' + d;
+    const ev = 'Struggle ' + d.charAt(0).toUpperCase() + d.slice(1);
+    const cv = '挣扎·' + STRUGGLE_ZH[d];
+    emit(bpEn, `item.pcraftrevorn:${n}`, ev); emit(bpZh, `item.pcraftrevorn:${n}`, cv);
+    emit(bpEn, `item.pcraftrevorn:${n}.name`, ev); emit(bpZh, `item.pcraftrevorn:${n}.name`, cv);
   }
   const header = '# Generated from PCraftRevorn 3.1.1 (author: MysticSummoner)\n';
   writeText(path.join(BP, 'texts', 'en_US.lang'), header + bpEn.sort().join('\n') + '\n');

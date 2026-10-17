@@ -21,3 +21,25 @@ export const progressCode = (level) => {
 
 export const buildTitle = (humanTitle, level) =>
   `${TITLE_MARKER}${PROGRESS_MARKER}${progressCode(level)}${humanTitle ?? ""}`;
+
+// ---------------------------------------------------------------------------
+// HUD bus (JSON-UI)
+//
+// The HUD screen cannot be scripted either, and its only globally readable
+// bindings are the game's own. So the vore HUD rides the *boss bar* instead: the
+// digestion-bar entity already draws a real bar (health = acid level) and its
+// nameTag is exposed to JSON-UI as the collection binding `#bossName`.
+//
+// Name layout:  TITLE_MARKER + one marker per direction
+//   marker = PROGRESS_MARKER + progressCode(dirIndex * 4 + stateIndex)
+// so hud/pcraftrevorn_hud.json can test for each of the 16 direction/state
+// sprites with the same `(not ((#name - 'marker') = #name))` trick the forms use.
+export const HUD_DIRS = ["up", "down", "left", "right"];
+export const HUD_STATES = ["off", "idle", "correct", "incorrect"];
+
+export const hudMarker = (dir, state) =>
+  `${PROGRESS_MARKER}${progressCode(HUD_DIRS.indexOf(dir) * 4 + HUD_STATES.indexOf(state))}`;
+
+/** @param {{[dir: string]: "off"|"idle"|"correct"|"incorrect"}} stateByDir */
+export const buildHudBus = (stateByDir) =>
+  TITLE_MARKER + HUD_DIRS.map((d) => hudMarker(d, stateByDir?.[d] ?? "off")).join("");

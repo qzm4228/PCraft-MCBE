@@ -14,3 +14,7 @@ desktop.ini
 
 # large third-party reference jar (assets extracted to tools/assets)
 examples/*Cobblemon*.jar
+
+# third-party reference jars (decompiled into .work/, not redistributed)
+jar/Internalised*.jar
+jar/hungryhana*.jar

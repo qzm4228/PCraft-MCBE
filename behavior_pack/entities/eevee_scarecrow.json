@@ -36,15 +36,7 @@
               "filters": {
                 "test": "is_family",
                 "subject": "other",
-                "value": "player"
-              },
-              "max_dist": 64
-            },
-            {
-              "filters": {
-                "test": "is_family",
-                "subject": "other",
-                "value": "villager"
+                "value": "monster"
               },
               "max_dist": 64
             }

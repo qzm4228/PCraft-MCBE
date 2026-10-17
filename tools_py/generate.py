@@ -386,6 +386,33 @@ ENC_SLOT = {
     "slot.armor.feet": "armor_feet",
 }
 
+# ---------------------------------------------------------------- struggle keys
+# Bedrock addons cannot register keybinds, so the escape interaction ships as four
+# hotbar items (one per direction) that the prey *uses* (right-click / tap). The
+# server listens for item use and resolves the struggle prompt from the item id.
+# Icons live in textures/ui/pcraftrevorn (not the wiped textures/items dir) so
+# tools/extract_hud_art.ps1 owns them.
+STRUGGLE_DIRS = ["up", "down", "left", "right"]
+STRUGGLE_ZH = {"up": "上", "down": "下", "left": "左", "right": "右"}
+
+
+def gen_struggle_items(texture_data) -> None:
+    for d in STRUGGLE_DIRS:
+        name = "struggle_" + d
+        tex_key = "pcraftrevorn_" + name
+        texture_data[tex_key] = {"textures": "textures/ui/pcraftrevorn/" + name}
+        write_json(BP / "items" / (name + ".json"), {
+            "format_version": "1.21.0",
+            "minecraft:item": {
+                # hidden from the creative menu: the server hands these out
+                "description": {"identifier": f"{NS}:{name}", "menu_category": {"category": "none"}},
+                "components": {
+                    "minecraft:icon": {"textures": {"default": tex_key}},
+                    "minecraft:max_stack_size": 1,
+                },
+            },
+        })
+
 
 # ---------------------------------------------------------------- items
 def gen_items() -> None:
@@ -435,6 +462,8 @@ def gen_items() -> None:
             },
         }
         write_json(BP / "items" / (name + ".json"), defn)
+    # struggle keys (the prey's escape items)
+    gen_struggle_items(texture_data)
     # spawn eggs
     for name, s in SPAWN_EGGS.items():
         gen_spawn_egg(name, s, texture_data)
@@ -877,6 +906,15 @@ def gen_lang() -> None:
             n = k[len("effect.pcraftrevorn."):]
             emit(bp_en, k, EN_EFFECT.get(n) or cv)
             emit(bp_zh, k, cv)  # consumed by scripts later
+    # struggle keys: not in the source lang, so emit them explicitly
+    for d in STRUGGLE_DIRS:
+        n = "struggle_" + d
+        ev = "Struggle " + d.capitalize()
+        cv = "挣扎·" + STRUGGLE_ZH[d]
+        emit(bp_en, f"item.pcraftrevorn:{n}", ev)
+        emit(bp_zh, f"item.pcraftrevorn:{n}", cv)
+        emit(bp_en, f"item.pcraftrevorn:{n}.name", ev)
+        emit(bp_zh, f"item.pcraftrevorn:{n}.name", cv)
     header = "# Generated from PCraftRevorn 3.1.1 (author: MysticSummoner)\n"
     write_text(BP / "texts" / "en_US.lang", header + "\n".join(sorted(bp_en)) + "\n")
     write_text(BP / "texts" / "zh_CN.lang", header + "\n".join(sorted(bp_zh)) + "\n")

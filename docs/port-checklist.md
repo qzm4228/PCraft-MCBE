@@ -58,14 +58,16 @@ scripts 模块已写入 manifest，依赖 `@minecraft/server 2.0.0` + `@minecraf
   - 会话状态（内存 `Map`）：`digest / rate / maxTimer / struggles / needed`
   - 每秒 tick：把玩家瞬移锁定到掠食者身上；`digest += rate`（rate 递增到上限）；超过 `maxTimer` 用 magic 伤害致死
   - 满腹贴图：`digest/maxTimer >= bellyFraction` 时切 `_belly` 贴图（`assignSkin(pred, true)`）
-  - 挣脱：挣扎够次数且 `digest <= 0` → `release(player, true)` 施放反刍效果
+  - 挣脱：成功挣扎够 `needed` 次 → `release(player, true)` 反刍脱身（判定在 `vore/struggle.js`，见 1.7）
+  - 被动捕食：每 2 秒对 `predator` 家族试一次——半径 8 格内、按 `pc:swallow × 0.5` 概率把**目标清单内**的生物吞入
+    （清单取自原版 `NearestAttackableTargetGoal`，见 2.3；玩家只走攻击/挣扎路径，不参与被动捕食）
 - `scripts/pcraftrevorn/skin/assign.js`：`TextureAssignerGendered` 的 JS 版，按
   `gender/variant/counter/wg/belly` 拼出贴图名并查 `skins.js` 索引 → `setProperty("pcraftrevorn:skin")`
 - `scripts/pcraftrevorn/data/skins.js`：由 `generate_entities.js` 自动生成的「贴图名 → skin 索引」表
 - 调试：`/scriptevent pcraftrevorn:swallow`（吞最近掠食者）、`/scriptevent pcraftrevorn:form`（纯表单演示）
 
 待办（P4 替换挣扎逻辑 + 平衡）：
-- [ ] 挣扎改为「正确方向组合」（读 `Struggle*Procedure` + `MobEatPlayerProcedure` 的 required 标志）
+- [x] 挣扎：**单方向**提示 + 道具输入（`Struggle*Procedure` 的 off/idle/correct/incorrect 四态，见 1.7）
 - [ ] 酸液系数/上限、致死时间按 `PCraftGeneralConfiguration` 还原
 - [ ] 胃内视角（`3d_structure_renderer` 渲染掠食者）
 - [ ] 被吞时隐藏 HUD、限制移动/视角
@@ -74,21 +76,33 @@ scripts 模块已写入 manifest，依赖 `@minecraft/server 2.0.0` + `@minecraf
 
 `scripts/pcraftrevorn/vore/struggle.js`（移植 `MobEatPlayerProcedure` 的 required 逻辑 + `Struggle*Procedure`）：
 
-- 每次提示随机要求 **1 个方向** 或 **2 个方向组合**（`struggleDifficulty=0.4` 概率为组合）
-- 玩家用表单按钮按出所需方向；按对（组合需全部按到）→ 挣扎成功，播放对应
-  `struggleup/down/left/right/upleft/upright/downleft/downright/updown/leftright` 动画
-- 按错 / 超时（`struggleTimer=60` 刻）→ 播放 `strugglefail`，消化进度回涨
-- 成功 `strugglesNeeded` 次且进度归零 → 反刍脱身
+- 每次提示只要求 **1 个方向**（`off/idle/correct/incorrect` 四态，与 `Struggle*Procedure` 一致）
+- 按对 → 成功，播放 `struggleup/down/left/right`；按错 → 该方向立刻显示为 `incorrect`，
+  窗口结束时判定失败；超时 → 播放 `strugglefail`，消化进度回涨 `failPenalty`
+- 成功 `strugglesNeeded` 次 → **反刍脱身**（每种掠食者的次数见 `skin/assign.js` 的 `PRED_STATS`，7~15）
+- 窗口时长 80 刻起步，按掠食者 `pc:difficulty`（0~1）收紧到 40 刻；提示间隔 40~100 刻（对齐原版节奏）
 
-> 实机反馈后**弃用表单挣扎**。Bedrock 无法注册按键，物品栏/HUD 的 JSON-UI 按钮也**无法回调脚本**
-> （TLM/Ponder 的按钮是**表单屏幕**的 `form_buttons` 集合，只在表单里有效）。
-> 现改为**原生输入**当按键（零 UI、不锁视角、触屏可用）：**跳跃=上、潜行=下、左右横移=左右**
-> （`Player.inputInfo` + `InputButton.Jump/Sneak`）。被吞流程：第三人称 + 松散锁位（漂移>4格才拉回）
-> + 每 60 刻自动 `digest` 动画 + actionbar 提示所需方向；`/scriptevent pcraftrevorn:release` 脱身。
+> **输入方案（实机反馈后第三次重做）**：Bedrock 无法注册按键，物品栏/HUD 的 JSON-UI 按钮也
+> **无法回调脚本**；原生的跳跃/潜行/横移语法反直觉，双方向提示更是读不出来（这正是"挣扎没反应" 的原因）。
+> 现改为**道具输入**：
 >
-> 实机修复（第二轮）：① 动画文件缺 `"loop": true`（GeckoLib 靠代码循环）→ 生成器对 idle/walk/sprint/hidden 设 true；
-> ② 掠食者攻击行为移入组件组 `pcraftrevorn:aggressive`，被吞时 `on_swallow` 移除、放出时 `on_release` 恢复，
-> 解决"被吞后还在打我"；③ `isPredator` 改按 `typeId` 判定（原 `matches({family})` 字段名错误）。
+> - 被吞瞬间把玩家**全部随身物品**（36 格主背包 + 盔甲 4 件 + 副手）**逐格**存进隐形容器
+>   （复用 `pcraftrevorn:belly_storage`，动态属性 `pc:stash` 标记；`followStash` 让它跟着主人走，
+>   主人不在了就把内容摊回地面）
+> - 快捷栏 0~3 放入 4 个方向道具 `pcraftrevorn:struggle_{up,down,left,right}`
+>   （`ItemStack.lockMode = ItemLockMode.slot` → **位置锁定 + 不可丢弃**，创造菜单不可见）
+> - 玩家**使用**（右键 / 点按）提示要求的方向道具 = 一次输入（`world.afterEvents.itemUse`）
+> - 挣脱成功 → 清掉 4 个道具，存档**按原槽位**归还；被消化或死亡 → 道具清掉，物品并入掠食者胃袋
+> - 兜底：每刻核对 4 个道具是否在位；`entitySpawn` 事件回收任何落地的挣扎道具
+
+> **HUD（JSON-UI）**：`resource_pack/ui/pcraftrevorn_hud.json` 用 vcraft 同款 `modifications`
+> 挂到原版 `hud.boss_health_panel` 上，把"消化进度" boss 条改画成原版美术：
+> `acid_indicator.png`（320×32 底框）+ 100 段酸液合成条 `acid_bar_fill.png`（300×8，由
+> `#progress_percentage` 裁剪 → 越满越深，与 Java 版一致）+ 四方向箭头（48×48，`struggle_<方向>_<状态>`）。
+> **状态总线** = 该 boss 实体的 `nameTag`（`constants.js` 的 `buildHudBus`，全 `§` 控制码 → 屏幕上不可见），
+> JSON-UI 用仓库已有的 `(not ((#值 - '标记') = #值))` 字符串技巧读取；实体血量 = 酸液进度。
+> **普通 boss 条不受影响**——所有自定义元素只在 `#bossName` 含 `§0§r§1§r` 标记时可见。
+> 美术提取脚本：`tools/extract_hud_art.ps1`（读取原版 jar 的 `assets/pcraftrevorn/textures/screens/`）。
 
 ## 1.8 工程自检
 
@@ -199,7 +213,7 @@ Bedrock 附加包**不支持 jigsaw 结构**，原 `royal_castle_remnant`（jigs
 | Custom `MobEffect`（18） | 不可注册 → 脚本伪效果（actionbar + 原版效果 + 实体标记） |
 | Custom `Attribute`（9） | BP 实体组件 + entity properties + 脚本变量 |
 | Custom `Menu`/`Screen`（14） | `@minecraft/server-ui` 表单 |
-| `KeyMapping`（4 个方向键） | 不可注册 → 移动/跳跃/潜行组合检测 |
+| `KeyMapping`（4 个方向键） | 不可注册 → 4 个锁定快捷栏道具 + JSON-UI HUD |
 | jigsaw structure + `.nbt` | Bedrock jigsaw + `.mcstructure` |
 
 ---
@@ -255,6 +269,12 @@ P2 精修：
 - [x] Bibaso 僵尸作为 `pcraftrevorn:zombie` 的**可选外观集**（变体集 `v_bibaso`：`geometry.zombie.v_bibaso` + `animation.zombie.v_bibaso.*` + 贴图 `pcv_bibaso_*`）；原 `pcraftrevorn:zombie` 默认经典 28 骨骼原版（`subpacks` 已删除）
 - [x] Predatopia / Predatopia V2 由「僵尸可选外观」改为**独立掠食者** `pcraftrevorn:predatopia` / `pcraftrevorn:predatopia_v2`（各 240 贴图、自带生成蛋）
 - [x] 猪灵王默认改为**原始模型**（Salmonpred 36 骨骼，无翼/角）；原“龙娘”模型（69 骨骼，带翼）独立为 `pcraftrevorn:piglin_dragon`；Royal Rump 保留为 `piglin_royal` 可选外观
+- [x] 掠食者**目标清单还原**：按原 `*Entity.java` 的 `NearestAttackableTargetGoal` 写回 `nearest_attackable_target`——
+      钙质虫/镀金钙质虫 = 岩浆怪；藤蔓少女 = cow/sheep/pig/goat/wolf/僵尸/掠夺者/卫道士/玩家；僵尸 = 村民/玩家；
+      蠹虫 = 玩家/村民/掠夺者/卫道士/女巫；稻草人 = monster；兔法师/猪灵骑士 = monster/玩家。
+      社区反皮（eevee_*、cathyl_rabbit、plant_maiden、lamia、predatopia*）按各自 `baseStats` 沿用同一张表
+      （`generate_community.py` 的 `TARGETS_BY_BASE`），猪灵龙（base `piglin_royal`）无原版数据 → 沿用默认玩家/村民。
+      脚本侧 `vore.js` 的 `PREY_FAMILIES` 与这两张表一一对应（被动捕食按它过滤，玩家除外）
 - [ ] 胃部骨骼显隐（`UpperStomach2..6`/`LowerStomach2..6`/`WGStomach*` 等）→ `part_visibility` + 属性（需逐状态核对，暂缓）
 
 ### 2.4 自定义状态效果（18）— ❌ 不可注册
@@ -280,7 +300,17 @@ P2 精修：
 ### 2.8 按键（4）— ❌
 
 `struggle_up/down/left/right`（方向键）
-→ P4 重新设计为移动/跳跃/潜行检测。
+→ P4 重新设计为**锁定快捷栏道具**（`pcraftrevorn:struggle_*`）+ JSON-UI HUD 提示（详见 1.7）。
+
+### 2.9 JSON-UI HUD（新增）
+
+| 文件 | 作用 |
+|---|---|
+| `resource_pack/ui/pcraftrevorn_hud.json` | 挂在原版 `hud.boss_health_panel` 上的消化条 + 四方向箭头 |
+| `resource_pack/ui/_ui_defs.json` | 注册上面的文件（和 `pcraftrevorn_forms.json` 并列） |
+| `resource_pack/textures/ui/pcraftrevorn/hud/*` | 原版 `acid_indicator` / `acid_bar_fill` / 16 张 `struggle_*` 箭头 |
+| `resource_pack/textures/ui/pcraftrevorn/struggle_*.png` | 4 个道具图标（16×16） |
+| `tools/extract_hud_art.ps1` | 从原版 jar 提取/合成上述美术（可重复执行） |
 
 ---
 

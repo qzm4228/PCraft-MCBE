@@ -1,14 +1,26 @@
-// P3/P4 vore core: swallow -> struggle (native input) -> digest -> release/death.
+// P3/P4 vore core: swallow -> struggle (hotbar keys) -> digest -> release/death.
 //
-// Struggle input uses native controls (no UI, view stays free):
-//   Jump  = up, Sneak = down, strafe Left/Right = left/right
+// Struggle input is item based: on swallow the prey's whole carried inventory
+// (36 slots + armour + offhand) is stashed slot-for-slot and four locked,
+// undiscardable "struggle key" items are placed in hotbar slots 0..3 -- one per
+// direction. The prey escapes by *using* the direction key the prompt asks for.
 // (Bedrock addons cannot register keybinds and inventory-UI buttons cannot call
-//  scripts, so native input is the only non-blocking option on stable APIs.)
+//  scripts, so server-watched item use is the only reliable interaction.)
+//
+// The on-screen HUD (acid bar + direction arrows) is drawn by JSON-UI from two
+// things the game already exposes per boss bar: the digestion-bar entity's health
+// (the bar fill) and its nameTag (the struggle state bus, see constants.js).
 import { world, system, EntityDamageCause, EquipmentSlot } from "@minecraft/server";
 import { assignSkin, playAnim, getNum, setNum, localId } from "../skin/assign.js";
 import { getCfg } from "../game/config.js";
 import { addWgProgress } from "../game/wg.js";
-import { newPrompt, pressDir, labelFor, animFor, DIRS } from "./struggle.js";
+import { newPrompt, pressDir, failPrompt, labelFor, animFor, allOff } from "./struggle.js";
+import {
+  dirOfItem, giveStruggleItems, ensureStruggleItems,
+  clearStruggleItems, stashInventory, unstashInventory, isStruggleItem,
+  STASH_ENTITY, STASH_KEY
+} from "./prey_items.js";
+import { buildHudBus } from "../constants.js";
 import { COMMUNITY } from "../data/community.js";
 
 export const CONFIG = {
@@ -21,16 +33,37 @@ export const CONFIG = {
   lockDistance: 4,
   digestAnimInterval: 60,
   slowRefresh: 40,
-  struggleDifficulty: 0.4,
-  struggleTimer: 90,
-  promptCooldownMin: 30,
-  promptCooldownMax: 80,
+  // struggle prompts: the original asks every 40-100 ticks inside a 60 tick window.
+  // Item input costs the prey an extra tap, so the base window is 80 ticks and the
+  // difficulty settings tighten it (defaults land back on ~59 = the source window).
+  struggleTimer: 80,
+  struggleTimerMin: 40,
+  promptCooldownMin: 40,
+  promptCooldownMax: 100,
+  // a successful struggle also churns the acid back down; enough of them and the
+  // predator throws the prey back up
   struggleReduction: 25,
-  strugglesNeeded: 6,
-  failPenalty: 15
+  failPenalty: 15,
+  // passive hunt: how far a predator looks for a mob to eat, and how strongly the
+  // per-2s roll is weighted by its `pc:swallow` (0..1) chance
+  huntRadius: 8,
+  huntChance: 0.5
 };
 
 const sessions = new Map(); // playerId -> session
+
+// A predator swaps its "aggressive" component group (melee_attack / hurt_by_target /
+// nearest_attackable_target) for the rideable-only "prey_holder" group while a meal is
+// inside it; only the on_release event swaps it back. So *every* path that ends a meal
+// (digested, released, prey logged out / despawned, predator repaired) must fire
+// on_release again -- otherwise the predator stays unable to attack and never hunts
+// again after its first digestion.
+const HELD_TAG = "pc_prey_holder";
+function unswallow(pred) {
+  if (!pred) return;
+  try { pred.removeTag(HELD_TAG); } catch { /* ignore */ }
+  try { pred.triggerEvent("pcraftrevorn:on_release"); } catch { /* ignore */ }
+}
 
 const PREDATORS = new Set([
   "pcraftrevorn:basaltmite", "pcraftrevorn:gilded_basaltmite", "pcraftrevorn:silverfish",
@@ -97,32 +130,79 @@ function lockTo(player, session) {
   return true;
 }
 
+// The digestion bar doubles as the HUD channel: the boss bar's fill comes from
+// the entity's health and its nameTag carries the struggle state bus that
+// hud/pcraftrevorn_hud.json reads back (see constants.js). The name is made of
+// formatting codes only, so nothing is ever printed.
 const BAR_ID = "pcraftrevorn:digestion_bar";
+
+/** Per-direction HUD state; the resolved frame lingers briefly before clearing. */
+function hudStates(session, now) {
+  if (session.awaiting) return session.hud ?? allOff();
+  return now < (session.hudUntil ?? 0) ? (session.hud ?? allOff()) : allOff();
+}
+
 function spawnBar(player, session) {
   try {
     const bar = player.dimension.spawnEntity(BAR_ID, player.location);
-    bar.nameTag = "§c消化进度";
+    bar.nameTag = buildHudBus(allOff());
     const hp = bar.getComponent("minecraft:health");
     if (hp) hp.setCurrentValue(1);
     session.barId = bar.id;
   } catch { /* ignore */ }
 }
+
 function updateBar(player, session) {
   if (!session.barId) return;
   let bar;
   try { bar = world.getEntity(session.barId); } catch { bar = undefined; }
   if (!bar) { session.barId = undefined; return; }
+  const now = system.currentTick;
   try {
     bar.teleport(player.location, { dimension: player.dimension });
     const pct = Math.max(1, Math.min(100, Math.round((session.digest / session.maxTimer) * 100)));
     const hp = bar.getComponent("minecraft:health");
     if (hp) hp.setCurrentValue(pct);
+    const bus = buildHudBus(hudStates(session, now));
+    if (bar.nameTag !== bus) bar.nameTag = bus;
   } catch { /* ignore */ }
 }
+
 function removeBar(session) {
   if (!session?.barId) return;
   try { world.getEntity(session.barId)?.remove(); } catch { /* ignore */ }
   session.barId = undefined;
+}
+
+// ---- prey stash ------------------------------------------------------------
+// Everything the prey carries is moved into an invisible container (the same
+// entity the belly loot uses) so that escaping puts every item back in the slot
+// it came from, and a finished digestion can fold the lot into the predator.
+function createStash(pred, player) {
+  let c;
+  try { c = pred.dimension.spawnEntity(STASH_ENTITY, pred.location); } catch { return undefined; }
+  try { c.setDynamicProperty(STASH_KEY, player.id); } catch { /* ignore */ }
+  return c;
+}
+
+function resolveStash(session) {
+  const c = validEntity(session?.stashId);
+  return c && c.typeId === STASH_ENTITY ? c : undefined;
+}
+
+/** Keeps each prey stash on its owner and spills orphans (owner gone). */
+function followStash() {
+  for (const dimId of DIMENSIONS) {
+    let list;
+    try { list = world.getDimension(dimId).getEntities({ families: ["belly_storage"] }); } catch { continue; }
+    for (const c of list) {
+      const preyId = c.getDynamicProperty(STASH_KEY);
+      if (!preyId) continue;
+      const player = world.getAllPlayers().find((p) => p.id === preyId);
+      if (player) { try { c.teleport(player.location, { dimension: player.dimension }); } catch { /* ignore */ } }
+      else spillBelly(c);
+    }
+  }
 }
 
 // Tag the predator once; the actual ride is attempted every tick (see digestTick)
@@ -161,38 +241,30 @@ function refreshBelly(session) {
   if (getNum(pred, "pc:full") !== 1) { setNum(pred, "pc:full", 1); assignSkin(pred, true); }
 }
 
-const pressed = (state) => String(state) === "Pressed";
-
-/** Returns a direction if the player just pressed a native input this tick. */
-function readInput(player, session) {
-  let info;
-  try { info = player.inputInfo; } catch { return undefined; }
-  if (!info) return undefined;
-  let jump = false, sneak = false, strafe = 0;
-  try {
-    jump = pressed(info.getButtonState("Jump"));
-    sneak = pressed(info.getButtonState("Sneak"));
-    const mv = info.getMovementVector();
-    strafe = mv.x;
-  } catch { return undefined; }
-
-  let dir;
-  if (jump && !session.prevJump) dir = "up";
-  else if (sneak && !session.prevSneak) dir = "down";
-  else if (strafe > 0.5 && !(session.prevStrafe > 0.5)) dir = "right";
-  else if (strafe < -0.5 && !(session.prevStrafe < -0.5)) dir = "left";
-
-  session.prevJump = jump;
-  session.prevSneak = sneak;
-  session.prevStrafe = strafe;
-  return dir;
-}
-
 function promptBar(session) {
   const left = Math.max(0, Math.ceil((session.promptTick + session.promptTimer - system.currentTick) / 20));
-  return `§e按要求按键：§f${labelFor(session.required)} §7(${left}s)  §8[跳=↑ 潜=↓ 左右移=←→]`;
+  return `§e使用 §f${labelFor(session.required)} §e方向道具 §7(${left}s)  §8[快捷栏 1=↑ 2=↓ 3=← 4=→]`;
 }
 
+/**
+ * Reaction window for a struggle prompt, in ticks.
+ *
+ * `cfg.timer` is the prey's base window; `cfg.difficulty` (player setting) and the
+ * predator's `pc:difficulty` (0..1) each tighten it by up to 40 %. The defaults
+ * (80 ticks / 40 % / 0.3) land on ~59 ticks -- the original mod's 60 tick window.
+ */
+function promptWindow(cfg, predator) {
+  const clamp01 = (v) => Math.max(0, Math.min(1, v));
+  const playerDiff = clamp01((cfg.difficulty ?? 40) / 100);
+  const predDiff = clamp01(getNum(predator, "pc:difficulty", 0.3));
+  const base = cfg.timer ?? CONFIG.struggleTimer;
+  return Math.max(
+    CONFIG.struggleTimerMin,
+    Math.round(base * (1 - 0.4 * predDiff) * (1 - 0.4 * playerDiff))
+  );
+}
+
+/** Feeds one pressed direction into the open prompt. */
 function handlePress(player, session, dir, pred, now) {
   const outcome = pressDir(session, dir, now);
   if (outcome.result === "success") {
@@ -200,14 +272,23 @@ function handlePress(player, session, dir, pred, now) {
     session.digest = Math.max(0, session.digest - CONFIG.struggleReduction);
     session.level = levelOf(session);
     playAnim(pred, outcome.anim ?? "struggleup");
-    if (session.struggles >= session.needed && session.digest <= 0) { release(player, true); return true; }
-  } else if (outcome.result === "partial") {
-    playAnim(pred, outcome.anim ?? animFor([dir]));
-  } else if (outcome.result === "fail") {
-    playAnim(pred, "strugglefail");
+    // enough good struggles and the predator coughs the prey back up
+    if (session.struggles >= session.needed) { release(player, true); return true; }
+  } else if (outcome.result === "wrong") {
+    // wrong key: the HUD flashes it red and the slip costs acid progress
+    playAnim(pred, animFor([dir]));
     session.digest += CONFIG.failPenalty;
   }
   return false;
+}
+
+/** Item-use input: the prey used one of the struggle keys. */
+export function strugglePress(player, dir) {
+  const session = sessions.get(player.id);
+  if (!session || !session.awaiting) return false;
+  const pred = resolvePredator(session);
+  if (!pred) return false;
+  return handlePress(player, session, dir, pred, system.currentTick);
 }
 
 export function startSwallow(player, predator) {
@@ -228,20 +309,23 @@ export function startSwallow(player, predator) {
     awaiting: false,
     required: [],
     pressed: new Set(),
+    promptDir: undefined,
+    wrongDirs: new Set(),
+    correctDir: undefined,
+    hud: allOff(),
+    hudUntil: 0,
     promptTick: 0,
-    promptTimer: cfg.timer ?? CONFIG.struggleTimer,
+    promptTimer: promptWindow(cfg, predator),
     cooldown: 20,
     difficulty: getNum(predator, "pc:difficulty", 0.3),
     struggles: 0,
     needed: getNum(predator, "pc:struggles", 7),
     digestKey: "digest",
-    prevJump: false,
-    prevSneak: false,
-    prevStrafe: 0,
     msgTimer: 0,
     bellyAt: 0,
     swallowEndAt: 0,
-    digestPlayed: false
+    digestPlayed: false,
+    stashId: undefined
   };
   sessions.set(pid, session);
   assignSkin(predator, false);
@@ -251,13 +335,21 @@ export function startSwallow(player, predator) {
   // belly bulge shows 1 second (20 ticks) after the swallow starts
   session.bellyAt = now0 + 20;
   try { predator.triggerEvent("pcraftrevorn:on_swallow"); } catch { /* ignore */ }
+  try { predator.addTag(HELD_TAG); } catch { /* ignore */ }
   try { player.setDynamicProperty("pc:pred", predator.id); } catch { /* ignore */ }
+
+  // Stash everything the prey carries (slot for slot) and hand it the four keys.
+  // A failed escape therefore costs it nothing; a completed digestion keeps the lot.
+  const stash = createStash(predator, player);
+  if (stash && stashInventory(player, stash)) session.stashId = stash.id;
+  else { try { stash?.remove(); } catch { /* ignore */ } }
+  giveStruggleItems(player);
 
   setThirdPerson(player, true);
   safeEffect(player, "invisibility", 40, 0, false);
   safeEffect(player, "resistance", 60, 4);
   try { player.onScreenDisplay.setTitle("§4被吞入", { fadeInDuration: 5, stayDuration: 40, fadeOutDuration: 10 }); } catch { /* ignore */ }
-  player.sendMessage("§4[掠食者] §c你被吞入腹中！§7按提示用 §f跳跃/潜行/左右移动 §7方向挣扎。§8(/scriptevent pcraftrevorn:release 脱身)");
+  player.sendMessage("§4[掠食者] §c你被吞入腹中！§7看屏幕上的提示，用快捷栏里的 §f方向道具 §7挣扎。§8(/scriptevent pcraftrevorn:release 脱身)");
 
   spawnBar(player, session);
   prepareRide(player, predator, session);
@@ -270,7 +362,7 @@ function digestTick() {
   for (const [pid, session] of sessions) {
     if (!session.alive) { sessions.delete(pid); continue; }
     const player = world.getAllPlayers().find((p) => p.id === pid);
-    if (!player) { sessions.delete(pid); continue; }
+    if (!player) { sessions.delete(pid); unswallow(resolvePredator(session)); continue; }
     const pred = resolvePredator(session);
     if (!pred) { release(player, false); continue; }
 
@@ -297,24 +389,16 @@ function digestTick() {
 
     // struggle only starts after the swallow animation has finished
     if (now >= session.swallowEndAt) {
+      ensureStruggleItems(player); // keys are locked, but never leave the prey stuck
       if (session.awaiting) {
-        if (now - session.promptTick > session.promptTimer) {
-          session.awaiting = false;
-          playAnim(pred, "strugglefail");
-        } else {
-          const dir = readInput(player, session);
-          if (dir && handlePress(player, session, dir, pred, now)) continue;
-        }
+        if (now - session.promptTick > session.promptTimer) playAnim(pred, failPrompt(session, now));
         session.msgTimer = (session.msgTimer + 1) % 10;
         if (session.msgTimer === 0) { try { player.onScreenDisplay.setActionBar(promptBar(session)); } catch { /* ignore */ } }
+      } else if (session.cooldown > 0) {
+        session.cooldown -= 1;
       } else {
-        readInput(player, session); // keep edge state fresh
-        if (session.cooldown > 0) {
-          session.cooldown -= 1;
-        } else {
-          playAnim(pred, newPrompt(session, now, session.difficulty, session.promptTimer));
-          session.cooldown = CONFIG.promptCooldownMin + Math.floor(Math.random() * (CONFIG.promptCooldownMax - CONFIG.promptCooldownMin));
-        }
+        playAnim(pred, newPrompt(session, now, session.promptTimer));
+        session.cooldown = CONFIG.promptCooldownMin + Math.floor(Math.random() * (CONFIG.promptCooldownMax - CONFIG.promptCooldownMin));
       }
     }
 
@@ -329,13 +413,16 @@ function digestTick() {
       addWgProgress(pred, 1);
       setNum(pred, "pc:full", 0);
       assignSkin(pred, false); // after digesting, belly returns to normal (with new WG stage)
+      // a finished meal must not leave the predator stuck in `prey_holder`:
+      // restore the hunting behaviors so it keeps preying
+      unswallow(pred);
       // PCraftGeneralConfiguration: pred recovers 30% max health + belch after digesting
       try {
         const hp = pred.getComponent("minecraft:health");
         if (hp) hp.setCurrentValue(Math.min(hp.effectiveMax, hp.currentValue + hp.effectiveMax * 0.3));
       } catch { /* ignore */ }
       try { pred.dimension.playSound("pcraftrevorn.burp", pred.location, { volume: 0.8 }); } catch { /* ignore */ }
-      try { collectBelly(pred, player); } catch { /* ignore */ }
+      try { collectStash(pred, session, player); } catch { /* ignore */ }
       try { player.applyDamage(1000000, { cause: EntityDamageCause.magic, damagingEntity: pred }); } catch { /* ignore */ }
       // safety net: make sure the prey actually dies
       system.runTimeout(() => {
@@ -360,11 +447,16 @@ export function release(player, regurgitate) {
   setThirdPerson(player, false);
   try { player.onScreenDisplay.setActionBar(" "); } catch { /* ignore */ }
 
+  // hand the prey its belongings back: keys out first, then the stash, slot for slot
+  clearStruggleItems(player);
+  const stash = resolveStash(session);
+  if (stash) { unstashInventory(player, stash); spillBelly(stash); }
+
   const pred = session ? resolvePredator(session) : undefined;
   if (pred) {
     setNum(pred, "pc:full", 0);
     assignSkin(pred, false);
-    try { pred.triggerEvent("pcraftrevorn:on_release"); } catch { /* ignore */ }
+    unswallow(pred);
   }
   if (regurgitate) safeEffect(player, "regeneration", 80, 1);
   player.sendMessage(regurgitate ? "§a你挣脱了，从胃袋里滑了出来。" : "§7[掠食者] §e你被放了出来。");
@@ -424,6 +516,29 @@ function collectBelly(pred, player) {
   }
 }
 
+/**
+ * A finished meal: fold the prey's stashed belongings into the predator's belly
+ * store (food is digested, the rest is kept), then remove the keys.
+ */
+function collectStash(pred, session, player) {
+  clearStruggleItems(player);
+  const stash = resolveStash(session);
+  if (!stash) { collectBelly(pred, player); return; }
+  const dst = bellyContainer(pred)?.getComponent("minecraft:inventory")?.container;
+  const src = stash.getComponent("minecraft:inventory")?.container;
+  if (dst && src) {
+    for (let i = 0; i < src.size; i++) {
+      let item;
+      try { item = src.getItem(i); } catch { item = undefined; }
+      if (!item) continue;
+      if (!isFood(item)) { try { dst.addItem(item); } catch { /* ignore */ } }
+      try { src.setItem(i, undefined); } catch { /* ignore */ }
+    }
+  }
+  spillBelly(stash); // anything that did not fit (or no belly store) drops out
+  collectBelly(pred, player); // plus whatever the prey picked up mid-meal
+}
+
 /** Spills a container's contents into the world and removes it. */
 function spillBelly(container) {
   const inv = container.getComponent("minecraft:inventory")?.container;
@@ -452,6 +567,7 @@ function followBelly() {
     let list;
     try { list = world.getDimension(dimId).getEntities({ families: ["belly_storage"] }); } catch { continue; }
     for (const c of list) {
+      if (c.getDynamicProperty(STASH_KEY)) continue; // prey stash: handled by followStash
       const owner = validEntity(c.getDynamicProperty(OWNER_KEY));
       if (owner) { try { c.teleport(owner.location, { dimension: owner.dimension }); } catch { /* ignore */ } }
       else spillBelly(c);
@@ -465,6 +581,41 @@ function followBelly() {
 // the predator gains weight + recovers health. State is kept per predator.
 const mobSessions = new Map(); // predatorId -> session
 const MOB_PREY_TAG = "pc_mobprey";
+
+// Which families each predator goes after, mirroring the generated
+// `minecraft:behavior.nearest_attackable_target` lists
+// (tools_py/generate_entities.py -> TARGETS and generate_community.py ->
+//  TARGETS_BY_BASE, taken from the original entity goals). The passive hunt is
+// filtered by the same lists so a predator only takes what its goals targeted.
+// `player` is left out on purpose: players are only swallowed through the
+// attack/struggle path.
+const VINEMAIDEN_PREY = ["cow", "sheep", "pig", "goat", "wolf", "zombie", "pillager", "vindicator"];
+const ZOMBIE_PREY = ["villager"];
+const SILVERFISH_PREY = ["villager", "pillager", "vindicator", "witch"];
+const PREY_FAMILIES = {
+  basaltmite: ["magma_cube"],
+  gilded_basaltmite: ["magma_cube"],
+  vinemaiden: VINEMAIDEN_PREY,
+  zombie: ZOMBIE_PREY,
+  silverfish: SILVERFISH_PREY,
+  scarecrow: ["monster"],
+  rabbit_wizard: ["monster"],
+  piglin_royal_knight: ["monster"],
+  // imported reskins hunt exactly like the creature they reskin
+  plant_maiden: VINEMAIDEN_PREY,
+  eevee_vinemaiden: VINEMAIDEN_PREY,
+  lamia: ZOMBIE_PREY,
+  predatopia: ZOMBIE_PREY,
+  predatopia_v2: ZOMBIE_PREY,
+  eevee_zombie: ZOMBIE_PREY,
+  eevee_silverfish: SILVERFISH_PREY,
+  cathyl_rabbit: ["monster"],
+  eevee_rabbit: ["monster"],
+  eevee_scarecrow: ["monster"]
+};
+// anything not listed (the community creatures) keeps hunting whatever mob is around
+const DEFAULT_PREY_FAMILIES = ["animal", "monster", "villager"];
+const huntFamilies = (pred) => PREY_FAMILIES[localId(pred.typeId)] ?? DEFAULT_PREY_FAMILIES;
 
 function isPreyMob(e) {
   if (!e) return false;
@@ -501,6 +652,7 @@ function startMobSwallow(pred, prey) {
   setNum(pred, "pc:full", 0);
   playAnim(pred, swallowSuffix(pred));
   try { pred.triggerEvent("pcraftrevorn:on_swallow"); } catch { /* ignore */ }
+  try { pred.addTag(HELD_TAG); } catch { /* ignore */ }
 }
 
 function endMobSession(pid) { mobSessions.delete(pid); }
@@ -514,7 +666,7 @@ function mobDigestTick() {
     if (!pred || !prey) {
       endMobSession(pid, false);
       if (prey) { try { prey.removeTag(MOB_PREY_TAG); } catch { /* ignore */ } try { prey.removeEffect("invisibility"); } catch { /* ignore */ } }
-      if (pred) { setNum(pred, "pc:full", 0); assignSkin(pred, false); }
+      if (pred) { setNum(pred, "pc:full", 0); assignSkin(pred, false); unswallow(pred); }
       continue;
     }
 
@@ -537,6 +689,7 @@ function mobDigestTick() {
       addWgProgress(pred, 1);
       setNum(pred, "pc:full", 0);
       assignSkin(pred, false);
+      unswallow(pred); // restore hunting behaviors after the meal
       try {
         const hp = pred.getComponent("minecraft:health");
         if (hp) hp.setCurrentValue(Math.min(hp.effectiveMax, hp.currentValue + hp.effectiveMax * 0.3));
@@ -553,19 +706,29 @@ function mobHuntTick() {
     let preds;
     try { preds = world.getDimension(dimId).getEntities({ families: ["predator"] }); } catch { continue; }
     for (const pred of preds) {
+      // safety net: if a meal ended without restoring the hunt behaviors (prey
+      // unloaded, predator reloaded mid-meal, ...), repair it here
+      let held = false;
+      try { held = pred.hasTag(HELD_TAG); } catch { held = false; }
+      if (held && !predatorBusy(pred.id)) {
+        setNum(pred, "pc:full", 0);
+        assignSkin(pred, false);
+        unswallow(pred);
+      }
       if (predatorBusy(pred.id)) continue;
       let prey;
       try {
         prey = pred.dimension.getEntities({
           location: pred.location,
-          maxDistance: 3.5,
+          maxDistance: CONFIG.huntRadius,
           closest: 1,
+          families: huntFamilies(pred),
           excludeFamilies: ["predator"],
           excludeTypes: ["minecraft:player", BELLY_ENTITY, "pcraftrevorn:digestion_bar"]
         })[0];
       } catch { prey = undefined; }
       if (!prey || !isPreyMob(prey) || prey.hasTag(MOB_PREY_TAG)) continue;
-      if (Math.random() > getNum(pred, "pc:swallow", 0.25) * 0.1) continue;
+      if (Math.random() > getNum(pred, "pc:swallow", 0.25) * CONFIG.huntChance) continue;
       startMobSwallow(pred, prey);
     }
   }
@@ -575,7 +738,20 @@ export function wireVoreEvents() {
   system.runInterval(digestTick, 1);
   system.runInterval(mobDigestTick, 1);
   system.runInterval(followBelly, 5);
+  system.runInterval(followStash, 5);
   system.runInterval(mobHuntTick, 40);
+
+  // struggle keys are locked in the hotbar, so a dropped key means something got
+  // around the lock (a death drop, a chunk reload, an engine without item locks):
+  // remove it rather than let the prey stash it away outside the minigame
+  world.afterEvents.entitySpawn.subscribe((ev) => {
+    const spawned = ev.entity;
+    if (!spawned || spawned.typeId !== "minecraft:item") return;
+    try {
+      const item = spawned.getComponent("minecraft:item")?.itemStack;
+      if (isStruggleItem(item)) spawned.remove();
+    } catch { /* ignore */ }
+  });
 
 
 
@@ -619,7 +795,14 @@ export function wireVoreEvents() {
     }
     if (dead?.typeId === "minecraft:player" && sessions.has(dead.id)) {
       const s = sessions.get(dead.id);
-      if (s) { s.alive = false; removeBar(s); }
+      if (s) {
+        s.alive = false;
+        removeBar(s);
+        const pred = resolvePredator(s);
+        // dying inside a predator means the predator keeps everything the prey had
+        try { collectStash(pred, s, dead); } catch { /* ignore */ }
+        unswallow(pred);
+      }
       sessions.delete(dead.id);
       try { dead.camera?.clear?.(); } catch { /* ignore */ }
     }

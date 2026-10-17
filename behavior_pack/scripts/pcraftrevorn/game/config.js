@@ -2,7 +2,7 @@
 import { showPcModal, showPcForm } from "../ui/forms.js";
 import { openVariants } from "./variants.js";
 
-const DEFAULTS = { swallow: 25, difficulty: 40, timer: 60 };
+const DEFAULTS = { swallow: 25, difficulty: 40, timer: 80 };
 
 const safeGet = (p, k) => { try { return p.getDynamicProperty(k); } catch { return undefined; } };
 const safeSet = (p, k, v) => { try { p.setDynamicProperty(k, v); } catch { /* ignore */ } };
@@ -21,8 +21,8 @@ export async function openSettings(player) {
     title: "PCraft 设置",
     controls: [
       { kind: "slider", label: "被吞概率 (%)", min: 0, max: 100, step: 5, default: cfg.swallow },
-      { kind: "slider", label: "挣扎难度（组合率 %）", min: 0, max: 100, step: 5, default: cfg.difficulty },
-      { kind: "slider", label: "挣扎时限（刻）", min: 20, max: 200, step: 10, default: cfg.timer }
+      { kind: "slider", label: "挣扎难度 (%) — 越高判定窗口越短", min: 0, max: 100, step: 5, default: cfg.difficulty },
+      { kind: "slider", label: "挣扎时限 (刻) — 判定窗口基准", min: 20, max: 200, step: 10, default: cfg.timer }
     ]
   });
   if (res.canceled) return;

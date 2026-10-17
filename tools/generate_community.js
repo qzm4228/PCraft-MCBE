@@ -222,6 +222,18 @@ const BASE_STATS = {
   piglin_royal: { swallow: 0.30, struggles: 13, difficulty: 0.65, acid: 5.0, acidMax: 14.35, acidIncr: 0.055, wg1: 999, wg2: 999 }
 };
 
+// target families per source creature (mirrors generate_entities.TARGETS); imports
+// whose base has no source data keep the port default (players + villagers)
+const TARGETS_BY_BASE = {
+  rabbit_wizard: ['monster', 'player'],
+  vinemaiden: ['cow', 'sheep', 'pig', 'goat', 'wolf', 'zombie', 'pillager', 'vindicator', 'player'],
+  zombie: ['villager', 'player'],
+  silverfish: ['player', 'villager', 'pillager', 'vindicator', 'witch'],
+  scarecrow: ['monster'],
+  piglin_royal_knight: ['monster', 'player']
+};
+const DEFAULT_TARGETS = ['player', 'villager'];
+
 // creature specs
 const CREATURES = [
   { id: 'cathyl_rabbit', pack: 'CathylFunni', srcMob: 'rabbit', texBase: 'cathyl_rabbit',
@@ -300,16 +312,14 @@ function behavior(c, skinMax) {
     'minecraft:behavior.random_look_around': { priority: 5 }
   };
   if (b.loot) components['minecraft:loot'] = { table: `loot_tables/entities/${b.loot}.json` };
+  const targets = TARGETS_BY_BASE[b.baseStats] ?? DEFAULT_TARGETS;
   const groups = {
     'pcraftrevorn:aggressive': {
       'minecraft:behavior.melee_attack': { priority: 1, speed_multiplier: 1.2 },
       'minecraft:behavior.hurt_by_target': { priority: 2 },
       'minecraft:behavior.nearest_attackable_target': {
         priority: 3, must_see: true, reselect_targets: true, within_radius: b.follow,
-        entity_types: [
-          { filters: { test: 'is_family', subject: 'other', value: 'player' }, max_dist: b.follow },
-          { filters: { test: 'is_family', subject: 'other', value: 'villager' }, max_dist: b.follow }
-        ]
+        entity_types: targets.map((t) => ({ filters: { test: 'is_family', subject: 'other', value: t }, max_dist: b.follow }))
       }
     },
     'pcraftrevorn:prey_holder': { 'minecraft:rideable': { seat_count: 1, family_types: ['player'], seats: [{ position: [0, 0, 0] }] } }
