@@ -3,10 +3,10 @@
     "output_name": "PCraftRevorn_BP",
     "folder_name": "PCraftRevorn_BP",
     "display_name": {
-      "en_US": "PCraftRevorn BP"
+      "en_US": "PCraft+Internalised BP"
     },
     "description": {
-      "en_US": "PCraftRevorn Behavior Pack - Custom entities and mechanics for your world."
+      "en_US": "PCraft+Internalised Behavior Pack - Custom entities and mechanics for your world."
     },
     "base_dir": "behavior_pack",
     "version": "261010-beta-1",
@@ -21,10 +21,10 @@
     "output_name": "PCraftRevorn_RP",
     "folder_name": "PCraftRevorn_RP",
     "display_name": {
-      "en_US": "PCraftRevorn RP"
+      "en_US": "PCraft+Internalised RP"
     },
     "description": {
-      "en_US": "PCraftRevorn Resource Pack - Custom textures and sounds for your world."
+      "en_US": "PCraft+Internalised Resource Pack - Custom textures and sounds for your world."
     },
     "base_dir": "resource_pack",
     "version": "261010-beta-1",

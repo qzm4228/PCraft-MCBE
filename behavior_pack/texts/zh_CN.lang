@@ -192,5 +192,5 @@ entity.pcraftrevorn:eevee_zombie.name=火伊布
 item.pcraftrevorn:eevee_zombie_spawn_egg.name=火伊布
 item.pcraftrevorn:eevee_zombie_spawn_egg=火伊布
 item.spawn_egg.entity.pcraftrevorn:eevee_zombie.name=火伊布
-pack.name=PCraftRevorn BP
-pack.description=PCraftRevorn Behavior Pack - Custom entities and mechanics for your world.
+pack.name=PCraft+Internalised BP
+pack.description=PCraft+Internalised Behavior Pack - Custom entities and mechanics for your world.
