@@ -23,6 +23,9 @@
     "result": {
       "item": "pcraftrevorn:glowberry_juice_bottle",
       "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
     }
   }
 }

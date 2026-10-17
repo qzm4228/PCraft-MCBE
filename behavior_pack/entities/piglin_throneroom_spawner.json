@@ -30,12 +30,6 @@
       "minecraft:damage_sensor": {
         "triggers": [
           {
-            "on_damage": {
-              "filters": {
-                "test": "always",
-                "value": true
-              }
-            },
             "deals_damage": false
           }
         ]

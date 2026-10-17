@@ -78,7 +78,7 @@
         "components": {
           "minecraft:shooter": {
             "def": "pcraftrevorn:druid_projectile",
-            "type": "entity"
+            "sound": "block.amethyst_block.chime"
           }
         }
       },
@@ -86,7 +86,7 @@
         "components": {
           "minecraft:shooter": {
             "def": "pcraftrevorn:autumn_druid_projectile",
-            "type": "entity"
+            "sound": "block.amethyst_block.chime"
           }
         }
       },
@@ -94,7 +94,7 @@
         "components": {
           "minecraft:shooter": {
             "def": "pcraftrevorn:spring_druid_projectile",
-            "type": "entity"
+            "sound": "block.amethyst_block.chime"
           }
         }
       },
@@ -102,7 +102,7 @@
         "components": {
           "minecraft:shooter": {
             "def": "pcraftrevorn:winter_druid_projectile",
-            "type": "entity"
+            "sound": "block.amethyst_block.chime"
           }
         }
       }
@@ -182,7 +182,7 @@
       },
       "minecraft:shooter": {
         "def": "pcraftrevorn:druid_projectile",
-        "type": "entity"
+        "sound": "block.amethyst_block.chime"
       },
       "minecraft:behavior.ranged_attack": {
         "priority": 2,

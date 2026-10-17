@@ -6,13 +6,10 @@
       "menu_category": {
         "category": "construction"
       },
-      "states": {
-        "minecraft:cardinal_direction": {
-          "values": [
-            "north",
-            "east",
-            "south",
-            "west"
+      "traits": {
+        "minecraft:placement_direction": {
+          "enabled_states": [
+            "minecraft:cardinal_direction"
           ]
         }
       }

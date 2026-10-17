@@ -22,6 +22,9 @@
     "result": {
       "item": "pcraftrevorn:soul_jack_o_lantern",
       "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
     }
   }
 }

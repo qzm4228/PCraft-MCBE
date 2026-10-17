@@ -29,6 +29,9 @@
     "result": {
       "item": "pcraftrevorn:vampiric_dagger",
       "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
     }
   }
 }

@@ -21,6 +21,9 @@
     "result": {
       "item": "pcraftrevorn:netherite_piglin_armor_kit",
       "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
     }
   }
 }

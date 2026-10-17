@@ -42,6 +42,7 @@
       "minecraft:particle_motion_collision": {
         "coefficient_of_restitution": 0.0,
         "collision_drag": 1.0,
+        "collision_radius": 0.1,
         "collisions_per_second": 20.0
       },
       "minecraft:particle_appearance_billboard": {

@@ -276,7 +276,7 @@ def generate_variants() -> None:
         write_json(rc_path, rc)
         # BP entity: add set property + widen skin range
         bp["minecraft:entity"]["description"]["properties"][f"{NS}:set"] = {"type": "int", "range": [0, len(sets)], "default": 0, "client_sync": True}
-        bp["minecraft:entity"]["description"]["properties"][f"{NS}:skin"]["range"] = [0, max(0, offset - 1)]
+        bp["minecraft:entity"]["description"]["properties"][f"{NS}:skin"]["range"] = [0, max(1, offset - 1)]
         write_json(bp_path, bp)
 
         reg[sp["species"]] = {"baseCount": base_count, "total": offset, "sets": sets}

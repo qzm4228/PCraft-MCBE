@@ -319,6 +319,31 @@ def ball_png(file, ball, size: int = 16) -> None:
     write_png(file, size, size, bytes(rgba))
 
 
+
+# GeckoLib/Blockbench sometimes export a whole channel as an easing marker,
+# e.g. "rotation": ["easeInOutSine", "easeInOutSine", "easeInOutSine"]. Bedrock
+# parses that as Molang and logs "unknown token"; it carries no rotation data,
+# so the channel is zeroed instead.
+EASING_NAMES = {n.lower() for n in (
+    "linear", "step", "catmullrom", "auto", "smooth",
+    "easeInSine", "easeOutSine", "easeInOutSine",
+    "easeInQuad", "easeOutQuad", "easeInOutQuad",
+    "easeInCubic", "easeOutCubic", "easeInOutCubic",
+    "easeInQuart", "easeOutQuart", "easeInOutQuart",
+    "easeInQuint", "easeOutQuint", "easeInOutQuint",
+    "easeInExpo", "easeOutExpo", "easeInOutExpo",
+    "easeInCirc", "easeOutCirc", "easeInOutCirc",
+    "easeInBack", "easeOutBack", "easeInOutBack",
+    "easeInElastic", "easeOutElastic", "easeInOutElastic",
+    "easeInBounce", "easeOutBounce", "easeInOutBounce",
+)}
+
+
+def _easing_channel(v) -> bool:
+    """True for a channel that holds only easing names (no numeric data)."""
+    return (isinstance(v, list) and bool(v)
+            and all(isinstance(x, str) and x.lower() in EASING_NAMES for x in v))
+
 def convert_anim_object(j):
     def unwrap(v):
         if isinstance(v, dict):
@@ -358,6 +383,8 @@ def convert_anim_object(j):
             for ch in ("rotation", "position", "scale"):
                 if ch in bd:
                     bd[ch] = convert_channel(bd[ch])
+                    if _easing_channel(bd[ch]):
+                        bd[ch] = [0, 0, 0]
     return j
 
 
@@ -543,7 +570,7 @@ def behavior(c, skin_max: int):
     return {
         "format_version": "1.21.0",
         "minecraft:entity": {
-            "description": {"identifier": f"{NS}:{c['id']}", "is_spawnable": True, "is_summonable": True, "properties": {f"{NS}:skin": {"type": "int", "range": [0, skin_max], "default": 0, "client_sync": True}}},
+            "description": {"identifier": f"{NS}:{c['id']}", "is_spawnable": True, "is_summonable": True, "properties": {f"{NS}:skin": {"type": "int", "range": [0, max(1, skin_max)], "default": 0, "client_sync": True}}},
             "component_groups": groups, "components": components, "events": events,
         },
     }

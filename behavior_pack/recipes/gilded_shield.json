@@ -26,6 +26,9 @@
     "result": {
       "item": "pcraftrevorn:gilded_shield",
       "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
     }
   }
 }

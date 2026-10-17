@@ -10,7 +10,7 @@
     "components": {
       "minecraft:icon": {
         "textures": {
-          "default": "pufferfish_bucket"
+          "default": "stick"
         }
       },
       "minecraft:max_stack_size": 64

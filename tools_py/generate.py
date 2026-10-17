@@ -340,7 +340,7 @@ ITEMS = [
     ["bejeweled_upgrade_kit", "jeweled_upgrade_template", 64, "items"],
     ["carbonated_water_bottle", "carbonated_water_bottle", 1, "items"],
     ["cupids_arrow", "cupid_arrow", 1, "items"],
-    ["debugging_item", "pufferfish_bucket", 64, "items", None, True],
+    ["debugging_item", "stick", 64, "items", None, True],
     ["fermented_glowberry_juice_bottle", "fermented_glowberry_bottle", 1, "nature"],
     ["gilded_basaltmite_scale", "basaltmite_plate_gilded", 64, "items", ["pcraftrevorn:basaltmite_scale"]],
     ["gilded_shield", "gilded_shield", 1, "equipment"],
@@ -443,7 +443,6 @@ def gen_items() -> None:
                 components["minecraft:food"]["can_always_eat"] = True
             components["minecraft:use_animation"] = {"value": "eat"}
             components["minecraft:use_modifiers"] = {
-                "start_using": "always",
                 "use_duration": 1.6,
                 "movement_modifier": 0.35,
             }
@@ -607,8 +606,7 @@ def gen_potions() -> None:
                     "minecraft:food": {"nutrition": 0, "saturation_modifier": 0, "can_always_eat": True},
                     "minecraft:use_animation": {"value": "drink"},
                     "minecraft:use_modifiers": {
-                        "start_using": "always",
-                        "use_duration": 1.6,
+                                "use_duration": 1.6,
                         "movement_modifier": 0.35,
                     },
                 },
@@ -687,7 +685,14 @@ def gen_blocks() -> None:
                 "description": {
                     "identifier": ident,
                     "menu_category": {"category": "construction"},
-                    "states": {"minecraft:cardinal_direction": {"values": ["north", "east", "south", "west"]}},
+                    # minecraft:cardinal_direction cannot be declared by hand (the
+                    # engine reserves the minecraft: namespace for block states);
+                    # the placement_direction trait enables it instead.
+                    "traits": {
+                        "minecraft:placement_direction": {
+                            "enabled_states": ["minecraft:cardinal_direction"]
+                        }
+                    },
                 },
                 "components": components,
                 "permutations": [
@@ -737,6 +742,7 @@ def gen_recipes() -> None:
                 "pattern": src["pattern"],
                 "key": key,
                 "result": {"item": src["result"].get("item"), "count": src["result"].get("count") or 1},
+                "unlock": {"context": "AlwaysUnlocked"},
             }
         elif src.get("type") == "minecraft:crafting_shapeless":
             out["minecraft:recipe_shapeless"] = {
@@ -744,6 +750,7 @@ def gen_recipes() -> None:
                 "tags": ["crafting_table"],
                 "ingredients": [convert_key(i) for i in src["ingredients"]],
                 "result": {"item": src["result"].get("item"), "count": src["result"].get("count") or 1},
+                "unlock": {"context": "AlwaysUnlocked"},
             }
         elif src.get("type") == "minecraft:smithing_transform":
             # Bedrock's smithing table only accepts a fixed netherite recipe shape
@@ -756,6 +763,7 @@ def gen_recipes() -> None:
                 "tags": ["crafting_table"],
                 "ingredients": [convert_key(src["template"]), convert_key(src["base"]), convert_key(src["addition"])],
                 "result": {"item": src["result"].get("item"), "count": src["result"].get("count") or 1},
+                "unlock": {"context": "AlwaysUnlocked"},
             }
         elif src.get("type") == "minecraft:smelting":
             out["minecraft:recipe_furnace"] = {
@@ -916,7 +924,7 @@ def gen_lang() -> None:
         emit(bp_zh, f"item.pcraftrevorn:{n}", cv)
         emit(bp_en, f"item.pcraftrevorn:{n}.name", ev)
         emit(bp_zh, f"item.pcraftrevorn:{n}.name", cv)
-    header = "# Generated from PCraftRevorn 3.1.1 (author: MysticSummoner)\n"
+    header = ""  # .lang has no comment syntax; a leading "#" breaks the parser
     write_text(BP / "texts" / "en_US.lang", header + "\n".join(sorted(bp_en)) + "\n")
     write_text(BP / "texts" / "zh_CN.lang", header + "\n".join(sorted(bp_zh)) + "\n")
     write_text(RP / "texts" / "en_US.lang", header + "\n".join(sorted(rp_en)) + "\n")

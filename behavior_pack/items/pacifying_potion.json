@@ -23,7 +23,6 @@
         "value": "drink"
       },
       "minecraft:use_modifiers": {
-        "start_using": "always",
         "use_duration": 1.6,
         "movement_modifier": 0.35
       }

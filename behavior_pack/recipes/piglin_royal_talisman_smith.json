@@ -21,6 +21,9 @@
     "result": {
       "item": "pcraftrevorn:piglin_royal_talisman",
       "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
     }
   }
 }

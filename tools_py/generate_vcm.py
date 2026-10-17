@@ -330,6 +330,7 @@ def _gen_recipe() -> None:
                 "d": {"item": "minecraft:stick"},
             },
             "result": {"item": f"{NS}:vampiric_dagger", "count": 1},
+            "unlock": {"context": "AlwaysUnlocked"},
         },
     })
 
@@ -403,6 +404,8 @@ STAFFS = {
 }
 STAFF_COOLDOWN = f"{NS}_druidstaff"
 PROJECTILE_FAMILY = f"{NS}_druid_projectile"
+# VCM's staff sound, also used by the druid's mob shots (minecraft:shooter.sound)
+SHOT_SOUND = "block.amethyst_block.chime"
 # 1 rad/tick in Bedrock's seconds-based animation time: 20 * (180 / pi)
 SPIN_DEG = "query.anim_time * 1145.9"
 
@@ -502,6 +505,7 @@ def _particle_effect(pid: str, texture: str, count: int, speed: float, life: str
                                               "linear_drag_coefficient": 0.02},
         "minecraft:particle_motion_collision": {"coefficient_of_restitution": 0.0,
                                                 "collision_drag": 1.0,
+                                                "collision_radius": 0.1,
                                                 "collisions_per_second": 20.0},
         "minecraft:particle_appearance_billboard": {
             "size": [0.2, 0.2], "facing_camera_mode": "lookat_xyz",
@@ -699,13 +703,13 @@ def generate_vcm() -> None:
             shoot = c["behavior"]["shoot"]
             for i, pid in enumerate(ids):
                 body["component_groups"][f"{NS}:shooter{i}"] = {"components": {
-                    "minecraft:shooter": {"def": f"{NS}:{pid}", "type": "entity"}}}
+                    "minecraft:shooter": {"def": f"{NS}:{pid}", "sound": SHOT_SOUND}}}
                 body["events"][f"{NS}:shooter{i}"] = {
                     "add": {"component_groups": [f"{NS}:shooter{i}"]},
                     "remove": {"component_groups": [f"{NS}:shooter{j}"
                                                     for j in range(len(ids)) if j != i]},
                 }
-            body["components"]["minecraft:shooter"] = {"def": f"{NS}:{ids[0]}", "type": "entity"}
+            body["components"]["minecraft:shooter"] = {"def": f"{NS}:{ids[0]}", "sound": SHOT_SOUND}
             body["components"]["minecraft:behavior.ranged_attack"] = {
                 "priority": 2, "speed_multiplier": 1.0,
                 "attack_interval_min": shoot["interval"][0],

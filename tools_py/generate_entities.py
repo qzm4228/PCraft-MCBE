@@ -464,7 +464,7 @@ def genBehavior(e, skinMax):
                 "identifier": NS + ":" + e["id"],
                 "is_spawnable": True,
                 "is_summonable": True,
-                "properties": {NS + ":skin": {"type": "int", "range": [0, max(0, skinMax)], "default": 0, "client_sync": True}},
+                "properties": {NS + ":skin": {"type": "int", "range": [0, max(1, skinMax)], "default": 0, "client_sync": True}},
             },
             "component_groups": componentGroups,
             "components": components,
@@ -513,7 +513,7 @@ def genSpecial():
                 "minecraft:pushable": {"is_pushable": False, "is_pushable_by_piston": False},
                 "minecraft:fire_immune": {},
                 "minecraft:persistent": {},
-                "minecraft:damage_sensor": {"triggers": [{"on_damage": {"filters": {"test": "always", "value": True}}, "deals_damage": False}]},
+                "minecraft:damage_sensor": {"triggers": [{"deals_damage": False}]},
             }
         elif s.get("boss"):
             components = {
@@ -525,7 +525,7 @@ def genSpecial():
                 "minecraft:pushable": {"is_pushable": False, "is_pushable_by_piston": False},
                 "minecraft:fire_immune": {},
                 "minecraft:persistent": {},
-                "minecraft:damage_sensor": {"triggers": [{"on_damage": {"filters": {"test": "always", "value": True}}, "deals_damage": False}]},
+                "minecraft:damage_sensor": {"triggers": [{"deals_damage": False}]},
             }
         else:
             components = {
@@ -535,7 +535,7 @@ def genSpecial():
                 "minecraft:physics": {},
                 "minecraft:pushable": {"is_pushable": False, "is_pushable_by_piston": False},
                 "minecraft:fire_immune": {},
-                "minecraft:damage_sensor": {"triggers": [{"on_damage": {"filters": {"test": "always", "value": True}}, "deals_damage": False}]},
+                "minecraft:damage_sensor": {"triggers": [{"deals_damage": False}]},
             }
         write_json(BP / "entities" / (s["id"] + ".json"), {
             "format_version": "1.21.0",

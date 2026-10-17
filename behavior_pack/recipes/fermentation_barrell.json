@@ -26,6 +26,9 @@
     "result": {
       "item": "pcraftrevorn:glowberry_fermentation_barrel",
       "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
     }
   }
 }

@@ -21,6 +21,9 @@
     "result": {
       "item": "pcraftrevorn:pred_guidebook_item",
       "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
     }
   }
 }

@@ -21,6 +21,9 @@
     "result": {
       "item": "pcraftrevorn:silverfish_plating_leggings",
       "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
     }
   }
 }

@@ -23,6 +23,9 @@
     "result": {
       "item": "pcraftrevorn:basaltmite_plated_soles",
       "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
     }
   }
 }

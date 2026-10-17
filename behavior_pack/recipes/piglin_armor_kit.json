@@ -24,6 +24,9 @@
     "result": {
       "item": "pcraftrevorn:golden_piglin_armor_kit",
       "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
     }
   }
 }

@@ -18,6 +18,9 @@
     "result": {
       "item": "minecraft:netherite_scrap",
       "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
     }
   }
 }
