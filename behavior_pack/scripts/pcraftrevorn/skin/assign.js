@@ -115,6 +115,12 @@ export function assignSkin(entity, belly = false) {
   // VCM creatures declare a client-synced belly flag that swaps in their *_full
   // animations. Other predators do not declare it, hence the try/catch.
   try { entity.setProperty("pcraftrevorn:belly", !!belly); } catch { /* not declared */ }
+  // VCM's druid shoots the projectile of its season; the shooter component
+  // groups are switched here because the skin index IS the season.
+  const shooters = VCM.shooter?.[id];
+  if (shooters?.length) {
+    try { entity.triggerEvent(`pcraftrevorn:shooter${Math.max(0, Math.min(shooters.length - 1, variant))}`); } catch { /* ignore */ }
+  }
 }
 
 export function getSet(entity) {

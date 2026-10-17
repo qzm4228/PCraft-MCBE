@@ -83,6 +83,37 @@ for (const f of list(path.join(RP, 'entity'), '.json')) {
 let unused = 0;
 for (const name of animInfo.keys()) if (!clientAnimNames.has(name)) unused++;
 
+// ---- our asset references must resolve (attachables included) ----
+// Only engine-provided paths are exempt: enchant glints, the humanoid/player
+// armor geometry + its offset animations. Everything else has to exist in RP.
+const VANILLA_GEO = /^geometry\.(humanoid|player)\./;
+const VANILLA_ANIM = /^animation\.armor\./;
+const ENCHANT_TEX = /^textures\/misc\/enchanted_/;
+function checkRefs(kind, file, d) {
+  const geo = d.geometry?.default;
+  if (typeof geo === 'string' && !geoBones.has(geo) && !/^Array\.|\[/.test(geo) && !VANILLA_GEO.test(geo)) {
+    problems.push(`${kind} ${d.identifier} (${file}): geometry ${geo} not found`);
+  }
+  for (const [k, v] of Object.entries(d.textures || {})) {
+    if (typeof v !== 'string' || !v.startsWith('textures/') || ENCHANT_TEX.test(v)) continue;
+    if (!fs.existsSync(path.join(RP, v + '.png')) && !fs.existsSync(path.join(RP, v))) {
+      problems.push(`${kind} ${d.identifier} (${file}): texture ${k}=${v} not found`);
+    }
+  }
+  for (const [k, v] of Object.entries(d.animations || {})) {
+    if (typeof v !== 'string' || v.startsWith('controller.') || animInfo.has(v) || VANILLA_ANIM.test(v)) continue;
+    problems.push(`${kind} ${d.identifier} (${file}): animation ${k}=${v} not found`);
+  }
+}
+for (const f of list(path.join(RP, 'attachables'), '.json')) {
+  const d = readJSON(path.join(RP, 'attachables', f))['minecraft:attachable']?.description;
+  if (d) checkRefs('attachable', f, d);
+}
+for (const f of list(path.join(RP, 'entity'), '.json')) {
+  const d = readJSON(path.join(RP, 'entity', f))['minecraft:client_entity']?.description;
+  if (d && d.identifier !== 'minecraft:player') checkRefs('client', f, d);
+}
+
 // ---- hostile predators: aggressive group + events ----
 const hostiles = [];
 for (const f of list(path.join(BP, 'entities'), '.json')) {

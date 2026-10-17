@@ -190,5 +190,87 @@ export const VCM = {
     "druid": 7,
     "lamia_vcm": 1,
     "slime_girl": 5
+  },
+  "shooter": {
+    "druid": [
+      "pcraftrevorn:druid_projectile",
+      "pcraftrevorn:autumn_druid_projectile",
+      "pcraftrevorn:spring_druid_projectile",
+      "pcraftrevorn:winter_druid_projectile"
+    ]
+  },
+  "particles": {
+    "leaves": {
+      "trail": "pcraftrevorn:leaves",
+      "burst": "pcraftrevorn:leaves_burst",
+      "texture": "textures/particle/pcraftrevorn/leaves",
+      "count": 2,
+      "burstCount": 35
+    },
+    "autumn_leaves": {
+      "trail": "pcraftrevorn:autumn_leaves",
+      "burst": "pcraftrevorn:autumn_leaves_burst",
+      "texture": "textures/particle/pcraftrevorn/autumn_leaves",
+      "count": 2,
+      "burstCount": 35
+    },
+    "spring_blossom": {
+      "trail": "pcraftrevorn:spring_blossom",
+      "burst": "pcraftrevorn:spring_blossom_burst",
+      "texture": "textures/particle/pcraftrevorn/spring_blossom",
+      "count": 2,
+      "burstCount": 35
+    },
+    "winter_snowflake": {
+      "trail": "pcraftrevorn:winter_snowflake",
+      "burst": "pcraftrevorn:winter_snowflake_burst",
+      "texture": "textures/particle/pcraftrevorn/winter_snowflake",
+      "count": 2,
+      "burstCount": 35
+    },
+    "siphon": {
+      "trail": "pcraftrevorn:siphon",
+      "burst": "pcraftrevorn:siphon_burst",
+      "texture": "textures/particle/pcraftrevorn/siphon",
+      "count": 2,
+      "burstCount": 35
+    }
+  },
+  "projectiles": {
+    "druid_projectile": {
+      "particle": "leaves",
+      "texture": "textures/entity/pcraftrevorn/druid_projectile"
+    },
+    "autumn_druid_projectile": {
+      "particle": "autumn_leaves",
+      "texture": "textures/entity/pcraftrevorn/autumn_druid_projectile"
+    },
+    "spring_druid_projectile": {
+      "particle": "spring_blossom",
+      "texture": "textures/entity/pcraftrevorn/spring_druid_projectile"
+    },
+    "winter_druid_projectile": {
+      "particle": "winter_snowflake",
+      "texture": "textures/entity/pcraftrevorn/winter_druid_projectile"
+    }
+  },
+  "projectileFamily": "pcraftrevorn_druid_projectile",
+  "staffs": {
+    "pcraftrevorn:druid_staff": {
+      "projectile": "pcraftrevorn:druid_projectile",
+      "cooldown": "pcraftrevorn_druidstaff"
+    },
+    "pcraftrevorn:autumn_druid_staff": {
+      "projectile": "pcraftrevorn:autumn_druid_projectile",
+      "cooldown": "pcraftrevorn_druidstaff"
+    },
+    "pcraftrevorn:spring_druid_staff": {
+      "projectile": "pcraftrevorn:spring_druid_projectile",
+      "cooldown": "pcraftrevorn_druidstaff"
+    },
+    "pcraftrevorn:winter_druid_staff": {
+      "projectile": "pcraftrevorn:winter_druid_projectile",
+      "cooldown": "pcraftrevorn_druidstaff"
+    }
   }
 };

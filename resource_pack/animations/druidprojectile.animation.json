@@ -1,0 +1,31 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.pcraftrevorn.druidprojectile.spin": {
+      "loop": true,
+      "bones": {
+        "Projectile": {
+          "rotation": [
+            0,
+            "query.anim_time * 1145.9",
+            0
+          ]
+        },
+        "Loop1": {
+          "rotation": [
+            0,
+            "query.anim_time * 1145.9",
+            0
+          ]
+        },
+        "Loop2": {
+          "rotation": [
+            0,
+            0,
+            "query.anim_time * 1145.9"
+          ]
+        }
+      }
+    }
+  }
+}

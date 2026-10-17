@@ -73,6 +73,38 @@
           "start_distance": 10,
           "stop_distance": 2
         }
+      },
+      "pcraftrevorn:shooter0": {
+        "components": {
+          "minecraft:shooter": {
+            "def": "pcraftrevorn:druid_projectile",
+            "type": "entity"
+          }
+        }
+      },
+      "pcraftrevorn:shooter1": {
+        "components": {
+          "minecraft:shooter": {
+            "def": "pcraftrevorn:autumn_druid_projectile",
+            "type": "entity"
+          }
+        }
+      },
+      "pcraftrevorn:shooter2": {
+        "components": {
+          "minecraft:shooter": {
+            "def": "pcraftrevorn:spring_druid_projectile",
+            "type": "entity"
+          }
+        }
+      },
+      "pcraftrevorn:shooter3": {
+        "components": {
+          "minecraft:shooter": {
+            "def": "pcraftrevorn:winter_druid_projectile",
+            "type": "entity"
+          }
+        }
       }
     },
     "components": {
@@ -147,6 +179,18 @@
       },
       "minecraft:scale": {
         "value": 2.0
+      },
+      "minecraft:shooter": {
+        "def": "pcraftrevorn:druid_projectile",
+        "type": "entity"
+      },
+      "minecraft:behavior.ranged_attack": {
+        "priority": 2,
+        "speed_multiplier": 1.0,
+        "attack_interval_min": 3.0,
+        "attack_interval_max": 3.0,
+        "attack_radius": 16.0,
+        "attack_radius_min": 4.0
       }
     },
     "events": {
@@ -185,6 +229,62 @@
         "add": {
           "component_groups": [
             "pcraftrevorn:tamed"
+          ]
+        }
+      },
+      "pcraftrevorn:shooter0": {
+        "add": {
+          "component_groups": [
+            "pcraftrevorn:shooter0"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "pcraftrevorn:shooter1",
+            "pcraftrevorn:shooter2",
+            "pcraftrevorn:shooter3"
+          ]
+        }
+      },
+      "pcraftrevorn:shooter1": {
+        "add": {
+          "component_groups": [
+            "pcraftrevorn:shooter1"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "pcraftrevorn:shooter0",
+            "pcraftrevorn:shooter2",
+            "pcraftrevorn:shooter3"
+          ]
+        }
+      },
+      "pcraftrevorn:shooter2": {
+        "add": {
+          "component_groups": [
+            "pcraftrevorn:shooter2"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "pcraftrevorn:shooter0",
+            "pcraftrevorn:shooter1",
+            "pcraftrevorn:shooter3"
+          ]
+        }
+      },
+      "pcraftrevorn:shooter3": {
+        "add": {
+          "component_groups": [
+            "pcraftrevorn:shooter3"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "pcraftrevorn:shooter0",
+            "pcraftrevorn:shooter1",
+            "pcraftrevorn:shooter2"
           ]
         }
       }

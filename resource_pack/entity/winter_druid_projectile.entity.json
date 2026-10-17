@@ -1,0 +1,31 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "pcraftrevorn:winter_druid_projectile",
+      "min_engine_version": "1.8.0",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/pcraftrevorn/winter_druid_projectile"
+      },
+      "geometry": {
+        "default": "geometry.pcraftrevorn.druidprojectile"
+      },
+      "animations": {
+        "spin": "animation.pcraftrevorn.druidprojectile.spin"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "spin": "1.0"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.druid_projectile"
+      ]
+    }
+  }
+}

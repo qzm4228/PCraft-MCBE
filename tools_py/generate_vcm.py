@@ -129,7 +129,12 @@ CREATURES = [
         "animate": ANIM_BELLY,
         "behavior": {"hp": 20, "speed": 0.3, "dmg": 4, "follow": 16, "size": [0.4, 0.95],
                      "scale": 2.0, "loot": None, "tameable": True, "undead": False,
-                     "targets": ["monster"]},
+                     "targets": ["monster"],
+                     # VCM: fires on a 60 tick cooldown (3 s), 4..16 blocks out,
+                     # and the projectile matches the seasonal variant
+                     "shooter": ["druid_projectile", "autumn_druid_projectile",
+                                 "spring_druid_projectile", "winter_druid_projectile"],
+                     "shoot": {"interval": [3.0, 3.0], "radius": [4.0, 16.0]}},
         "stats": _stats(swallow=0.25, difficulty=0.35),
     },
     {
@@ -335,10 +340,269 @@ def _gen_loot() -> None:
     })
 
 
+# ---- particles ------------------------------------------------------------ #
+# VCM's five particles are plain 8x8 sprites with no gravity: leaves / blossom /
+# snowflake live 20+-7 ticks and roll at 0.2 rad/tick, `siphon` (the dagger's
+# lifesteal swirl) only 5+-2. Java spawns them with a random direction scaled by
+# `speed` (0.08 while flying, 0.3 on impact), so each particle ships twice: a
+# trail emitter (VCM's 2 particles, no spread) and a burst emitter (35 at +1
+# block, 0.1 spread). Java's render type decompiles to CUSTOM/NO_RENDER, so all
+# five are drawn as translucent billboards here.
+TRAIL_COUNT = 2
+BURST_COUNT = 35
+
+PARTICLES = [
+    {"id": "leaves", "src": "leaves_particle", "life": "math.random(0.65, 1.35)",
+     "spin": 11.46, "speed": 0.08, "burst_speed": 0.3},
+    {"id": "autumn_leaves", "src": "autumn_leaves_particle", "life": "math.random(0.65, 1.35)",
+     "spin": 11.46, "speed": 0.08, "burst_speed": 0.3},
+    {"id": "spring_blossom", "src": "spring_blossom_particle", "life": "math.random(0.65, 1.35)",
+     "spin": 11.46, "speed": 0.08, "burst_speed": 0.3},
+    {"id": "winter_snowflake", "src": "winter_snowflake_particle", "life": "math.random(0.65, 1.35)",
+     "spin": 11.46, "speed": 0.08, "burst_speed": 0.3},
+    {"id": "siphon", "src": "siphon_particle", "life": "math.random(0.15, 0.35)",
+     "spin": 0.0, "speed": 0.1, "burst_speed": 0.25},
+]
+
+# ---- projectiles ---------------------------------------------------------- #
+# VCM's druid projectile is an AbstractArrow clone: Modelmcv is a 3x3x3 core
+# with two 5x1x5 leaf plates that spin around Y / Z every tick (the loop bones
+# were the reason the Java renderer exists at all). Damage 1, no knockback,
+# launched from the eye (-0.1) at 5 blocks/tick with the amethyst chime.
+PROJECTILES = [
+    {"id": "druid_projectile", "src": "druidprojectile", "particle": "leaves",
+     "name": "德鲁伊弹射物", "nameEn": "Druid Projectile"},
+    {"id": "autumn_druid_projectile", "src": "autumndruidprojectile", "particle": "autumn_leaves",
+     "name": "秋日德鲁伊弹射物", "nameEn": "Autumn Druid Projectile"},
+    {"id": "spring_druid_projectile", "src": "springdruidprojectile", "particle": "spring_blossom",
+     "name": "春日德鲁伊弹射物", "nameEn": "Spring Druid Projectile"},
+    {"id": "winter_druid_projectile", "src": "winterdruidprojectile", "particle": "winter_snowflake",
+     "name": "冬日德鲁伊弹射物", "nameEn": "Winter Druid Projectile"},
+]
+
+# staff item (local id) -> projectile id. VCM fires on release; Bedrock fires on
+# use, which is the closest thing a hand item has.
+STAFFS = {
+    "druid_staff": "druid_projectile",
+    "autumn_druid_staff": "autumn_druid_projectile",
+    "spring_druid_staff": "spring_druid_projectile",
+    "winter_druid_staff": "winter_druid_projectile",
+}
+STAFF_COOLDOWN = f"{NS}_druidstaff"
+PROJECTILE_FAMILY = f"{NS}_druid_projectile"
+# 1 rad/tick in Bedrock's seconds-based animation time: 20 * (180 / pi)
+SPIN_DEG = "query.anim_time * 1145.9"
+
+# Modelmcv -> Bedrock. Java's y-down model space is flipped (Bedrock y = -java
+# y) and the 22.5px "feet" offset is dropped so the leaf sits on the projectile
+# origin instead of hanging below it; the per-cube 90 deg Z spin of the second
+# plate is carried over (it is symmetric, so the sign does not matter).
+PROJECTILE_GEO = {
+    "format_version": "1.12.0",
+    "minecraft:geometry": [{
+        "description": {
+            "identifier": f"geometry.{NS}.druidprojectile",
+            "texture_width": 32, "texture_height": 32,
+            "visible_bounds_width": 1, "visible_bounds_height": 1.5,
+            "visible_bounds_offset": [0, 0.25, 0],
+        },
+        "bones": [
+            {"name": "Projectile", "pivot": [0, 0, 0],
+             "cubes": [{"origin": [-1.5, -1.5, -1.5], "size": [3, 3, 3], "uv": [0, 14]}]},
+            {"name": "Loop1", "parent": "Projectile", "pivot": [0, 0, 0],
+             "cubes": [{"origin": [-2.5, -0.5, -2.5], "size": [5, 1, 5], "uv": [0, 0]}]},
+            {"name": "Loop2", "parent": "Projectile", "pivot": [0, 0, 0],
+             "cubes": [{"origin": [-2.5, -0.5, -2.6], "size": [5, 1, 5], "uv": [0, 7],
+                        "rotation": [0, 0, 90], "pivot": [0, 0, 0]}]},
+        ],
+    }],
+}
+
+
+# ---- natural spawns (VCM's data/vcm/forge/biome_modifier) ----------------- #
+# Five biome modifiers: bat_girl in the dripstone/lush caves (VCM also lists the
+# dark forest, kept as a dark surface condition), bunny/cat/lamia anywhere in
+# the overworld, slime_girl in swamps 1-4 at a time. VCM's MONSTER-category ones
+# keep the vanilla dark requirement; its CREATURE ones may spawn in daylight.
+# The druid has no biome modifier in VCM and stays spawn-egg only.
+SPAWNS = [
+    {"id": "bat_girl", "weight": 10, "min": 1, "max": 1, "pop": "ambient",
+     "conds": [{"underground": True, "maxLight": 7}, {"surface": True, "maxLight": 7}]},
+    {"id": "bunny_girl", "weight": 5, "min": 1, "max": 1, "pop": "monster",
+     "conds": [{"surface": True, "maxLight": 7}]},
+    {"id": "cat_girl", "weight": 10, "min": 1, "max": 1, "pop": "monster",
+     "conds": [{"surface": True, "maxLight": 15}]},
+    {"id": "lamia_vcm", "weight": 20, "min": 1, "max": 1, "pop": "monster",
+     "conds": [{"surface": True, "maxLight": 7}]},
+    {"id": "slime_girl", "weight": 20, "min": 1, "max": 4, "pop": "monster",
+     "conds": [{"surface": True, "maxLight": 15, "tags": ["swamp", "mangrove_swamp"]}]},
+]
+
+
+def _gen_spawn_rules() -> None:
+    """VCM's biome modifiers as Bedrock spawn rules (see SPAWNS)."""
+    for r in SPAWNS:
+        conds = []
+        for c in r["conds"]:
+            cond = {
+                "minecraft:difficulty_filter": {"min": "easy", "max": "hard"},
+                "minecraft:brightness_filter": {"min": 0, "max": c["maxLight"],
+                                                "adjust_for_weather": False},
+                "minecraft:weight": {"default": r["weight"]},
+                "minecraft:herd": {"min_size": r["min"], "max_size": r["max"]},
+            }
+            if c.get("underground"):
+                cond["minecraft:spawns_underground"] = {}
+            else:
+                cond["minecraft:spawns_on_surface"] = {}
+            if c.get("tags"):
+                cond["minecraft:biome_filter"] = {"any_of": [
+                    {"test": "has_biome_tag", "operator": "==", "value": t}
+                    for t in c["tags"]]}
+            else:
+                cond["minecraft:biome_filter"] = {"test": "has_biome_tag",
+                                                  "operator": "==", "value": "overworld"}
+            conds.append(cond)
+        write_json(BP / "spawn_rules" / (r["id"] + ".json"), {
+            "format_version": "1.8.0",
+            "minecraft:spawn_rules": {
+                "description": {"identifier": f"{NS}:{r['id']}", "population_control": r["pop"]},
+                "conditions": conds,
+            },
+        })
+
+
+def _particle_effect(pid: str, texture: str, count: int, speed: float, life: str,
+                     spin: float, spread: float) -> dict:
+    """Build one Bedrock particle_effect (trail when spread==0, burst otherwise)."""
+    shape = {"direction": ["math.random(-1, 1)", "math.random(-1, 1)", "math.random(-1, 1)"]}
+    if spread:
+        shape["offset"] = [f"math.random(-{spread}, {spread})"] * 3
+    comps = {
+        "minecraft:emitter_local_space": {"position": False, "rotation": False, "velocity": False},
+        "minecraft:emitter_rate_instant": {"num_particles": count},
+        "minecraft:emitter_lifetime_once": {"active_time": 0.0},
+        "minecraft:emitter_shape_point": shape,
+        "minecraft:particle_initial_speed": speed,
+        "minecraft:particle_lifetime_expression": {"max_lifetime": life},
+        "minecraft:particle_motion_dynamic": {"linear_acceleration": [0, 0, 0],
+                                              "linear_drag_coefficient": 0.02},
+        "minecraft:particle_motion_collision": {"coefficient_of_restitution": 0.0,
+                                                "collision_drag": 1.0,
+                                                "collisions_per_second": 20.0},
+        "minecraft:particle_appearance_billboard": {
+            "size": [0.2, 0.2], "facing_camera_mode": "lookat_xyz",
+            "uv": {"texture_width": 8, "texture_height": 8, "uv": [0, 0], "uv_size": [8, 8]},
+        },
+        "minecraft:particle_appearance_lighting": {},
+    }
+    if spin:
+        comps["minecraft:particle_initial_spin"] = {"rotation": "math.random(0, 360)",
+                                                    "rotation_rate": spin}
+    return {
+        "format_version": "1.10.0",
+        "particle_effect": {
+            "description": {"identifier": f"{NS}:{pid}",
+                            "basic_render_parameters": {"material": "particles_alpha",
+                                                        "texture": texture}},
+            "components": comps,
+        },
+    }
+
+
+def _gen_particles() -> dict:
+    """Emit the five VCM particles: sprite, trail emitter and burst emitter."""
+    out = {}
+    dst = RP / "textures" / "particle" / "pcraftrevorn"
+    for p in PARTICLES:
+        pid = p["id"]
+        copy(VCM / "textures" / "particle" / (p["src"] + ".png"), dst / (pid + ".png"))
+        tex = f"textures/particle/pcraftrevorn/{pid}"
+        write_json(RP / "particles" / (pid + ".particle.json"),
+                   _particle_effect(pid, tex, TRAIL_COUNT, p["speed"], p["life"], p["spin"], 0.0))
+        write_json(RP / "particles" / (pid + "_burst.particle.json"),
+                   _particle_effect(pid + "_burst", tex, BURST_COUNT, p["burst_speed"],
+                                    p["life"], p["spin"], 0.1))
+        out[pid] = {"trail": f"{NS}:{pid}", "burst": f"{NS}:{pid}_burst",
+                    "texture": tex, "count": TRAIL_COUNT, "burstCount": BURST_COUNT}
+    return out
+
+
+def _gen_projectiles(extra_en: list, extra_zh: list) -> dict:
+    """Emit the four seasonal druid projectiles (geo, spin, client + server entity)."""
+    write_json(RP / "models" / "entity" / "druidprojectile.geo.json", PROJECTILE_GEO)
+    write_json(RP / "animations" / "druidprojectile.animation.json", {
+        "format_version": "1.8.0",
+        "animations": {f"animation.{NS}.druidprojectile.spin": {
+            "loop": True,
+            "bones": {"Projectile": {"rotation": [0, SPIN_DEG, 0]},
+                      "Loop1": {"rotation": [0, SPIN_DEG, 0]},
+                      "Loop2": {"rotation": [0, 0, SPIN_DEG]}},
+        }},
+    })
+    write_json(RP / "render_controllers" / "vcm_projectiles.render_controllers.json", {
+        "format_version": "1.10.0",
+        "render_controllers": {f"controller.render.{NS}.druid_projectile": {
+            "geometry": "Geometry.default", "materials": [{"*": "Material.default"}],
+            "textures": ["Texture.default"]}},
+    })
+
+    out = {}
+    for p in PROJECTILES:
+        pid = p["id"]
+        # the geo declares a 32x32 UV space, the art is painted at 64x64 (same
+        # GeckoLib/Blockbench oversampling as the held items) -> resample
+        _resample_png(VCM / "textures" / "entities" / (p["src"] + ".png"),
+                      RP / "textures" / "entity" / "pcraftrevorn" / (pid + ".png"), 32)
+        write_json(RP / "entity" / (pid + ".entity.json"), {
+            "format_version": "1.10.0",
+            "minecraft:client_entity": {
+                "description": {
+                    "identifier": f"{NS}:{pid}", "min_engine_version": "1.8.0",
+                    "materials": {"default": "entity_alphatest"},
+                    "textures": {"default": f"textures/entity/pcraftrevorn/{pid}"},
+                    "geometry": {"default": f"geometry.{NS}.druidprojectile"},
+                    "animations": {"spin": f"animation.{NS}.druidprojectile.spin"},
+                    "scripts": {"animate": [{"spin": "1.0"}]},
+                    "render_controllers": [f"controller.render.{NS}.druid_projectile"],
+                },
+            },
+        })
+        write_json(BP / "entities" / (pid + ".json"), {
+            "format_version": "1.21.0",
+            "minecraft:entity": {
+                "description": {"identifier": f"{NS}:{pid}", "is_spawnable": False,
+                                "is_summonable": True},
+                "components": {
+                    "minecraft:collision_box": {"width": 0.5, "height": 0.5},
+                    "minecraft:type_family": {"family": [PROJECTILE_FAMILY]},
+                    "minecraft:projectile": {
+                        "on_hit": {
+                            "impact_damage": {"damage": 1, "knockback": False,
+                                              "destroy_on_hit": True},
+                        },
+                        "power": 5.0, "gravity": 0.05, "inertia": 0.99,
+                        "liquid_inertia": 0.6, "anchor": 1, "offset": [0, -0.1, 0],
+                        "uncertainty_base": 0, "uncertainty_multiplier": 0,
+                        "shoot_target": True,
+                    },
+                    "minecraft:physics": {},
+                    "minecraft:pushable": {"is_pushable": False, "is_pushable_by_piston": False},
+                    "minecraft:damage_sensor": {"triggers": [
+                        {"cause": "all", "deals_damage": False}]},
+                },
+            },
+        })
+        extra_en.append(f"entity.{NS}:{pid}.name={p['nameEn']}")
+        extra_zh.append(f"entity.{NS}:{pid}.name={p['name']}")
+        out[pid] = {"particle": p["particle"], "texture": f"textures/entity/pcraftrevorn/{pid}"}
+    return out
+
+
 def generate_vcm() -> None:
     reg = {"texBase": {}, "gendered": [], "variants": {}, "endKind": {}, "animPrefix": {},
            "counterMax": {}, "stats": {}, "names": {}, "lore": {}, "predatorIds": [],
-           "skins": {}, "texMax": {}}
+           "skins": {}, "texMax": {}, "shooter": {}}
     atlas = read_json(RP / "textures" / "item_texture.json")
     bp_texts = [BP / "texts" / "en_US.lang", BP / "texts" / "zh_CN.lang"]
     extra_en, extra_zh = [], []
@@ -400,6 +664,30 @@ def generate_vcm() -> None:
         }
         if c["behavior"].get("scale"):
             ent["minecraft:entity"]["components"]["minecraft:scale"] = {"value": c["behavior"]["scale"]}
+        # VCM's druid is the only ranged creature: one shooter component group per
+        # season, switched by assign.js from the skin index, plus a 60 tick
+        # ranged_attack that only fires at 4..16 blocks (VCM's staff cooldown).
+        if c["behavior"].get("shooter"):
+            body = ent["minecraft:entity"]
+            ids = c["behavior"]["shooter"]
+            shoot = c["behavior"]["shoot"]
+            for i, pid in enumerate(ids):
+                body["component_groups"][f"{NS}:shooter{i}"] = {"components": {
+                    "minecraft:shooter": {"def": f"{NS}:{pid}", "type": "entity"}}}
+                body["events"][f"{NS}:shooter{i}"] = {
+                    "add": {"component_groups": [f"{NS}:shooter{i}"]},
+                    "remove": {"component_groups": [f"{NS}:shooter{j}"
+                                                    for j in range(len(ids)) if j != i]},
+                }
+            body["components"]["minecraft:shooter"] = {"def": f"{NS}:{ids[0]}", "type": "entity"}
+            body["components"]["minecraft:behavior.ranged_attack"] = {
+                "priority": 2, "speed_multiplier": 1.0,
+                "attack_interval_min": shoot["interval"][0],
+                "attack_interval_max": shoot["interval"][1],
+                "attack_radius": shoot["radius"][1],
+                "attack_radius_min": shoot["radius"][0],
+            }
+            reg["shooter"][cid] = [f"{NS}:{p}" for p in ids]
         write_json(BP / "entities" / (cid + ".json"), ent)
 
         # spawn egg - tinted from the ForgeSpawnEggItem colours so it matches Java
@@ -509,6 +797,14 @@ def generate_vcm() -> None:
         })
     write_json(RP / "render_controllers" / "vcm_items.render_controllers.json",
                {"format_version": "1.10.0", "render_controllers": rc})
+
+    # ---- particles + projectiles ---- #
+    reg["particles"] = _gen_particles()
+    reg["projectiles"] = _gen_projectiles(extra_en, extra_zh)
+    reg["projectileFamily"] = PROJECTILE_FAMILY
+    reg["staffs"] = {f"{NS}:{sid}": {"projectile": f"{NS}:{pid}", "cooldown": STAFF_COOLDOWN}
+                     for sid, pid in STAFFS.items()}
+    _gen_spawn_rules()
 
     write_text(bp_texts[0], read_text(bp_texts[0]).rstrip() + "\n" + "\n".join(extra_en) + "\n")
     write_text(bp_texts[1], read_text(bp_texts[1]).rstrip() + "\n" + "\n".join(extra_zh) + "\n")
