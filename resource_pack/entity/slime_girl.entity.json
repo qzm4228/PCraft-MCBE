@@ -27,10 +27,16 @@
       "scripts": {
         "animate": [
           {
-            "idle": "(1.0 - query.property('pcraftrevorn:belly'))"
+            "idle": "query.property('pcraftrevorn:belly_size') == 0 ? 1.0 : 0.0"
           },
           {
-            "idle2": "query.property('pcraftrevorn:belly')"
+            "idle2": "query.property('pcraftrevorn:belly_size') == 1 ? 1.0 : 0.0"
+          },
+          {
+            "idle3": "query.property('pcraftrevorn:belly_size') == 2 ? 1.0 : 0.0"
+          },
+          {
+            "idle4": "query.property('pcraftrevorn:belly_size') >= 3 ? 1.0 : 0.0"
           }
         ]
       },

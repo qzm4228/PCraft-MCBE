@@ -10,12 +10,17 @@
           "type": "int",
           "range": [
             0,
-            5
+            11
           ],
           "default": 0,
           "client_sync": true
         },
         "pcraftrevorn:belly": {
+          "type": "bool",
+          "default": false,
+          "client_sync": true
+        },
+        "pcraftrevorn:tamed": {
           "type": "bool",
           "default": false,
           "client_sync": true
@@ -202,6 +207,9 @@
           "component_groups": [
             "pcraftrevorn:tamed"
           ]
+        },
+        "set_property": {
+          "pcraftrevorn:tamed": true
         }
       }
     }

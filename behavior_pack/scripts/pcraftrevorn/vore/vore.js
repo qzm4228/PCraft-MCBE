@@ -425,7 +425,11 @@ function digestTick() {
       } catch { /* ignore */ }
       try { pred.dimension.playSound("pcraftrevorn.burp", pred.location, { volume: 0.8 }); } catch { /* ignore */ }
       try { collectStash(pred, session, player); } catch { /* ignore */ }
-      try { player.applyDamage(1000000, { cause: EntityDamageCause.magic, damagingEntity: pred }); } catch { /* ignore */ }
+      // VCM ships its own vcm:digestion damage type for the "was digested" death
+      // message; Bedrock cannot register damage types, so the closest thing is an
+      // entityAttack from the predator ("<prey> was slain by <predator>") instead
+      // of the flavourless magic kill this used to be.
+      try { player.applyDamage(1000000, { cause: EntityDamageCause.entityAttack, damagingEntity: pred }); } catch { /* ignore */ }
       // safety net: make sure the prey actually dies
       system.runTimeout(() => {
         try {

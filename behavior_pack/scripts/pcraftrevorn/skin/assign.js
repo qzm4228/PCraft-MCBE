@@ -58,6 +58,8 @@ for (const id of VCM.gendered ?? []) GENDERED.add(id);
 Object.assign(VARIANTS, VCM.variants ?? {});
 Object.assign(END_KIND, VCM.endKind ?? {});
 Object.assign(ANIM_PREFIX, VCM.animPrefix ?? {});
+// creatures that ship a second texture set for their tamed state (bat_girl)
+const TAMED_SKINS = new Set(VCM.tamedSkins ?? []);
 
 export const localId = (typeId) => (typeId.includes(":") ? typeId.split(":")[1] : typeId);
 
@@ -66,12 +68,32 @@ export function getNum(entity, key, def = 0) {
 }
 export function setNum(entity, key, v) { try { entity.setDynamicProperty(key, v); } catch { /* ignore */ } }
 
-export function buildSkinName(id, variant, gender, counter, wg, belly) {
+/** VCM's slime girl has 0-3 belly slots and swaps idle2/3/4 in as they fill.
+ *  The port keeps that content in the belly storage entity, so the count is the
+ *  number of occupied slots, floored at 1 while a meal is being digested. */
+function bellySize(entity, belly) {
+  if (!belly) return 0;
+  let used = 0;
+  try {
+    const storeId = entity.getDynamicProperty("pc:belly");
+    const store = typeof storeId === "string" ? world.getEntity(storeId) : undefined;
+    const inv = store?.getComponent("minecraft:inventory")?.container;
+    if (inv) for (let i = 0; i < inv.size; i++) if (inv.getItem(i)) used++;
+  } catch { /* ignore */ }
+  return Math.max(1, Math.min(3, used));
+}
+
+export function buildSkinName(id, variant, gender, counter, wg, belly, tamed = false) {
   const base = TEX_BASE[id] ?? id;
   const middle = GENDERED.has(id) ? (gender === 1 ? "_male" : "_female") : "";
   const end = END_KIND[id] ? `_${END_KIND[id]}${counter}` : "";
+  const tame = tamed ? "_tamed" : "";
   const wgSuffix = wg === 2 ? "_wg2" : wg === 1 ? "_wg" : "";
-  return `${base}${middle}${variant}${end}${wgSuffix}${belly ? "_belly" : ""}`;
+  return `${base}${middle}${variant}${end}${tame}${wgSuffix}${belly ? "_belly" : ""}`;
+}
+
+function isTamedEntity(entity) {
+  try { return !!entity.getProperty("pcraftrevorn:tamed"); } catch { return false; }
 }
 
 export function assignSkin(entity, belly = false) {
@@ -107,20 +129,28 @@ export function assignSkin(entity, belly = false) {
     }
   }
   if (idx === undefined) {
-    const name = buildSkinName(id, variant, gender, counter, wg, belly);
-    const fallback = buildSkinName(id, variant, gender, counter, 0, false);
+    const tamed = TAMED_SKINS.has(id) && isTamedEntity(entity);
+    const name = buildSkinName(id, variant, gender, counter, wg, belly, tamed);
+    const fallback = buildSkinName(id, variant, gender, counter, 0, false, tamed);
     idx = map[name] ?? map[fallback] ?? 0;
   }
   try { entity.setProperty("pcraftrevorn:skin", idx); } catch { /* property out of range / unsupported */ }
   // VCM creatures declare a client-synced belly flag that swaps in their *_full
   // animations. Other predators do not declare it, hence the try/catch.
   try { entity.setProperty("pcraftrevorn:belly", !!belly); } catch { /* not declared */ }
+  try { entity.setProperty("pcraftrevorn:belly_size", bellySize(entity, belly)); } catch { /* not declared */ }
   // VCM's druid shoots the projectile of its season; the shooter component
   // groups are switched here because the skin index IS the season.
   const shooters = VCM.shooter?.[id];
   if (shooters?.length) {
     try { entity.triggerEvent(`pcraftrevorn:shooter${Math.max(0, Math.min(shooters.length - 1, variant))}`); } catch { /* ignore */ }
   }
+}
+
+/** Recomputes the skin of a creature whose tamed state just changed (bat_girl). */
+export function refreshTamed(entity) {
+  if (!TAMED_SKINS.has(localId(entity?.typeId ?? ""))) return;
+  assignSkin(entity, getNum(entity, "pc:full") === 1);
 }
 
 export function getSet(entity) {

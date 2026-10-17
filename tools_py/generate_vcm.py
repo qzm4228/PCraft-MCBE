@@ -46,6 +46,9 @@ SKIN_IDLE = "(1.0 - math.min(1.0, query.modified_move_speed * 4.0))"
 SKIN_MOVE = "math.min(1.0, query.modified_move_speed * 4.0)"
 BELLY = "query.property('pcraftrevorn:belly')"
 NO_BELLY = "(1.0 - query.property('pcraftrevorn:belly'))"
+# VCM's slime girl keeps a numeric belly (0-3 filled belly slots) and swaps
+# between idle/idle2/idle3/idle4 instead of using a *_belly texture.
+BELLY_SIZE = "query.property('pcraftrevorn:belly_size')"
 
 ANIM_BELLY = [
     ("idle", NO_BELLY + " * " + SKIN_IDLE),
@@ -73,15 +76,19 @@ def _stats(**over):
 CREATURES = [
     {
         "id": "bat_girl",
-        # normal / white / black (the *_tamed skins wait for a tame-state texture
-        # swap, see docs/vcm-integration.md phase D)
+        # normal / white / black, each with VCM's *_tamed pair (swapped in by
+        # assign.js from the client-synced pcraftrevorn:tamed flag)
         "src": "bat_girl", "name": "蝙蝠娘", "nameEn": "Bat Girl",
         "lore": "洞穴里的夜行小姐姐：翅膀软、心眼小，饿起来可不讲道理。",
         "egg": (-9610733, -10471161), "variants": [0, 1, 2],
+        "tamedSkins": True,
         "skins": [
             ("batgirltexturenobelly", "bat_girl0"), ("batgirltexture", "bat_girl0_belly"),
+            ("batgirltexturetamednobelly", "bat_girl0_tamed"), ("batgirltexturetamed", "bat_girl0_tamed_belly"),
             ("whitebatgirltexturenobelly", "bat_girl1"), ("whitebatgirltexture", "bat_girl1_belly"),
+            ("whitebatgirltexturetamednobelly", "bat_girl1_tamed"), ("whitebatgirltexturetamed", "bat_girl1_tamed_belly"),
             ("blackbatgirltexturenobelly", "bat_girl2"), ("blackbatgirltexture", "bat_girl2_belly"),
+            ("blackbatgirltexturetamednobelly", "bat_girl2_tamed"), ("blackbatgirltexturetamed", "bat_girl2_tamed_belly"),
         ],
         "animate": ANIM_BELLY,
         "behavior": {"hp": 20, "speed": 0.3, "dmg": 4, "follow": 32, "size": [0.35, 1.15],
@@ -165,8 +172,14 @@ CREATURES = [
             ("vcmslime" + "textred", "slime_girl4"), ("vcmslime" + "textyellow", "slime_girl5"),
         ],
         # no walk animation in the source (slimes slide), so the idle is not
-        # movement-gated; idle2 is the digesting pose
-        "animate": [("idle", NO_BELLY), ("idle2", BELLY)],
+        # movement-gated; VCM swaps idle2/3/4 in for 1/2/3 occupied belly slots
+        # and pehkui-inflates, so the count comes from the client-synced
+        # pcraftrevorn:belly_size property (set by assign.js).
+        "bellySize": True,
+        "animate": [("idle", BELLY_SIZE + " == 0 ? 1.0 : 0.0"),
+                    ("idle2", BELLY_SIZE + " == 1 ? 1.0 : 0.0"),
+                    ("idle3", BELLY_SIZE + " == 2 ? 1.0 : 0.0"),
+                    ("idle4", BELLY_SIZE + " >= 3 ? 1.0 : 0.0")],
         "behavior": {"hp": 20, "speed": 0.3, "dmg": 6, "follow": 24, "size": [1.0, 2.0],
                      "scale": 2.0, "loot": "slime_girl", "tameable": True, "undead": False,
                      "targets": HUNT_PLAYER},
@@ -602,7 +615,7 @@ def _gen_projectiles(extra_en: list, extra_zh: list) -> dict:
 def generate_vcm() -> None:
     reg = {"texBase": {}, "gendered": [], "variants": {}, "endKind": {}, "animPrefix": {},
            "counterMax": {}, "stats": {}, "names": {}, "lore": {}, "predatorIds": [],
-           "skins": {}, "texMax": {}, "shooter": {}}
+           "skins": {}, "texMax": {}, "shooter": {}, "tamedSkins": []}
     atlas = read_json(RP / "textures" / "item_texture.json")
     bp_texts = [BP / "texts" / "en_US.lang", BP / "texts" / "zh_CN.lang"]
     extra_en, extra_zh = [], []
@@ -662,6 +675,21 @@ def generate_vcm() -> None:
         ent["minecraft:entity"]["description"]["properties"][f"{NS}:belly"] = {
             "type": "bool", "default": False, "client_sync": True,
         }
+        # VCM's slime girl tracks 0-3 occupied belly slots and swaps idle2/3/4;
+        # assign.js computes the count from the port's belly storage.
+        if c.get("bellySize"):
+            ent["minecraft:entity"]["description"]["properties"][f"{NS}:belly_size"] = {
+                "type": "int", "range": [0, 3], "default": 0, "client_sync": True,
+            }
+        # *_tamed skins: the shared tameable event adds the tamed group, mirror
+        # the state into a client-synced flag that assign.js reads for the skin.
+        if c.get("tamedSkins"):
+            body = ent["minecraft:entity"]
+            body["description"]["properties"][f"{NS}:tamed"] = {
+                "type": "bool", "default": False, "client_sync": True,
+            }
+            body["events"].setdefault(f"{NS}:on_tame", {})["set_property"] = {f"{NS}:tamed": True}
+            reg["tamedSkins"].append(cid)
         if c["behavior"].get("scale"):
             ent["minecraft:entity"]["components"]["minecraft:scale"] = {"value": c["behavior"]["scale"]}
         # VCM's druid is the only ranged creature: one shooter component group per

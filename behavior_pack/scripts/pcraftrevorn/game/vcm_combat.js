@@ -7,7 +7,7 @@
 // because the trail/burst counts (2 per tick, 35 on impact) are VCM's own.
 import { world, system, EquipmentSlot, ItemStack } from "@minecraft/server";
 import { VCM } from "../data/vcm.js";
-import { getNum, localId } from "../skin/assign.js";
+import { getNum, localId, refreshTamed } from "../skin/assign.js";
 
 const STAFFS = VCM.staffs ?? {};
 const PROJ = VCM.projectiles ?? {};
@@ -15,6 +15,7 @@ const PARTICLES = VCM.particles ?? {};
 
 const DAGGER = "pcraftrevorn:vampiric_dagger";
 const DAGGER_DAMAGE = 3; // the item's minecraft:damage component
+const TAME_ITEM = "pcraftrevorn:cupids_arrow";
 const MAX_AGE = 200; // 10 s; VCM's arrows never stick, this is a safety net
 
 // Drops: bat girl 1/8 blood shard, druid 1/3 its own seasonal staff. VCM's
@@ -133,6 +134,14 @@ function holdsDagger(player) {
   } catch { return false; }
 }
 
+/** VCM tames with the same cupid's arrow the rest of the pack uses. */
+function holdsTameItem(player) {
+  try {
+    const eq = player.getComponent("minecraft:equippable");
+    return eq.getEquipment(EquipmentSlot.Mainhand)?.typeId === TAME_ITEM;
+  } catch { return false; }
+}
+
 export function wireVcmCombat() {
   world.afterEvents.itemUse.subscribe((ev) => {
     const player = ev.source;
@@ -144,6 +153,14 @@ export function wireVcmCombat() {
   // every druid projectile is registered on spawn, no matter who shot it
   world.afterEvents.entitySpawn.subscribe((ev) => {
     if (ev.entity?.typeId && PROJ[ev.entity.typeId]) track(ev.entity);
+  });
+
+  // Taming goes through minecraft:tameable, which fires no script event, so the
+  // tamed texture set (bat_girl) is swapped in on the interaction that tames it.
+  world.afterEvents.playerInteractWithEntity.subscribe((ev) => {
+    const target = ev.target;
+    if (!target || !holdsTameItem(ev.player)) return;
+    system.runTimeout(() => { try { refreshTamed(target); } catch { /* gone */ } }, 2);
   });
 
   world.afterEvents.entityHitEntity.subscribe((ev) => {
