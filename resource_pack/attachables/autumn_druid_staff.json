@@ -1,0 +1,32 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:attachable": {
+    "description": {
+      "identifier": "pcraftrevorn:autumn_druid_staff",
+      "materials": {
+        "default": "entity_alphatest",
+        "enchanted": "entity_alphatest_glint"
+      },
+      "textures": {
+        "default": "textures/items/pcraftrevorn/autumn_druid_staff_model",
+        "enchanted": "textures/misc/enchanted_item_glint"
+      },
+      "geometry": {
+        "default": "geometry.druidstaff"
+      },
+      "animations": {
+        "idle": "animation.pcraftrevorn.druidstaff.loop",
+        "wield": "animation.pcraftrevorn.held.druidstaff"
+      },
+      "scripts": {
+        "animate": [
+          "idle",
+          "wield"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.pcraftrevorn.autumn_druid_staff"
+      ]
+    }
+  }
+}

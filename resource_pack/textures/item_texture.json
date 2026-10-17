@@ -196,6 +196,27 @@
     },
     "pcraftrevorn_slime_girl_spawn_egg": {
       "textures": "textures/items/pcraftrevorn/slime_girl_spawn_egg"
+    },
+    "pcraftrevorn_druid_staff": {
+      "textures": "textures/items/pcraftrevorn/druid_staff"
+    },
+    "pcraftrevorn_autumn_druid_staff": {
+      "textures": "textures/items/pcraftrevorn/autumn_druid_staff"
+    },
+    "pcraftrevorn_spring_druid_staff": {
+      "textures": "textures/items/pcraftrevorn/spring_druid_staff"
+    },
+    "pcraftrevorn_winter_druid_staff": {
+      "textures": "textures/items/pcraftrevorn/winter_druid_staff"
+    },
+    "pcraftrevorn_vampiric_dagger": {
+      "textures": "textures/items/pcraftrevorn/vampiric_dagger"
+    },
+    "pcraftrevorn_blood_shard": {
+      "textures": "textures/items/pcraftrevorn/blood_shard"
+    },
+    "pcraftrevorn_slime_pearl": {
+      "textures": "textures/items/pcraftrevorn/slime_pearl"
     }
   }
 }

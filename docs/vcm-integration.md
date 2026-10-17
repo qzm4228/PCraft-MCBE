@@ -136,7 +136,7 @@
 |---|---|---|
 | A 资产 | ✅ | `tools/extract_vcm_assets.ps1` → `.work/vcm/`（104 文件） |
 | B1 生物 | ✅ | `tools_py/generate_vcm.py`：6 生物 + 客户端实体 + 渲染控制器 + geo/anim 转换 + 生成蛋 + `data/vcm.js`；`assign.js`/`vore.js`/`guide.js` 合并 VCM 注册表 |
-| B2 物品 | ⏳ | 7 物品（四季德鲁伊法杖、吸血匕首、血碎片、史莱姆珍珠）+ 手持 3D attachables + 匕首配方 |
+| B2 物品 | ✅ | 7 物品（四季德鲁伊法杖、吸血匕首、血碎片、史莱姆珍珠）+ 5 手持 3D attachables + 手持 geo/anim 转换 + 匕首配方 + 史莱姆娘掉落表 |
 | B3 弹射物/粒子 | ⏳ | 4 个德鲁伊弹射物 + 5 个粒子 |
 | B4 特色 | ⏳ | 史莱姆娘数值肚量、天然生成规则、蝙蝠娘 component group 缩放、驯服物品 |
 | C 收尾 | ⏳ | 文档索引、Downloads 刷新 |
@@ -152,6 +152,17 @@
 - **史莱姆娘**：源里没有 `*nobelly` 贴图（肚皮是数值状态），皮肤只放 6 个染料色；消化时播 `idle2`。
 - **id 冲突**：社区导入已占用 `pcraftrevorn:lamia`（僵尸娘改皮），VCM 的拉米亚落到 `lamia_vcm`。
 - **不照抄的 bug**：`BunnyEatPlayerProcedure` 把肚皮状态写进了 `DruidEntity.DATA_BellySlot`。
+
+### 6.3 已落地的映射细节（B2）
+
+- **手持模型的 UV 空间**：VCM 的 geo 声明 16×16（法杖）/32×32（匕首）UV，但贴图按 64×64 画（GeckoLib 按声明尺寸归一化 UV）。
+  Bedrock 的 box UV 按声明的像素空间取样，所以**不动几何**、把贴图重采样到声明尺寸（`<id>_model.png`），
+  背包图标仍用原分辨率 64×64（`<id>.png`）。
+- **法杖四种季节**共用一个 geo（`geometry.druidstaff`，骨 `Staff`/`Core`）+ `animation.pcraftrevorn.druidstaff.loop`；
+  匕首 `geometry.vampiricdagger`（骨 `Knife`/`handle`）+ `animation.pcraftrevorn.vampiricdagger.loop`。
+  手持姿态统一写在 `RP/animations/vcm_held.animation.json`（`animation.pcraftrevorn.held.<geo>`）。
+- **踩到的坑**：第一轮构建把 attachable 的 `geometry.*` 写成了 `geometry.{'out': ...}`（字典当字符串用），
+  说明 `check.js` 不校验 attachable 的几何/动画引用；已修，并用 `.work/artifact_check.py` 复核产物与源 1:1。
 
 ### 6.2 B2/B3 清单（已核对自 jar / 反编译）
 

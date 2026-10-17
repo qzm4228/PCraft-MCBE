@@ -1,0 +1,39 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.pcraftrevorn.held.druidstaff": {
+      "loop": true,
+      "bones": {
+        "Staff": {
+          "rotation": [
+            "query.is_first_person ? 7 : 0",
+            "query.is_first_person ? -29 : 0",
+            0
+          ],
+          "position": [
+            0,
+            "query.is_first_person ? -2.75 : -6",
+            "query.is_first_person ? -0.75 : 0"
+          ]
+        }
+      }
+    },
+    "animation.pcraftrevorn.held.vampiricdagger": {
+      "loop": true,
+      "bones": {
+        "Knife": {
+          "rotation": [
+            "query.is_first_person ? 7 : 0",
+            "query.is_first_person ? -29 : 0",
+            0
+          ],
+          "position": [
+            0,
+            "query.is_first_person ? -2.75 : -6",
+            "query.is_first_person ? -0.75 : 0"
+          ]
+        }
+      }
+    }
+  }
+}

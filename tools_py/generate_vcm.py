@@ -30,7 +30,8 @@ from _common import (  # noqa: E402
     ROOT, NS, copy, exists, read_json, read_text, write_json, write_text,
 )
 from generate_community import (  # noqa: E402
-    VALID_SEG, behavior, convert_anim_object, egg_rgba, sanitize_bones, write_png,
+    VALID_SEG, behavior, convert_anim_object, decode_png_rgba, egg_rgba,
+    sanitize_bones, write_png,
 )
 
 BP = ROOT / "behavior_pack"
@@ -162,7 +163,7 @@ CREATURES = [
         # movement-gated; idle2 is the digesting pose
         "animate": [("idle", NO_BELLY), ("idle2", BELLY)],
         "behavior": {"hp": 20, "speed": 0.3, "dmg": 6, "follow": 24, "size": [1.0, 2.0],
-                     "scale": 2.0, "loot": None, "tameable": True, "undead": False,
+                     "scale": 2.0, "loot": "slime_girl", "tameable": True, "undead": False,
                      "targets": HUNT_PLAYER},
         "stats": _stats(difficulty=0.30),
     },
@@ -197,6 +198,141 @@ def _client_entity(c: dict, skins, shorts) -> dict:
             },
         },
     }
+
+
+# ---- items --------------------------------------------------------------- #
+# VCM's held items: the four seasonal druid staffs share one model, the dagger
+# has its own. Body damage/durability come straight off the Java items.
+HELD = {
+    "druidstaff": {"out": "druidstaff", "bone": "Staff"},
+    "vampiricdagger": {"out": "vampiricdagger", "bone": "Knife"},
+}
+
+ITEMS = [
+    {"id": "druid_staff", "src": "druidstafftexture", "name": "德鲁伊法杖", "nameEn": "Druid Staff",
+     "category": "equipment", "damage": 2, "durability": 300, "cooldown": 3.0, "held": "druidstaff"},
+    {"id": "autumn_druid_staff", "src": "autumndruidstafftexture", "name": "秋日德鲁伊法杖",
+     "nameEn": "Autumn Druid Staff", "category": "equipment", "damage": 2, "durability": 300,
+     "cooldown": 3.0, "held": "druidstaff"},
+    {"id": "spring_druid_staff", "src": "springdruidstafftexture", "name": "春日德鲁伊法杖",
+     "nameEn": "Spring Druid Staff", "category": "equipment", "damage": 2, "durability": 300,
+     "cooldown": 3.0, "held": "druidstaff"},
+    {"id": "winter_druid_staff", "src": "winterdruidstafftexture", "name": "冬日德鲁伊法杖",
+     "nameEn": "Winter Druid Staff", "category": "equipment", "damage": 2, "durability": 300,
+     "cooldown": 3.0, "held": "druidstaff"},
+    {"id": "vampiric_dagger", "src": "vampiricdaggertexture", "name": "吸血匕首", "nameEn": "Vampiric Dagger",
+     "category": "equipment", "damage": 3, "durability": 300, "cooldown": None, "held": "vampiricdagger"},
+    {"id": "blood_shard", "src": "bloodshardtext", "name": "血碎片", "nameEn": "Blood Shard",
+     "category": "items", "damage": None, "durability": None, "cooldown": None, "held": None},
+    {"id": "slime_pearl", "src": "slimepearl", "name": "史莱姆珍珠", "nameEn": "Slime Pearl",
+     "category": "items", "damage": None, "durability": None, "cooldown": None, "held": None},
+]
+
+
+def _gen_held_models() -> dict:
+    """Convert the held-item geos/animations and emit the wield poses.
+
+    The source geos declare a 16x16 (staff) / 32x32 (dagger) UV space while the
+    art is painted at 64x64, because GeckoLib normalises UV by the declared size.
+    Bedrock reads box UVs as pixels of the declared space, so the *art* is
+    resampled down to the declared size rather than touching the geometry - the
+    inventory icon keeps the full-resolution art.
+    """
+    out = {}
+    for src, spec in HELD.items():
+        geo = read_json(VCM / "geo" / (src + ".geo.json"))
+        g = geo["minecraft:geometry"][0]
+        g["description"]["identifier"] = "geometry." + spec["out"]
+        write_json(RP / "models" / "entity" / (spec["out"] + ".geo.json"), geo)
+        out[src] = {"out": spec["out"], "size": int(g["description"]["texture_width"])}
+
+        anim = convert_anim_object(read_json(VCM / "animations" / (src + ".animation.json")))
+        renamed = {}
+        for k, v in (anim.get("animations") or {}).items():
+            short = k.split(".")[-1]
+            if VALID_SEG.match(short):
+                renamed[f"animation.{NS}.{spec['out']}.{short}"] = v
+        anim["animations"] = renamed
+        write_json(RP / "animations" / (spec["out"] + ".animation.json"), anim)
+
+    # hand poses - the staff reuses the port's existing wield values, the dagger
+    # gets the same transform on its own bone
+    pose = {"rotation": ["query.is_first_person ? 7 : 0", "query.is_first_person ? -29 : 0", 0],
+            "position": [0, "query.is_first_person ? -2.75 : -6", "query.is_first_person ? -0.75 : 0"]}
+    write_json(RP / "animations" / "vcm_held.animation.json", {
+        "format_version": "1.8.0",
+        "animations": {
+            f"animation.{NS}.held.{spec['out']}": {"loop": True, "bones": {spec["bone"]: pose}}
+            for spec in HELD.values()
+        },
+    })
+    return out
+
+
+def _resample_png(src: Path, dst: Path, size: int) -> None:
+    """Box-average `src` down to `size`x`size` (nearest copy when already small)."""
+    img = decode_png_rgba(src.read_bytes())
+    f = (img["w"] // size) if img else 1
+    if not img or f <= 1:
+        copy(src, dst)
+        return
+    d = img["data"]
+    out = bytearray(size * size * 4)
+    n = f * f
+    for y in range(size):
+        for x in range(size):
+            r = g = b = a = 0
+            for dy in range(f):
+                for dx in range(f):
+                    i = ((y * f + dy) * img["w"] + (x * f + dx)) * 4
+                    r += d[i]
+                    g += d[i + 1]
+                    b += d[i + 2]
+                    a += d[i + 3]
+            o = (y * size + x) * 4
+            out[o] = r // n
+            out[o + 1] = g // n
+            out[o + 2] = b // n
+            out[o + 3] = a // n
+    write_png(dst, size, size, bytes(out))
+
+
+def _gen_recipe() -> None:
+    """VCM's dagger recipe: obsidian / 2 iron ingot / blood shard / stick."""
+    write_json(BP / "recipes" / "vampiric_dagger.json", {
+        "format_version": "1.20.10",
+        "minecraft:recipe_shaped": {
+            "description": {"identifier": f"{NS}:vampiric_dagger"},
+            "tags": ["crafting_table"],
+            "pattern": [" a ", "bcb", " d "],
+            "key": {
+                "a": {"item": "minecraft:obsidian"},
+                "b": {"item": "minecraft:iron_ingot"},
+                "c": {"item": f"{NS}:blood_shard"},
+                "d": {"item": "minecraft:stick"},
+            },
+            "result": {"item": f"{NS}:vampiric_dagger", "count": 1},
+        },
+    })
+
+
+def _gen_loot() -> None:
+    """data/vcm/loot_tables/entities/slime_girl.json, translated to Bedrock."""
+    write_json(BP / "loot_tables" / "entities" / "slime_girl.json", {
+        "pools": [
+            {"rolls": 1, "entries": [
+                {"type": "item", "name": f"{NS}:slime_pearl", "weight": 1,
+                 "functions": [{"function": "set_count", "count": {"min": 0, "max": 1}}]},
+                # the Java table's "nothing" entry is weighted minecraft:air
+                {"type": "item", "name": "minecraft:air", "weight": 5,
+                 "functions": [{"function": "set_count", "count": {"min": 0, "max": 0}}]},
+            ]},
+            {"rolls": {"min": 1, "max": 2}, "entries": [
+                {"type": "item", "name": "minecraft:slime_ball", "weight": 1,
+                 "functions": [{"function": "set_count", "count": {"min": 1, "max": 2}}]},
+            ]},
+        ],
+    })
 
 
 def generate_vcm() -> None:
@@ -306,6 +442,73 @@ def generate_vcm() -> None:
         reg["predatorIds"].append(cid)
         reg["skins"][cid] = {n: i for i, n in enumerate(skins)}
         reg["texMax"][cid] = skin_max
+
+    # ---- items, held models, recipe, loot ---- #
+    held = _gen_held_models()
+    _gen_recipe()
+    _gen_loot()
+    rc = {}
+    for it in ITEMS:
+        iid = it["id"]
+        src_png = VCM / "textures" / "item" / (it["src"] + ".png")
+        copy(src_png, RP / "textures" / "items" / "pcraftrevorn" / (iid + ".png"))
+        tex = iid
+        if it["held"]:
+            # The geo's UV space is 1/4 (staff) or 1/2 (dagger) of the painted
+            # art, so the model texture is resampled to the declared size while
+            # the inventory icon keeps the full-resolution original.
+            tex = iid + "_model"
+            _resample_png(src_png, RP / "textures" / "items" / "pcraftrevorn" / (tex + ".png"),
+                          held[it["held"]]["size"])
+        components = {
+            "minecraft:icon": {"textures": {"default": f"{NS}_{iid}"}},
+            "minecraft:max_stack_size": 1 if it["held"] else 64,
+        }
+        if it["held"]:
+            components["minecraft:hand_equipped"] = True
+        if it["damage"]:
+            components["minecraft:damage"] = it["damage"]
+        if it["durability"]:
+            components["minecraft:durability"] = {"max_durability": it["durability"]}
+        if it["cooldown"]:
+            components["minecraft:cooldown"] = {
+                "category": f"{NS}_{it['held']}", "duration": it["cooldown"]}
+        write_json(BP / "items" / (iid + ".json"), {
+            "format_version": "1.21.0",
+            "minecraft:item": {
+                "description": {"identifier": f"{NS}:{iid}",
+                                "menu_category": {"category": it["category"]}},
+                "components": components,
+            },
+        })
+        atlas["texture_data"][f"{NS}_{iid}"] = {"textures": f"textures/items/pcraftrevorn/{iid}"}
+        extra_en.extend([f"item.{NS}:{iid}.name={it['nameEn']}", f"item.{NS}:{iid}={it['nameEn']}"])
+        extra_zh.extend([f"item.{NS}:{iid}.name={it['name']}", f"item.{NS}:{iid}={it['name']}"])
+
+        if not it["held"]:
+            continue
+        out = held[it["held"]]["out"]
+        rc[f"controller.render.{NS}.{iid}"] = {
+            "geometry": "Geometry.default", "materials": [{"*": "Material.default"}],
+            "textures": ["Texture.default"]}
+        write_json(RP / "attachables" / (iid + ".json"), {
+            "format_version": "1.10.0",
+            "minecraft:attachable": {
+                "description": {
+                    "identifier": f"{NS}:{iid}",
+                    "materials": {"default": "entity_alphatest", "enchanted": "entity_alphatest_glint"},
+                    "textures": {"default": f"textures/items/pcraftrevorn/{tex}",
+                                 "enchanted": "textures/misc/enchanted_item_glint"},
+                    "geometry": {"default": f"geometry.{out}"},
+                    "animations": {"idle": f"animation.{NS}.{out}.loop",
+                                   "wield": f"animation.{NS}.held.{out}"},
+                    "scripts": {"animate": ["idle", "wield"]},
+                    "render_controllers": [f"controller.render.{NS}.{iid}"],
+                },
+            },
+        })
+    write_json(RP / "render_controllers" / "vcm_items.render_controllers.json",
+               {"format_version": "1.10.0", "render_controllers": rc})
 
     write_text(bp_texts[0], read_text(bp_texts[0]).rstrip() + "\n" + "\n".join(extra_en) + "\n")
     write_text(bp_texts[1], read_text(bp_texts[1]).rstrip() + "\n" + "\n".join(extra_zh) + "\n")
