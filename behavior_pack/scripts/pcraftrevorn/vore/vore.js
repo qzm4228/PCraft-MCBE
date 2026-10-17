@@ -134,9 +134,12 @@ function lockTo(player, session) {
 
 // The digestion bar doubles as the HUD channel: the boss bar's fill comes from
 // the entity's health and its nameTag carries the struggle state bus that
-// hud/pcraftrevorn_hud.json reads back (see constants.js). The name is made of
-// formatting codes only, so nothing is ever printed.
+// hud/pcraftrevorn_hud.json reads back (see constants.js). The bus itself is
+// formatting codes only, so it never prints; the readable suffix after it is
+// what the plain vanilla bar shows while the custom HUD is disabled.
 const BAR_ID = "pcraftrevorn:digestion_bar";
+const BAR_SUFFIX = "§7消化中";
+const barName = (bus) => bus + BAR_SUFFIX;
 
 /** Per-direction HUD state; the resolved frame lingers briefly before clearing. */
 function hudStates(session, now) {
@@ -147,7 +150,7 @@ function hudStates(session, now) {
 function spawnBar(player, session) {
   try {
     const bar = player.dimension.spawnEntity(BAR_ID, player.location);
-    bar.nameTag = buildHudBus(allOff());
+    bar.nameTag = barName(buildHudBus(allOff()));
     const hp = bar.getComponent("minecraft:health");
     if (hp) hp.setCurrentValue(1);
     session.barId = bar.id;
@@ -165,7 +168,7 @@ function updateBar(player, session) {
     const pct = Math.max(1, Math.min(100, Math.round((session.digest / session.maxTimer) * 100)));
     const hp = bar.getComponent("minecraft:health");
     if (hp) hp.setCurrentValue(pct);
-    const bus = buildHudBus(hudStates(session, now));
+    const bus = barName(buildHudBus(hudStates(session, now)));
     if (bar.nameTag !== bus) bar.nameTag = bus;
   } catch { /* ignore */ }
 }

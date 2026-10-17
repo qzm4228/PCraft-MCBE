@@ -14,17 +14,26 @@
   // The bar art is the original mod's `acid_indicator.png` plus its 100 acid
   // segments pre-composited into one strip that `#progress_percentage` clips, so
   // the bar darkens as it fills exactly like the source screens do.
-  "boss_health_panel": {
-    "modifications": [
-      {
-        "operation": "insert_after",
-        "control_name": "progress_bar_for_collections",
-        "value": [
-          { "pcr_boss_hud_instance@hud.pcr_boss_hud": {} }
-        ]
-      }
-    ]
-  },
+  // NOTE: the graphical HUD is currently DISABLED on purpose.
+  //
+  // hud.boss_health_panel is the *grid_item_template* of hud.boss_health_grid,
+  // i.e. the engine clones it once per boss bar. Attaching `modifications` to a
+  // template makes the clone lose its type ("Type not specified ... for control:
+  // boss_health_panel") and the client crashes with 0xc0000005 the moment a bar
+  // appears (1.21.100, crash offset 0x3c9a47). Until the overlay can be hung on a
+  // non-template control and tested in game, the struggle prompt stays on the
+  // action bar + the four locked hotbar items.
+  //
+  // "boss_health_panel": {
+  //   "modifications": [
+  //     {
+  //       "operation": "insert_back",
+  //       "value": [
+  //         { "pcr_boss_hud_instance@hud.pcr_boss_hud": {} }
+  //       ]
+  //     }
+  //   ]
+  // },
 
   "pcr_boss_hud": {
     "type": "panel",

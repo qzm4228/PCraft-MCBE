@@ -4588,9 +4588,9 @@
       "bones": {
         "Head": {
           "rotation": [
-            "easeInOutSine",
-            "easeInOutSine",
-            "easeInOutSine"
+            0,
+            0,
+            0
           ],
           "position": {
             "0.0": [

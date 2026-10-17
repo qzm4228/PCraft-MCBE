@@ -533,10 +533,70 @@ def java_element_to_bedrock(el, tex_key_map=None):
     return cube
 
 
+# Bedrock rejects block geometry that leaves these bounds (the content log says
+# "contains N boxes outside the error bounds"). Values are block units, so in the
+# 16-units-per-block model space the band is [-14, 30]; its centre is the block
+# centre (8), which is what custom block models should sit on.
+BLOCK_GEO_MIN, BLOCK_GEO_MAX = -14.0, 30.0
+BLOCK_GEO_CENTER = 8.0
+
+
+def _fit_block_geometry(cubes):
+    """Scale/translate converted cubes so they stay inside Bedrock's block bounds."""
+    if not cubes:
+        return cubes
+    pts = [[], [], []]
+    for c in cubes:
+        for i in range(3):
+            pts[i] += [c["origin"][i], c["origin"][i] + c["size"][i]]
+    lo = [min(p) for p in pts]
+    hi = [max(p) for p in pts]
+    span = [hi[i] - lo[i] for i in range(3)]
+    room = BLOCK_GEO_MAX - BLOCK_GEO_MIN
+    scale = 1.0
+    for s in span:
+        if s > room:
+            scale = min(scale, room / s)
+    if scale == 1.0 and all(lo[i] >= BLOCK_GEO_MIN and hi[i] <= BLOCK_GEO_MAX for i in range(3)):
+        return cubes
+
+    # scale x/z about the model centre and y about its bottom, then sit the model
+    # on the block centre so the overhang is symmetric
+    cx, cz, by = (lo[0] + hi[0]) / 2, (lo[2] + hi[2]) / 2, lo[1]
+
+    def tr(v):
+        return [(v[0] - cx) * scale + BLOCK_GEO_CENTER,
+                (v[1] - by) * scale + by,
+                (v[2] - cz) * scale + BLOCK_GEO_CENTER]
+
+    out = []
+    for c in cubes:
+        n = dict(c)
+        n["origin"] = [round(v, 4) for v in tr(c["origin"])]
+        n["size"] = [round(v * scale, 4) for v in c["size"]]
+        if "pivot" in c:
+            n["pivot"] = [round(v, 4) for v in tr(c["pivot"])]
+        out.append(n)
+
+    ylo = min(min(n["origin"][1], n["origin"][1] + n["size"][1]) for n in out)
+    yhi = max(max(n["origin"][1], n["origin"][1] + n["size"][1]) for n in out)
+    dy = 0.0
+    if ylo < BLOCK_GEO_MIN:
+        dy = BLOCK_GEO_MIN - ylo
+    if yhi + dy > BLOCK_GEO_MAX:
+        dy = BLOCK_GEO_MAX - yhi
+    if dy:
+        for n in out:
+            n["origin"][1] = round(n["origin"][1] + dy, 4)
+            if "pivot" in n:
+                n["pivot"][1] = round(n["pivot"][1] + dy, 4)
+    return out
+
+
 def convert_java_model(src_file, identifier, override_size):
     m = read_json(src_file)
     cubes = [java_element_to_bedrock(el) for el in (m.get("elements") or [])]
-    cubes = [c for c in cubes if c]
+    cubes = _fit_block_geometry([c for c in cubes if c])
     size = override_size or [64, 64]
     geo = {
         "format_version": "1.12.0",

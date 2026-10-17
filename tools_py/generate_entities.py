@@ -212,6 +212,29 @@ def _unwrap_vector(val):
 
 # Convert a GeckoLib animation JSON to Bedrock: unwrap {vector:...} keyframes,
 # keep {pre,post,lerp_mode}, drop the GeckoLib root field and add loop flags.
+# GeckoLib/Blockbench sometimes export a whole channel as an easing marker,
+# e.g. "rotation": ["easeInOutSine", ...]. Bedrock parses that as Molang and
+# logs "unknown token"; the channel carries no numeric data, so zero it.
+EASING_NAMES = {n.lower() for n in (
+    "linear", "step", "catmullrom", "auto", "smooth",
+    "easeInSine", "easeOutSine", "easeInOutSine",
+    "easeInQuad", "easeOutQuad", "easeInOutQuad",
+    "easeInCubic", "easeOutCubic", "easeInOutCubic",
+    "easeInQuart", "easeOutQuart", "easeInOutQuart",
+    "easeInQuint", "easeOutQuint", "easeInOutQuint",
+    "easeInExpo", "easeOutExpo", "easeInOutExpo",
+    "easeInCirc", "easeOutCirc", "easeInOutCirc",
+    "easeInBack", "easeOutBack", "easeInOutBack",
+    "easeInElastic", "easeOutElastic", "easeInOutElastic",
+    "easeInBounce", "easeOutBounce", "easeInOutBounce",
+)}
+
+
+def _easing_channel(v) -> bool:
+    return (isinstance(v, list) and bool(v)
+            and all(isinstance(x, str) and x.lower() in EASING_NAMES for x in v))
+
+
 def convertAnimObject(j):
     def unwrap(v):
         if v is not None and isinstance(v, dict) and not isinstance(v, list):
@@ -251,6 +274,8 @@ def convertAnimObject(j):
             for ch in ("rotation", "position", "scale"):
                 if bd.get(ch) is not None:
                     bd[ch] = convertChannel(bd[ch])
+                    if _easing_channel(bd[ch]):
+                        bd[ch] = [0, 0, 0]
     return j
 
 
