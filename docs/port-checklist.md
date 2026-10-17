@@ -197,6 +197,29 @@ Bedrock 附加包**不支持 jigsaw 结构**，原 `royal_castle_remnant`（jigs
   - 说明：外观集选择是**服务端统一**（同种生物所有个体外观一致），不是每玩家；且重做集的 `swallow/digest/struggle` 一次性动画仍走基础集（重做集主要体现 idle/walk + 模型 + 贴图）。
 
 
+## 1.14 VCM（Internalised）并入 PCraft+Internalised
+
+来源：`jar/InternalisedV1.35(1.20.1-forge).jar`（不入库），解包脚本 `tools/extract_vcm_assets.ps1` → `.work/vcm/`，
+生成器 `tools_py/generate_vcm.py`（`generate_entities.py` 末尾调用，排在所有清目录之后）。方案与逐项映射见 `docs/vcm-integration.md`。
+
+- **合并而非新包**：全部 id 留在 `pcraftrevorn:`；组件名/显示名统一为 **PCraft+Internalised**（`config/packs.json`）。
+  社区导入已占用 `pcraftrevorn:lamia`，VCM 的拉米亚因此叫 `lamia_vcm`。
+- **6 个生物**：`bat_girl`、`bunny_girl`、`cat_girl`、`druid`、`lamia_vcm`、`slime_girl` + 6 个生成蛋（Forge 蛋色）。
+  走现成的 predator/vore 机制（`PRED_STATS` 按 VCM 手感另配：消化约 60 s、逃脱 15 次、`wg1/wg2=999`）。
+- **肚皮**：VCM 的 `<mob>texture`（满腹）/`<mob>texturenobelly`（空腹）成对贴图 → 沿用整包 `_belly` 约定；
+  动画用客户端同步的 `pcraftrevorn:belly` 布尔切换 `*full` 版本。史莱姆娘没有成对贴图，改为
+  `pcraftrevorn:belly_size`（0–3）驱动 `idle/idle2/3/4`（VCM 的 3 个 BellySlot）。蝙蝠娘的 `*_tamed` 一套另用
+  `pcraftrevorn:tamed` 切换（共 12 张皮肤）。
+- **物品**：四季德鲁伊法杖 + 吸血匕首（3D attachable，手持 geo 的 UV 空间是贴图的 1/2～1/4，贴图重采样到声明尺寸）、
+  血碎片、史莱姆珍珠（2D）+ 匕首配方 + 史莱姆娘掉落表。
+- **战斗**：`game/vcm_combat.js` —— 法杖右键发射季节弹射物（5 格/tick、紫水晶音、1 点耐久、60 tick 冷却）、
+  每 tick 2 颗尾迹粒子、命中 35 颗爆散；吸血匕首命中回血 = 伤害/4（虹吸粒子）；蝙蝠娘 1/8 血碎片、德鲁伊 1/3 季节法杖。
+- **生物 AI**：德鲁伊是唯一远程（`minecraft:shooter` 四个季节组件组 + `ranged_attack` 3 s / 4–16 格）；
+  天然生成按 VCM 的 biome modifier：蝙蝠娘=洞穴 + 暗处地表，兔/猫/拉米亚=主世界，史莱姆娘=沼泽 1–4，德鲁伊只靠生成蛋。
+- **有损项**：弹射物穿透 2、按发射者变化的伤害、蝙蝠娘满腹的 pehkui 防御/移速、VCM 自定义伤害类型的原文死亡信息，
+  以及 Java 端解析成 `CUSTOM` 的粒子渲染类型——均已在 `docs/vcm-integration.md` §6.4 记录。
+
+
 ---
 
 ## 1. Java → Bedrock 技术栈映射

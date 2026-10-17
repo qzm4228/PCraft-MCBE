@@ -137,9 +137,9 @@
 | A 资产 | ✅ | `tools/extract_vcm_assets.ps1` → `.work/vcm/`（104 文件） |
 | B1 生物 | ✅ | `tools_py/generate_vcm.py`：6 生物 + 客户端实体 + 渲染控制器 + geo/anim 转换 + 生成蛋 + `data/vcm.js`；`assign.js`/`vore.js`/`guide.js` 合并 VCM 注册表 |
 | B2 物品 | ✅ | 7 物品（四季德鲁伊法杖、吸血匕首、血碎片、史莱姆珍珠）+ 5 手持 3D attachables + 手持 geo/anim 转换 + 匕首配方 + 史莱姆娘掉落表 |
-| B3 弹射物/粒子 | ⏳ | 4 个德鲁伊弹射物 + 5 个粒子 |
-| B4 特色 | ⏳ | 史莱姆娘数值肚量、天然生成规则、蝙蝠娘 component group 缩放、驯服物品 |
-| C 收尾 | ⏳ | 文档索引、Downloads 刷新 |
+| B3 弹射物/粒子 | ✅ | 4 个德鲁伊弹射物（Modelmcv → geo + 自转动画 + 客户端实体 + `minecraft:projectile`）+ 5 个粒子（每个含 trail / `_burst` 两个发射器）+ `game/vcm_combat.js` 的法杖开火、尾迹、命中爆散 |
+| B4 特色 | ✅ | 德鲁伊远程（`minecraft:shooter` 四个组件组按季节切换 + `ranged_attack`）+ 天然生成 5 条 + 史莱姆娘数值肚量 + 蝙蝠娘驯服贴图 + 吸血匕首吸血 + 蝙蝠娘/德鲁伊掉落 + 消化死亡信息 |
+| C 收尾 | ⏳ | 文档索引、Downloads 刷新、实机验证（Node 参照实现缺失，见 §6.4） |
 
 ### 6.1 已落地的映射细节（B1）
 
@@ -153,7 +153,7 @@
 - **id 冲突**：社区导入已占用 `pcraftrevorn:lamia`（僵尸娘改皮），VCM 的拉米亚落到 `lamia_vcm`。
 - **不照抄的 bug**：`BunnyEatPlayerProcedure` 把肚皮状态写进了 `DruidEntity.DATA_BellySlot`。
 
-### 6.3 已落地的映射细节（B2）
+### 6.2 已落地的映射细节（B2）
 
 - **手持模型的 UV 空间**：VCM 的 geo 声明 16×16（法杖）/32×32（匕首）UV，但贴图按 64×64 画（GeckoLib 按声明尺寸归一化 UV）。
   Bedrock 的 box UV 按声明的像素空间取样，所以**不动几何**、把贴图重采样到声明尺寸（`<id>_model.png`），
@@ -164,7 +164,7 @@
 - **踩到的坑**：第一轮构建把 attachable 的 `geometry.*` 写成了 `geometry.{'out': ...}`（字典当字符串用），
   说明 `check.js` 不校验 attachable 的几何/动画引用；已修，并用 `.work/artifact_check.py` 复核产物与源 1:1。
 
-### 6.2 B2/B3 清单（已核对自 jar / 反编译）
+### 6.3 B2/B3 清单（已核对自 jar / 反编译）
 
 | 项目 | Bedrock 落点 | 备注 |
 |---|---|---|
@@ -177,3 +177,33 @@
 | 5 个粒子 | `RP/particles/*.particle.json` + 贴图 | `autumn_leaves`/`leaves`/`siphon`/`spring_blossom`/`winter_snowflake` |
 | `slime_girl` 掉落 | `BP/loot_tables/entities/slime_girl.json` | 1/6 史莱姆珍珠 + 1–2 史莱姆球（Java 表直译） |
 | 驯服 | `minecraft:tameable` | 全用 `pcraftrevorn:cupids_arrow`（与整包一致）；史莱姆娘另加史莱姆球 20%（阶段 D） |
+
+### 6.4 已落地的映射细节（B3 / 特色）与已知有损点
+
+- **弹射物**：`Modelmcv` 是 3×3×3 核心 + 两片 5×1×5 叶子板，Java 每 tick 绕 Y/Z 各转 1 rad →
+  `geometry.pcraftrevorn.druidprojectile` + `animation.pcraftrevorn.druidprojectile.spin`（`query.anim_time * 1145.9` 度/秒）。
+  贴图 64×64 / 声明 32×32，按 B2 的办法重采样到 32×32。飞行用 `minecraft:projectile`（power 5、伤害 1、引力 0.05），
+  发射沿用 VCM 的 `block.amethyst_block.chime`（音高 `1/(rand*0.5+1) + power/2`）。
+- **粒子走脚本而不是 `particle_on_hit`**：Bedrock 的 `minecraft:projectile.on_hit.particle_on_hit` 只接受原版粒子枚举，
+  所以 `game/vcm_combat.js` 负责每 tick 2 颗尾迹、命中时 35 颗爆散（位置 = 命中点 +1，VCM 原样）。粒子本体 0.2 尺寸、
+  13–27 tick 寿命、无重力 + 方块碰撞、0.2 rad/tick 自转，`siphon` 只有 3–7 tick。
+- **法杖开火**：Java 是松手（`onPlayerStoppedUsing`），Bedrock 手持有物品只有 `itemUse` → 右键即发；每次消耗 1 点耐久，
+  `minecraft:cooldown` 60 tick（3 s，与 VCM 一致）。
+- **德鲁伊远程**：德鲁伊实体带 4 个 `pcraftrevorn:shooter0..3` 组件组（各绑一个季节弹射物），
+  `assign.js` 按皮肤索引触发；`minecraft:behavior.ranged_attack` 间隔 3 s、4–16 格，与原版法杖冷却对齐。
+- **史莱姆娘数值肚量**：`pcraftrevorn:belly_size`（0–3，client_sync）由 `assign.js` 按肚内储物槽位计算，
+  客户端在 `idle`/`idle2`/`idle3`/`idle4` 之间切换（VCM 的 3 个 BellySlot）。
+- **蝙蝠娘驯服贴图**：`minecraft:tameable` 的事件顺带写 `pcraftrevorn:tamed`（client_sync），
+  皮肤表扩到 12 张（三色 × 驯服 × 满腹），驯服交互后由 `vcm_combat.js` 重算一次皮肤。
+- **死亡信息**：`vcm:digestion` 伤害类型无法注册，改为「掠食者造成 entityAttack」，
+  原版死亡信息会显示「<猎物> 被 <掠食者> 杀死」，比原来的 magic 死法更贴近 VCM。
+- **已知有损**（记录在案，不再追）：
+  1. `pierce 2`（穿透两个目标）→ Bedrock `impact_damage` 无对应项，命中即消失；
+  2. 德鲁伊弹射物的 `damage` 在 Java 里随发射者变化（玩家 1.0 / 生物 0.0），Bedrock 组件是静态值，统一取 1；
+  3. 蝙蝠娘满腹时的 pehkui 防御 ×2 / 移速 ×0.75 未复刻（只保留了 `minecraft:scale` 比例）；
+  4. 原版 `%2$s using %3$s` / `whilst struggling to escape %2$s` 两条变体死亡信息不适用（Bedrock 无自定义伤害类型消息）；
+  5. Java 端 5 个粒子的渲染类型反编译成 `CUSTOM`/`NO_RENDER`，Bedrock 统一按半透明广告牌渲染。
+- **工具链偏差**：VCM 的生成器只有 Python 版（`tools_py/generate_vcm.py`，853 行），没有按仓库惯例补
+  `tools/generate_vcm.js` 参照实现；`data/vcm.js` 的头部也据此标注。若后续要以 Node 为唯一参照，再补一份镜像。
+
+

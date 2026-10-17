@@ -147,7 +147,7 @@ resource_pack/
 
 ---
 
-## 6. 社区 / 相关实例研究（15 个）
+## 6. 社区 / 相关实例研究（16 个）
 
 > 「与仓库相关」= 本仓库直接引用、移植来源、或同类型（vore/gender/生物/JSON-UI）的可借鉴 addon。
 > 位置以仓库相对路径给出。
@@ -226,6 +226,17 @@ resource_pack/
 - 位置：`examples/url.txt` → `playergendersaddonskinconverter.tiiny.site`
 - 要点：把皮肤包转成性别包可用格式的社区工具。
 - 教训：性别/皮肤生态里有现成转换工具，可减轻资产转换负担。
+
+### ⑯ Internalised (VCM) V1.35（移植来源 · Java Forge 1.20.1）
+- 位置：`jar/InternalisedV1.35(1.20.1-forge).jar`（不入库）→ `tools/extract_vcm_assets.ps1` → `.work/vcm/`；反编译树 `.work/vcm_src/`
+- 要点：MCreator 生成的 Forge mod，8 个生物、10 个物品、5 个粒子、4 个弹射物、5 个 biome modifier。
+  已整体并入 PCraftRevorn 包对（显示名 **PCraft+Internalised**），方案见 `docs/vcm-integration.md`。
+- 教训：
+  1. GeckoLib 的 geo 常声明 16/32 的 UV 空间而贴图按 64 画 —— Bedrock 的 box UV 按声明空间取样，
+     **不要只缩放 UV 原点**，应保留几何、把贴图重采样到声明尺寸（背包图标仍用原图）。
+  2. Bedrock 的 `particle_on_hit` 只吃原版粒子枚举，自定义粒子必须由脚本按 tick/命中点生成。
+  3. 自定义伤害类型（`vcm:digestion`）无法注册，死亡文本只能退化成「被掠食者击杀」。
+  4. MCreator 的 bug（`BunnyEatPlayerProcedure` 写错实体）不要照抄。
 
 ---
 
