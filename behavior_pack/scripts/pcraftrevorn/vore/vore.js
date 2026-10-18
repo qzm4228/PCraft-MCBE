@@ -269,7 +269,9 @@ function strugglePct(session) {
 /** Bus string: gate + one marker per direction/state + the readable text. */
 function hudBus(session) {
   const marks = PROMPT_DIRS.map((d) => hudMarker(d, session.hud?.[d] ?? "off")).join("");
-  return `${PCT_MARKER}${marks}§7挣脱 §f${strugglePct(session)}%`;
+  const left = Math.max(0, Math.ceil((session.promptTick + session.promptTimer - system.currentTick) / 20));
+  const time = session.awaiting ? ` §8· §f${left}s` : "";
+  return `${PCT_MARKER}${marks}§7挣脱 §f${strugglePct(session)}%${time}`;
 }
 
 function showPrompt(player, session) {

@@ -852,6 +852,16 @@ def generate_vcm() -> None:
                      for sid, pid in STAFFS.items()}
     _gen_spawn_rules()
 
+    # ---- struggle HUD arrows ----
+    # VoreMinigameOverlay draws one of these 48x48 sprites dead centre: up red,
+    # right cyan, down magenta, left green (VCM's CurrentKey 1..4).
+    arrow_dir = RP / "textures" / "ui" / "pcraftrevorn" / "hud"
+    for src, out in (("new_piskel-1.png_6.png", "vcm_arrow_up"),
+                     ("new_piskel-2.png_3.png", "vcm_arrow_right"),
+                     ("new_piskel-3.png_2.png", "vcm_arrow_down"),
+                     ("new_piskel-4.png_2.png", "vcm_arrow_left")):
+        copy(VCM / "textures" / "screens" / src, arrow_dir / (out + ".png"))
+
     write_text(bp_texts[0], read_text(bp_texts[0]).rstrip() + "\n" + "\n".join(extra_en) + "\n")
     write_text(bp_texts[1], read_text(bp_texts[1]).rstrip() + "\n" + "\n".join(extra_zh) + "\n")
     write_json(RP / "textures" / "item_texture.json", atlas)

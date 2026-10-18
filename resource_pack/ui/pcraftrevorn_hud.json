@@ -1,43 +1,131 @@
 {
   "namespace": "hud",
 
-  // PCraftRevorn vore HUD (JSON-UI).
+  // PCraftRevorn vore HUD (JSON-UI), modelled on VCM's VoreMinigameOverlay:
+  // a single 48x48 arrow in the middle of the screen (up red / right cyan /
+  // down magenta / left green) plus the escape numbers in the corner.
   //
-  // Patched exactly like the VCraft pack's ui/hud_screen.json: one
-  // `insert_after root_panel` inside `hud_content`. Vanilla controls are never
-  // redefined (doing that broke the whole HUD once).
+  // Patched the VCraft way: one `insert_after root_panel` inside `hud_content`,
+  // no vanilla control redefinitions.
   //
-  // Data bus: the script writes one string into the *title*
-  // (the only HUD text Bedrock exposes globally, `#hud_title_text_string`):
-  //   "§0§r§2§r"                      gate marker (hides the centre title, shows the HUD)
-  //   + 4 x "§2§r§<hex>§r"            per-direction state (dir*4 + state, see constants.js)
-  //   + "§7挣脱 §fNN%"                escape percentage
-  // Every element below binds that string and tests for its own marker.
+  // Data bus (title string, the only HUD text Bedrock exposes globally):
+  //   "§0§r§2§r"            gate marker (shows the HUD, hides the centre title)
+  //   + 4 x "§2§r§<hex>§r"  direction/state (dir*4+state, constants.js hudMarker);
+  //                         only the required direction carries "idle"
+  //   + "§7挣脱 §fNN% …"    readable percentage (+ remaining seconds while a
+  //                         prompt is open)
   "hud_content": {
     "modifications": [
       {
         "operation": "insert_after",
         "control_name": "root_panel",
         "value": [
-          { "pcr_struggle_pct@hud.pcr_struggle_pct": {} },
-          { "pcr_arrows@hud.pcr_arrows": {} }
+          { "pcr_struggle_arrow@hud.pcr_struggle_arrow": {} },
+          { "pcr_struggle_pct@hud.pcr_struggle_pct": {} }
         ]
       }
     ]
   },
 
   // the bus is written into the title; drop its visible frame so nothing big is
-  // printed in the middle (a modification, never a redefinition)
+  // printed in the middle (modification only, never a redefinition)
   "hud_title_text": {
     "modifications": [
       { "operation": "remove", "control_name": "title_frame" }
     ]
   },
 
-  // ---- escape percentage (bottom-right) -----------------------------------
+  // ---- the arrow (screen centre, like the mod) ----------------------------
+  "pcr_struggle_arrow": {
+    "type": "panel",
+    "size": [ 48, 48 ],
+    "anchor_from": "center",
+    "anchor_to": "center",
+    "layer": 40,
+    "controls": [
+        {
+          "arrow_up": {
+            "type": "image",
+            "size": [ 48, 48 ],
+            "anchor_from": "center",
+            "anchor_to": "center",
+            "offset": [ -3, -7 ],
+            "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_up",
+            "property_bag": { "#pcr_bus": "" },
+            "bindings": [
+              { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+              {
+                "binding_type": "view",
+                "source_property_name": "(not ((#pcr_bus - '§2§r§1§r') = #pcr_bus))",
+                "target_property_name": "#visible"
+              }
+            ]
+          }
+        },
+        {
+          "arrow_right": {
+            "type": "image",
+            "size": [ 48, 48 ],
+            "anchor_from": "center",
+            "anchor_to": "center",
+            "offset": [ -3, -7 ],
+            "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_right",
+            "property_bag": { "#pcr_bus": "" },
+            "bindings": [
+              { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+              {
+                "binding_type": "view",
+                "source_property_name": "(not ((#pcr_bus - '§2§r§d§r') = #pcr_bus))",
+                "target_property_name": "#visible"
+              }
+            ]
+          }
+        },
+        {
+          "arrow_down": {
+            "type": "image",
+            "size": [ 48, 48 ],
+            "anchor_from": "center",
+            "anchor_to": "center",
+            "offset": [ -3, -7 ],
+            "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_down",
+            "property_bag": { "#pcr_bus": "" },
+            "bindings": [
+              { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+              {
+                "binding_type": "view",
+                "source_property_name": "(not ((#pcr_bus - '§2§r§5§r') = #pcr_bus))",
+                "target_property_name": "#visible"
+              }
+            ]
+          }
+        },
+        {
+          "arrow_left": {
+            "type": "image",
+            "size": [ 48, 48 ],
+            "anchor_from": "center",
+            "anchor_to": "center",
+            "offset": [ -3, -7 ],
+            "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_left",
+            "property_bag": { "#pcr_bus": "" },
+            "bindings": [
+              { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+              {
+                "binding_type": "view",
+                "source_property_name": "(not ((#pcr_bus - '§2§r§9§r') = #pcr_bus))",
+                "target_property_name": "#visible"
+              }
+            ]
+          }
+        }
+    ]
+  },
+
+  // ---- escape percentage (bottom-right) ----------------------------------
   "pcr_struggle_pct": {
     "type": "panel",
-    "size": [ 112, 18 ],
+    "size": [ 140, 18 ],
     "anchor_from": "bottom_right",
     "anchor_to": "bottom_right",
     "offset": [ -6, -8 ],
@@ -74,275 +162,6 @@
           "layer": 2
         }
       }
-    ]
-  },
-
-  // ---- four direction arrows (above the percentage) ----------------------
-  "pcr_arrows": {
-    "type": "stack_panel",
-    "orientation": "horizontal",
-    "size": [ 168, 42 ],
-    "anchor_from": "bottom_right",
-    "anchor_to": "bottom_right",
-    "offset": [ -6, -30 ],
-    "layer": 40,
-    "controls": [
-        {
-          "up": {
-            "type": "panel",
-            "size": [ 42, 42 ],
-            "controls": [
-            { "off": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_up_off",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§0§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } },
-            { "idle": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_up_idle",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§1§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } },
-            { "correct": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_up_correct",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§2§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } },
-            { "incorrect": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_up_incorrect",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§3§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } }
-            ]
-          }
-        },
-        {
-          "down": {
-            "type": "panel",
-            "size": [ 42, 42 ],
-            "controls": [
-            { "off": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_down_off",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§4§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } },
-            { "idle": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_down_idle",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§5§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } },
-            { "correct": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_down_correct",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§6§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } },
-            { "incorrect": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_down_incorrect",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§7§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } }
-            ]
-          }
-        },
-        {
-          "left": {
-            "type": "panel",
-            "size": [ 42, 42 ],
-            "controls": [
-            { "off": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_left_off",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§8§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } },
-            { "idle": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_left_idle",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§9§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } },
-            { "correct": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_left_correct",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§a§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } },
-            { "incorrect": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_left_incorrect",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§b§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } }
-            ]
-          }
-        },
-        {
-          "right": {
-            "type": "panel",
-            "size": [ 42, 42 ],
-            "controls": [
-            { "off": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_right_off",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§c§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } },
-            { "idle": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_right_idle",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§d§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } },
-            { "correct": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_right_correct",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§e§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } },
-            { "incorrect": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/struggle_right_incorrect",
-              "property_bag": { "#pcr_bus": "" },
-              "bindings": [
-                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-                {
-                  "binding_type": "view",
-                  "source_property_name": "(not ((#pcr_bus - '§2§r§f§r') = #pcr_bus))",
-                  "target_property_name": "#visible"
-                }
-              ]
-            } }
-            ]
-          }
-        }
     ]
   }
 }
