@@ -257,10 +257,11 @@ function refreshBelly(session) {
 //   + 4 x "§2§r§<hex>§r"         per-direction state (dir*4 + state)
 //   + "§7挣脱 §fNN%[ · Ns]"      readable text, drawn by the corner label
 const PROMPT_DIRS = ["up", "down", "left", "right"];
-// WAILA-style token: ASCII prefix (matched with string subtraction) + a leading
-// black code so a leaked title is invisible anyway
-const BLACK_GATE = "§0__pcr:";
+// ASCII token; the fixed-width fields after it are sliced by the UI with %.Ns
+const BLACK_GATE = "__pcr:";
 const PCT_MARKER = BLACK_GATE;
+
+const pad3 = (n) => String(Math.max(0, n | 0)).padStart(3, " ");
 
 /** Escape progress, 0..100 (good struggles out of the required count). */
 function strugglePct(session) {
@@ -268,16 +269,18 @@ function strugglePct(session) {
   return Math.max(0, Math.min(100, Math.round(((session.struggles ?? 0) / need) * 100)));
 }
 
-/** Bus string: gate + markers + a black-on-dark number.
+/** Bus string: token + 3 fixed-width numbers + the four direction markers.
  *
- * On 1.21.100 the title element is instantiated by `hud_title_text_factory` on
- * every /title, so `modifications` on hud_title_text never reach it (and the
- * wiki's "control path" override is not honoured either) -- the payload is
- * therefore drawn in black (§0) over the title's dark plate, i.e. invisible.
+ * __pcr:<timer><score><needed><markers>
+ * The UI slices the numbers with %.6s/.9s/.12s/.15s (see the hud file), so no
+ * variable-length text ever crosses the boundary.
  */
 function hudBus(session) {
   const marks = PROMPT_DIRS.map((d) => hudMarker(d, session.hud?.[d] ?? "off")).join("");
-  return `${BLACK_GATE}${marks}§0${strugglePct(session)}%`;
+  const left = session.awaiting
+    ? Math.ceil((session.promptTick + session.promptTimer - system.currentTick) / 20)
+    : 0;
+  return `${BLACK_GATE}${pad3(left)}${pad3(session.struggles ?? 0)}${pad3(session.needed ?? 0)}${marks}`;
 }
 
 function showPrompt(player, session) {

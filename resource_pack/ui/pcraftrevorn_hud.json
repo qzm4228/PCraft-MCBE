@@ -1,96 +1,107 @@
 {
   "namespace": "hud",
 
-  // PCraftRevorn vore HUD, modelled on
-  //   * VCM's VoreMinigameOverlay (one coloured arrow + numbers), and
-  //   * poggy's 高亮信息显示 (ui/hud_screen.json): the readout is carried by the
-  //     action bar and this file replaces `hud_actionbar_text`, which the engine
-  //     re-creates for every action-bar message with `$actionbar_text` set.
+  // PCraftRevorn vore HUD -- VCM's VoreMinigameOverlay look on the action-bar
+  // channel (the mechanism is copied from poggy's 高亮信息显示: this file fully
+  // replaces hud_actionbar_text, whose $actionbar_text is fed by the engine).
   //
-  // No /title is used at all, so nothing can leak into the middle of the screen.
-  // Bus: "§0__pcr:" + 4 markers + "§0<NN>%"; the panel hides itself unless the
-  // token is present, so other action-bar messages are not swallowed by it.
+  // Layout, like VoreMinigameOverlay:
+  //        "剩余 3s"          (VCM: "Time Remaining: 3" at h/2-114)
+  //        [48x48 arrow]      (VCM: 48x48 sprite at w/2-27, h/2-31)
+  //        "挣脱 4/15"        (VCM: "Score: 4/15" at h/2+86)
+  //
+  // Bus: "__pcr:" + timer(3) + score(3) + needed(3) + 4 direction markers
   "hud_actionbar_text": {
     "type": "panel",
-    "size": [ 150, 26 ],
-    "anchor_from": "top_middle",
-    "anchor_to": "top_middle",
-    "offset": [ 0, 46 ],
-    "layer": 40,
+    "size": [ 0, 0 ],
+    "anchor_from": "center",
+    "anchor_to": "center",
     "$atext": "$actionbar_text",
+      "$t6": "('%.6s' * $atext)",
+      "$t9": "('%.9s' * $atext)",
+      "$t12": "('%.12s' * $atext)",
+      "$t15": "('%.15s' * $atext)",
     "visible": "(not (($atext - '__pcr:') = $atext))",
     "controls": [
       {
-        "pcr_bg": {
-          "type": "image",
-          "texture": "textures/ui/Black",
-          "size": [ "100%", "100%" ],
-          "alpha": 0.35,
-          "layer": 1
+        "pcr_timer": {
+          "type": "label",
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "offset": [ 0, -100 ],
+          "color": [ 1, 1, 1, 1 ],
+          "shadow": false,
+          "localize": false,
+          "$atext": "$actionbar_text",
+      "$t6": "('%.6s' * $atext)",
+      "$t9": "('%.9s' * $atext)",
+      "$t12": "('%.12s' * $atext)",
+      "$t15": "('%.15s' * $atext)",
+          "text": "('剩余 ' + ($t9 - $t6) + 's')"
         }
       },
       {
         "pcr_arrow": {
           "type": "panel",
-          "size": [ 22, 22 ],
-          "anchor_from": "left_middle",
-          "anchor_to": "left_middle",
-          "offset": [ 5, 0 ],
-          "layer": 2,
+          "size": [ 48, 48 ],
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "offset": [ -3, -7 ],
           "controls": [
-          {
-            "arrow_up": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_up",
-              "$atext": "$actionbar_text",
-              "visible": "(not (($atext - '§2§r§1§r') = $atext))"
+            {
+              "arrow_up": {
+                "type": "image",
+                "size": [ "100%", "100%" ],
+                "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_up",
+                "$atext": "$actionbar_text",
+                "visible": "(not (($atext - '§2§r§1§r') = $atext))"
+              }
+            },
+            {
+              "arrow_down": {
+                "type": "image",
+                "size": [ "100%", "100%" ],
+                "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_down",
+                "$atext": "$actionbar_text",
+                "visible": "(not (($atext - '§2§r§5§r') = $atext))"
+              }
+            },
+            {
+              "arrow_left": {
+                "type": "image",
+                "size": [ "100%", "100%" ],
+                "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_left",
+                "$atext": "$actionbar_text",
+                "visible": "(not (($atext - '§2§r§9§r') = $atext))"
+              }
+            },
+            {
+              "arrow_right": {
+                "type": "image",
+                "size": [ "100%", "100%" ],
+                "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_right",
+                "$atext": "$actionbar_text",
+                "visible": "(not (($atext - '§2§r§d§r') = $atext))"
+              }
             }
-          },
-          {
-            "arrow_down": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_down",
-              "$atext": "$actionbar_text",
-              "visible": "(not (($atext - '§2§r§5§r') = $atext))"
-            }
-          },
-          {
-            "arrow_left": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_left",
-              "$atext": "$actionbar_text",
-              "visible": "(not (($atext - '§2§r§9§r') = $atext))"
-            }
-          },
-          {
-            "arrow_right": {
-              "type": "image",
-              "size": [ "100%", "100%" ],
-              "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_right",
-              "$atext": "$actionbar_text",
-              "visible": "(not (($atext - '§2§r§d§r') = $atext))"
-            }
-          }
           ]
         }
       },
       {
-        "pcr_label": {
+        "pcr_score": {
           "type": "label",
-          "size": [ "100%", "100%" ],
-          "anchor_from": "left_middle",
-          "anchor_to": "left_middle",
-          "offset": [ 32, 0 ],
-          "layer": 2,
-          "font_size": "large",
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "offset": [ 0, 86 ],
           "color": [ 1, 1, 1, 1 ],
-          "shadow": true,
+          "shadow": false,
           "localize": false,
           "$atext": "$actionbar_text",
-          "text": "('挣脱 ' + (($atext - '§0__pcr:') - '§0'))"
+      "$t6": "('%.6s' * $atext)",
+      "$t9": "('%.9s' * $atext)",
+      "$t12": "('%.12s' * $atext)",
+      "$t15": "('%.15s' * $atext)",
+          "text": "('挣脱 ' + ($t12 - $t9) + '/' + ($t15 - $t12))"
         }
       }
     ]
