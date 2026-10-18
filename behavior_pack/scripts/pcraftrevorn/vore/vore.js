@@ -257,8 +257,9 @@ function refreshBelly(session) {
 //   + 4 x "§2§r§<hex>§r"         per-direction state (dir*4 + state)
 //   + "§7挣脱 §fNN%[ · Ns]"      readable text, drawn by the corner label
 const PROMPT_DIRS = ["up", "down", "left", "right"];
-// codes-only gate: unique among the markers, completely invisible in text
-const BLACK_GATE = "§0§1";
+// WAILA-style token: ASCII prefix (matched with string subtraction) + a leading
+// black code so a leaked title is invisible anyway
+const BLACK_GATE = "§0__pcr:";
 const PCT_MARKER = BLACK_GATE;
 
 /** Escape progress, 0..100 (good struggles out of the required count). */

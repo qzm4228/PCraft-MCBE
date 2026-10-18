@@ -5,12 +5,12 @@
   // one 48x48 arrow in the middle (up red / right cyan / down magenta / left
   // green) and the escape percentage in the bottom-right corner.
   //
-  // Patched the VCraft way: a single `insert_after root_panel` inside
-  // `hud_content`. No path overrides and no hud_title_text modifications -- on
-  // 1.21.100 both are ignored for the title (it is rebuilt by
-  // hud_title_text_factory), so the title payload itself is sent in black.
+  // Data channel and title suppression follow WAILA GT's hud_screen.json:
+  // hud_title_text gets the global binding inserted at the FRONT (so #text is
+  // already populated when our visibility test runs -- the mistake in the
+  // earlier builds) plus a view binding that hides any title carrying our token.
   //
-  // Bus string: "§0pcr|" + 4 x "§2§r§<hex>§r" + "§0<NN>%"
+  // Bus string: "§0__pcr:" + 4 x "§2§r§<hex>§r" + "§0<NN>%"
   "hud_content": {
     "modifications": [
       {
@@ -19,6 +19,34 @@
         "value": [
           { "pcr_struggle_arrow@hud.pcr_struggle_arrow": {} },
           { "pcr_struggle_pct@hud.pcr_struggle_pct": {} }
+        ]
+      }
+    ]
+  },
+
+  // ---- hide our own title payload (WAILA GT pattern) ----------------------
+  "hud_title_text": {
+    "modifications": [
+      {
+        "array_name": "bindings",
+        "operation": "insert_front",
+        "value": [
+          {
+            "binding_type": "global",
+            "binding_name": "#hud_title_text_string",
+            "binding_name_override": "#text"
+          }
+        ]
+      },
+      {
+        "array_name": "bindings",
+        "operation": "insert_back",
+        "value": [
+          {
+            "binding_type": "view",
+            "source_property_name": "(not ((#text - '__pcr:') = #text))",
+            "target_property_name": "#visible"
+          }
         ]
       }
     ]
@@ -128,7 +156,7 @@
       { "binding_type": "global", "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
       {
         "binding_type": "view",
-        "source_property_name": "(not ((#pcr_bus - '§0§1') = #pcr_bus))",
+        "source_property_name": "(not ((#pcr_bus - '__pcr:') = #pcr_bus))",
         "target_property_name": "#visible"
       }
     ],
@@ -146,7 +174,7 @@
         "pcr_pct_label": {
           "type": "label",
           "size": [ "100%", "100%" ],
-          "text": "('挣脱 ' + ((#pcr_bus - '§0§1') - '§0'))",
+          "text": "('挣脱 ' + ((#pcr_bus - '§0__pcr:') - '§0'))",
           "font_size": "large",
           "color": [ 1, 1, 1, 1 ],
           "shadow": true,
