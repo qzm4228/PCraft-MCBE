@@ -2,18 +2,15 @@
   "namespace": "hud",
 
   // PCraftRevorn vore HUD (JSON-UI), modelled on VCM's VoreMinigameOverlay:
-  // a single 48x48 arrow in the middle of the screen (up red / right cyan /
-  // down magenta / left green) plus the escape numbers in the corner.
+  // one 48x48 arrow in the middle (up red / right cyan / down magenta / left
+  // green) plus the escape percentage in the bottom-right corner.
   //
-  // Patched the VCraft way: one `insert_after root_panel` inside `hud_content`,
-  // no vanilla control redefinitions.
+  // Data flows through #hud_title_text_string, the only HUD text Bedrock exposes
+  // globally, but it is never shown: the wiki's "conditionally hide a title"
+  // pattern adds a #visible binding to hud_title_text/title_frame/title, so only
+  // titles carrying our keyword are suppressed (every other title still works).
   //
-  // Data bus (title string, the only HUD text Bedrock exposes globally):
-  //   "§0§r§2§r"            gate marker (shows the HUD, hides the centre title)
-  //   + 4 x "§2§r§<hex>§r"  direction/state (dir*4+state, constants.js hudMarker);
-  //                         only the required direction carries "idle"
-  //   + "§7挣脱 §fNN% …"    readable percentage (+ remaining seconds while a
-  //                         prompt is open)
+  // Bus string: "pcr|" + 4 x "§2§r§<hex>§r" + "§7挣脱 §fNN%[ · Ns]"
   "hud_content": {
     "modifications": [
       {
@@ -27,11 +24,19 @@
     ]
   },
 
-  // the bus is written into the title; drop its visible frame so nothing big is
-  // printed in the middle (modification only, never a redefinition)
-  "hud_title_text": {
+  // hide only OUR title text (path override + one extra binding, nothing is
+  // redefined -- see wiki.bedrock.dev/json-ui/json-ui-intro#conditional-rendering)
+  "hud_title_text/title_frame/title": {
     "modifications": [
-      { "operation": "remove", "control_name": "title_frame" }
+      {
+        "array_name": "bindings",
+        "operation": "insert_back",
+        "value": {
+          "binding_type": "view",
+          "source_property_name": "(not ((#text - 'pcr|') = #text))",
+          "target_property_name": "#visible"
+        }
+      }
     ]
   },
 
@@ -53,7 +58,8 @@
             "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_up",
             "property_bag": { "#pcr_bus": "" },
             "bindings": [
-              { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+              { "binding_type": "global", "binding_name": "#hud_title_text_string",
+                "binding_name_override": "#pcr_bus" },
               {
                 "binding_type": "view",
                 "source_property_name": "(not ((#pcr_bus - '§2§r§1§r') = #pcr_bus))",
@@ -72,7 +78,8 @@
             "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_right",
             "property_bag": { "#pcr_bus": "" },
             "bindings": [
-              { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+              { "binding_type": "global", "binding_name": "#hud_title_text_string",
+                "binding_name_override": "#pcr_bus" },
               {
                 "binding_type": "view",
                 "source_property_name": "(not ((#pcr_bus - '§2§r§d§r') = #pcr_bus))",
@@ -91,7 +98,8 @@
             "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_down",
             "property_bag": { "#pcr_bus": "" },
             "bindings": [
-              { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+              { "binding_type": "global", "binding_name": "#hud_title_text_string",
+                "binding_name_override": "#pcr_bus" },
               {
                 "binding_type": "view",
                 "source_property_name": "(not ((#pcr_bus - '§2§r§5§r') = #pcr_bus))",
@@ -110,7 +118,8 @@
             "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_left",
             "property_bag": { "#pcr_bus": "" },
             "bindings": [
-              { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+              { "binding_type": "global", "binding_name": "#hud_title_text_string",
+                "binding_name_override": "#pcr_bus" },
               {
                 "binding_type": "view",
                 "source_property_name": "(not ((#pcr_bus - '§2§r§9§r') = #pcr_bus))",
@@ -132,10 +141,10 @@
     "layer": 40,
     "property_bag": { "#pcr_bus": "" },
     "bindings": [
-      { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+      { "binding_type": "global", "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
       {
         "binding_type": "view",
-        "source_property_name": "(not ((#pcr_bus - '§0§r§2§r') = #pcr_bus))",
+        "source_property_name": "(not ((#pcr_bus - 'pcr|') = #pcr_bus))",
         "target_property_name": "#visible"
       }
     ],
@@ -153,7 +162,7 @@
         "pcr_pct_label": {
           "type": "label",
           "size": [ "100%", "100%" ],
-          "text": "#pcr_bus",
+          "text": "(#pcr_bus - 'pcr|')",
           "font_size": "large",
           "color": [ 1, 1, 1, 1 ],
           "shadow": true,

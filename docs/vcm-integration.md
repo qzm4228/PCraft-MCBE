@@ -216,16 +216,17 @@
 - **驯服（依照原版）**：原版只有**蝙蝠娘**和**史莱姆娘**可驯服，且都是 **20%** 每次尝试；其余（兔娘/猫娘/德鲁伊/拉米亚）
   原版就没有驯服逻辑，已改为不可驯服。物品沿用整包的**丘比特之箭**（史莱姆娘另可喂**史莱姆球**）。
   手册（`guide.js`）每只新增「脾气」「驯服」两行，写明用什么东西、多少概率。
-- **挣脱提示改为 JSON-UI（照原版布局）**：原版 `VoreMinigameOverlay` 是**屏幕正中一个 48×48 方向箭头**
-  （上=红 `new_piskel-1`、右=青 `-2`、下=品红 `-3`、左=绿 `-4`），上方一行 `Time Remaining: N`，
-  下方一行 `Score: n/15`。移植版：把原版四张箭头贴图原样拷进 `RP/textures/ui/pcraftrevorn/hud/vcm_arrow_*`，
-  UI 里 4 张图叠在 `anchor center`、`offset [-3,-7]`（与原版 `w/2-27, h/2-31` 的视觉位置一致），
-  只有当前需要按的方向显示；数字部分按你的要求放在右下角（`挣脱 NN% · Ns`）。
-  数据仍是 title 字符串（`#hud_title_text_string`）：
-  `§0§r§2§r`（总开关）+ 4 × `§2§r§<hex>§r`（方向/状态，只有当前方向是 idle）+ `§7挣脱 §fNN%`（可读文本）。
-  UI 侧照 VCraft 的写法：只在 `hud_content` 里 `insert_after root_panel` 插入两个控件，**不重定义任何原版控件**；
-  中间大字标题用 `hud_title_text` 的 `modifications: [{remove: title_frame}]` 去掉。
-  （10.17.1 曾把 `hud_title_text` 整个重定义成 label，导致整个 HUD 加载失败，已回退。）
+- **挣脱提示（JSON-UI，数据通道与显示分离）**：原版 `VoreMinigameOverlay` 是屏幕正中一个 48×48 方向箭头
+  （上=红、右=青、下=品红、左=绿），上方 `Time Remaining`、下方 `Score: n/15`。移植版把箭头放在正中，
+  数字放右下角。**数据**走 `#hud_title_text_string`（Bedrock 唯一全局可读的 HUD 字符串），
+  格式 `pcr|` + 4 × `§2§r§<hex>§r`（方向/状态）+ `§7挣脱 NN% · Ns`；
+  **显示**完全由 JSON-UI 负责，标题本身按官方文档的写法隐藏：
+  - 用**路径覆盖**只给原版 `hud_title_text/title_frame/title` 追加一条 `bindings` modification：
+    `(not ((#text - 'pcr|') = #text))` → 含 `pcr|` 的标题不显示，**其它标题照常**
+    （wiki.bedrock.dev/json-ui/json-ui-intro「Conditional Rendering with Bindings」）；
+  - 右下角标签用字符串减法把门禁去掉再显示：`(#pcr_bus - 'pcr|')`
+    （wiki.bedrock.dev/json-ui/preserve-title-texts 的同一手法）。
+  不重定义任何原版控件；VCraft 那种 `insert_after root_panel` 用于插入 `pcr_struggle_arrow` / `pcr_struggle_pct`。
   百分比 = 成功挣脱次数 / 需要次数，每 10 tick 刷新，结束时 `clearPrompt()` 清空。
 
 

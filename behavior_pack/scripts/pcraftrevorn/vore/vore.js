@@ -247,18 +247,17 @@ function refreshBelly(session) {
 }
 
 // ---- struggle HUD bus (JSON-UI) --------------------------------------------
-// Bedrock exposes exactly one HUD string globally: #hud_title_text_string. So the
-// script writes the whole HUD state into the *title* of a title packet:
+// Bedrock exposes exactly one HUD string globally, #hud_title_text_string, so the
+// script writes the HUD state into a *title* packet - but the title never shows
+// it: ui/pcraftrevorn_hud.json path-patches hud_title_text/title_frame/title with
+// a #visible binding that rejects strings starting with "pcr|" (the documented
+// way to conditionally hide a title; other packs' titles are untouched).
 //
-//   "§0§r§2§r"                   gate marker (shows the HUD, hides the title)
+//   "pcr|"                       ASCII gate: hides the title text, enables the HUD
 //   + 4 x "§2§r§<hex>§r"         per-direction state (dir*4 + state)
-//   + "§7挣脱 §fNN%"             escape percentage
-//
-// resource_pack/ui/pcraftrevorn_hud.json binds that string: the four arrow
-// images test their own marker, the corner label prints the whole string (the
-// markers are formatting codes, so only the text is visible).
+//   + "§7挣脱 §fNN%[ · Ns]"      readable text, drawn by the corner label
 const PROMPT_DIRS = ["up", "down", "left", "right"];
-const PCT_MARKER = "§0§r§2§r";
+const PCT_MARKER = "pcr|";
 
 /** Escape progress, 0..100 (good struggles out of the required count). */
 function strugglePct(session) {
