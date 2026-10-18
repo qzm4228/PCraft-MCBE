@@ -257,7 +257,9 @@ function refreshBelly(session) {
 //   + 4 x "§2§r§<hex>§r"         per-direction state (dir*4 + state)
 //   + "§7挣脱 §fNN%[ · Ns]"      readable text, drawn by the corner label
 const PROMPT_DIRS = ["up", "down", "left", "right"];
-const PCT_MARKER = "pcr|";
+// codes-only gate: unique among the markers, completely invisible in text
+const BLACK_GATE = "§0§1";
+const PCT_MARKER = BLACK_GATE;
 
 /** Escape progress, 0..100 (good struggles out of the required count). */
 function strugglePct(session) {
@@ -265,15 +267,27 @@ function strugglePct(session) {
   return Math.max(0, Math.min(100, Math.round(((session.struggles ?? 0) / need) * 100)));
 }
 
-/** Bus string: gate + one marker per direction/state + the readable text. */
+/** Bus string: gate + markers + a black-on-dark number.
+ *
+ * On 1.21.100 the title element is instantiated by `hud_title_text_factory` on
+ * every /title, so `modifications` on hud_title_text never reach it (and the
+ * wiki's "control path" override is not honoured either) -- the payload is
+ * therefore drawn in black (§0) over the title's dark plate, i.e. invisible.
+ */
 function hudBus(session) {
   const marks = PROMPT_DIRS.map((d) => hudMarker(d, session.hud?.[d] ?? "off")).join("");
-  const left = Math.max(0, Math.ceil((session.promptTick + session.promptTimer - system.currentTick) / 20));
-  const time = session.awaiting ? ` §8· §f${left}s` : "";
-  return `${PCT_MARKER}${marks}§7挣脱 §f${strugglePct(session)}%${time}`;
+  return `${BLACK_GATE}${marks}§0${strugglePct(session)}%`;
 }
 
+const ARROW_TEXT = { up: "↑", down: "↓", left: "←", right: "→" };
+
 function showPrompt(player, session) {
+  // action bar: the readout that always works (plain engine text, no JSON-UI)
+  const arrow = session.awaiting ? ARROW_TEXT[session.promptDir] ?? "" : "";
+  try {
+    player.onScreenDisplay.setActionBar(`§7${arrow} §f挣脱 §e${strugglePct(session)}%`);
+  } catch { /* ignore */ }
+  // title: data bus for the JSON-UI overlay (hidden by hud_title_text patch)
   try {
     player.onScreenDisplay.setTitle(hudBus(session), {
       fadeInDuration: 0,
