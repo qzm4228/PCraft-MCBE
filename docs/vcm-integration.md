@@ -216,18 +216,16 @@
 - **驯服（依照原版）**：原版只有**蝙蝠娘**和**史莱姆娘**可驯服，且都是 **20%** 每次尝试；其余（兔娘/猫娘/德鲁伊/拉米亚）
   原版就没有驯服逻辑，已改为不可驯服。物品沿用整包的**丘比特之箭**（史莱姆娘另可喂**史莱姆球**）。
   手册（`guide.js`）每只新增「脾气」「驯服」两行，写明用什么东西、多少概率。
-- **挣脱提示改为 subtitle + 自定义字体**：`RP/font/glyph_E2.png`（Bedrock 的 U+E200–E2FF 私用页，16×16 格）
-  把 16 张挣扎提示图（四方向 × off/idle/correct/incorrect）做成字形，脚本用
-  `U+E200 + 方向*4 + 状态` 拼成 subtitle 行（`onScreenDisplay.setTitle("§r", { subtitle })`），
-  不用 JSON-UI、不依赖 Boss 血条，也就绕开了上一版崩溃的那条路径。
-  旧的四向 HUD 定义仍留在 `pcraftrevorn_hud.json` 里（注释掉的 patch），等有安全挂点再启用。
-- **右下角挣脱百分比（JSON-UI）**：Bedrock 里唯一全局可读的 HUD 字符串是 `#hud_title_text_string`，
-  所以脚本把 `§0§r§2§r§7挣脱 §fNN%` 写进 **title**（同时把箭头放进 subtitle，一次 `setTitle` 全给）。
-  UI 侧**完全参照 VCraft 的写法**：只在 `hud_content` 里 `insert_after root_panel` 插入 `pcr_struggle_pct`
-  （bottom_right、112×18、半透明黑底），**不重定义任何原版控件**；标题中间那份用
-  `hud_title_text` 的 `modifications: [{remove: title_frame}]` 去掉（modification 失败最多重复显示，不会坏 HUD）。
-  （10.17.1 曾把 `hud_title_text` 整个重定义成 label，导致整个 HUD 加载失败，已回退并改为上述写法。）
+- **挣脱提示改为 JSON-UI（四箭头 + 百分比）**：Bedrock 里唯一全局可读的 HUD 字符串是 `#hud_title_text_string`，
+  所以脚本把整块 HUD 状态写进 **title**：
+  `§0§r§2§r`（总开关）+ 4 × `§2§r§<hex>§r`（方向×状态，`dir*4+state`）+ `§7挣脱 §fNN%`（可读文本）。
+  UI 侧**完全参照 VCraft 的写法**：在 `hud_content` 里 `insert_after root_panel` 插入两个控件 ——
+  `pcr_arrows`（4 个方向各 4 张 `struggle_<dir>_<state>` 图，按各自标记显隐）
+  和 `pcr_struggle_pct`（右下角 112×18 半透明底 + 白字）。**不重定义任何原版控件**；
+  中间那份大字标题用 `hud_title_text` 的 `modifications: [{remove: title_frame}]` 去掉。
+  （10.17.1 曾把 `hud_title_text` 整个重定义成 label，导致整个 HUD 加载失败，已回退。）
   百分比 = 成功挣脱次数 / 需要次数，每 10 tick 刷新，结束时 `clearPrompt()` 清空。
+  原来的 subtitle 字形方案（`font/glyph_E2.png` + `genStruggleFont()`）已删除，subtitle 只用于「被吞入」提示。
 
 
 

@@ -220,7 +220,7 @@ Bedrock 附加包**不支持 jigsaw 结构**，原 `royal_castle_remnant`（jigs
   以及 Java 端解析成 `CUSTOM` 的粒子渲染类型——均已在 `docs/vcm-integration.md` §6.4 记录。
 - **10.17.1 体验调整**：吞食概率 0.60/0.65 + ≤10 血必吞；6 个生物改为中立（只猎村民/动物，被打了才还手）；
   驯服按原版只留蝙蝠娘与史莱姆娘（各 20%，丘比特之箭 / 史莱姆球），手册逐只写明；
-  挣脱提示从 JSON-UI/Boss 血条改成 `font/glyph_E2.png` 自定义字体 + subtitle（详见 §6.5）。
+  挣脱提示改为 JSON-UI：`pcr_arrows`（四方向 × 四状态的贴图按 title 标记显隐）+ 右下角百分比（详见 §6.5）。
 
 
 ---

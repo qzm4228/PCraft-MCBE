@@ -3,34 +3,38 @@
 
   // PCraftRevorn vore HUD (JSON-UI).
   //
-  // Patched exactly like the VCraft pack's ui/hud_screen.json: a single
+  // Patched exactly like the VCraft pack's ui/hud_screen.json: one
   // `insert_after root_panel` inside `hud_content`. Vanilla controls are never
-  // redefined -- replacing hud_title_text in the previous build broke the whole
-  // HUD.
+  // redefined (doing that broke the whole HUD once).
   //
-  // Struggle progress: the script writes "§0§r§2§r§7挣脱 §fNN%" into the *title*
-  // (the only HUD string Bedrock exposes globally, `#hud_title_text_string`).
-  // `pcr_struggle_pct` renders it in the bottom-right corner. The title frame is
-  // removed with a modification so the same text is not printed big in the
-  // middle; if that op is ever ignored the text merely shows twice.
+  // Data bus: the script writes one string into the *title*
+  // (the only HUD text Bedrock exposes globally, `#hud_title_text_string`):
+  //   "§0§r§2§r"                      gate marker (hides the centre title, shows the HUD)
+  //   + 4 x "§2§r§<hex>§r"            per-direction state (dir*4 + state, see constants.js)
+  //   + "§7挣脱 §fNN%"                escape percentage
+  // Every element below binds that string and tests for its own marker.
   "hud_content": {
     "modifications": [
       {
         "operation": "insert_after",
         "control_name": "root_panel",
         "value": [
-          { "pcr_struggle_pct@hud.pcr_struggle_pct": {} }
+          { "pcr_struggle_pct@hud.pcr_struggle_pct": {} },
+          { "pcr_arrows@hud.pcr_arrows": {} }
         ]
       }
     ]
   },
 
+  // the bus is written into the title; drop its visible frame so nothing big is
+  // printed in the middle (a modification, never a redefinition)
   "hud_title_text": {
     "modifications": [
       { "operation": "remove", "control_name": "title_frame" }
     ]
   },
 
+  // ---- escape percentage (bottom-right) -----------------------------------
   "pcr_struggle_pct": {
     "type": "panel",
     "size": [ 112, 18 ],
@@ -38,12 +42,12 @@
     "anchor_to": "bottom_right",
     "offset": [ -6, -8 ],
     "layer": 40,
-    "property_bag": { "#pcr_pct_text": "" },
+    "property_bag": { "#pcr_bus": "" },
     "bindings": [
-      { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_pct_text" },
+      { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
       {
         "binding_type": "view",
-        "source_property_name": "(not ((#pcr_pct_text - '§0§r§2§r') = #pcr_pct_text))",
+        "source_property_name": "(not ((#pcr_bus - '§0§r§2§r') = #pcr_bus))",
         "target_property_name": "#visible"
       }
     ],
@@ -61,7 +65,7 @@
         "pcr_pct_label": {
           "type": "label",
           "size": [ "100%", "100%" ],
-          "text": "#pcr_pct_text",
+          "text": "#pcr_bus",
           "font_size": "large",
           "color": [ 1, 1, 1, 1 ],
           "shadow": true,
@@ -70,6 +74,275 @@
           "layer": 2
         }
       }
+    ]
+  },
+
+  // ---- four direction arrows (above the percentage) ----------------------
+  "pcr_arrows": {
+    "type": "stack_panel",
+    "orientation": "horizontal",
+    "size": [ 168, 42 ],
+    "anchor_from": "bottom_right",
+    "anchor_to": "bottom_right",
+    "offset": [ -6, -30 ],
+    "layer": 40,
+    "controls": [
+        {
+          "up": {
+            "type": "panel",
+            "size": [ 42, 42 ],
+            "controls": [
+            { "off": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_up_off",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§0§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } },
+            { "idle": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_up_idle",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§1§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } },
+            { "correct": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_up_correct",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§2§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } },
+            { "incorrect": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_up_incorrect",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§3§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } }
+            ]
+          }
+        },
+        {
+          "down": {
+            "type": "panel",
+            "size": [ 42, 42 ],
+            "controls": [
+            { "off": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_down_off",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§4§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } },
+            { "idle": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_down_idle",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§5§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } },
+            { "correct": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_down_correct",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§6§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } },
+            { "incorrect": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_down_incorrect",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§7§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } }
+            ]
+          }
+        },
+        {
+          "left": {
+            "type": "panel",
+            "size": [ 42, 42 ],
+            "controls": [
+            { "off": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_left_off",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§8§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } },
+            { "idle": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_left_idle",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§9§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } },
+            { "correct": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_left_correct",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§a§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } },
+            { "incorrect": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_left_incorrect",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§b§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } }
+            ]
+          }
+        },
+        {
+          "right": {
+            "type": "panel",
+            "size": [ 42, 42 ],
+            "controls": [
+            { "off": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_right_off",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§c§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } },
+            { "idle": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_right_idle",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§d§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } },
+            { "correct": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_right_correct",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§e§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } },
+            { "incorrect": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/struggle_right_incorrect",
+              "property_bag": { "#pcr_bus": "" },
+              "bindings": [
+                { "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
+                {
+                  "binding_type": "view",
+                  "source_property_name": "(not ((#pcr_bus - '§2§r§f§r') = #pcr_bus))",
+                  "target_property_name": "#visible"
+                }
+              ]
+            } }
+            ]
+          }
+        }
     ]
   }
 }

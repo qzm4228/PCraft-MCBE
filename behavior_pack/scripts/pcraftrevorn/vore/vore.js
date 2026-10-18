@@ -14,13 +14,13 @@ import { world, system, EntityDamageCause, EquipmentSlot } from "@minecraft/serv
 import { assignSkin, playAnim, getNum, setNum, localId } from "../skin/assign.js";
 import { getCfg } from "../game/config.js";
 import { addWgProgress } from "../game/wg.js";
-import { newPrompt, pressDir, failPrompt, STATES, animFor, allOff } from "./struggle.js";
+import { newPrompt, pressDir, failPrompt, animFor, allOff } from "./struggle.js";
 import {
   dirOfItem, giveStruggleItems, ensureStruggleItems,
   clearStruggleItems, stashInventory, unstashInventory, isStruggleItem,
   STASH_ENTITY, STASH_KEY
 } from "./prey_items.js";
-import { buildHudBus } from "../constants.js";
+import { buildHudBus, hudMarker } from "../constants.js";
 import { COMMUNITY } from "../data/community.js";
 import { VCM } from "../data/vcm.js";
 
@@ -246,16 +246,18 @@ function refreshBelly(session) {
   if (getNum(pred, "pc:full") !== 1) { setNum(pred, "pc:full", 1); assignSkin(pred, true); }
 }
 
-// ---- struggle prompt on the subtitle line -----------------------------------
-// The old JSON-UI HUD crashed the client when a boss bar spawned, so the prompt
-// is drawn with the pack's own font instead: RP/font/glyph_E2.png maps
-// U+E200..U+E20F to the 16 struggle sprites (up/down/left/right x
-// off/idle/correct/incorrect), i.e. exactly the `hud` state the session keeps.
-const GLYPH_BASE = 0xE200;
+// ---- struggle HUD bus (JSON-UI) --------------------------------------------
+// Bedrock exposes exactly one HUD string globally: #hud_title_text_string. So the
+// script writes the whole HUD state into the *title* of a title packet:
+//
+//   "§0§r§2§r"                   gate marker (shows the HUD, hides the title)
+//   + 4 x "§2§r§<hex>§r"         per-direction state (dir*4 + state)
+//   + "§7挣脱 §fNN%"             escape percentage
+//
+// resource_pack/ui/pcraftrevorn_hud.json binds that string: the four arrow
+// images test their own marker, the corner label prints the whole string (the
+// markers are formatting codes, so only the text is visible).
 const PROMPT_DIRS = ["up", "down", "left", "right"];
-// The title string is the only HUD text Bedrock exposes globally
-// (#hud_title_text_string), so the percentage rides it: marked titles are hidden
-// in the centre by hud_title_text and drawn bottom-right by pcr_struggle_pct.
 const PCT_MARKER = "§0§r§2§r";
 
 /** Escape progress, 0..100 (good struggles out of the required count). */
@@ -264,17 +266,15 @@ function strugglePct(session) {
   return Math.max(0, Math.min(100, Math.round(((session.struggles ?? 0) / need) * 100)));
 }
 
-function promptGlyphs(session) {
-  return PROMPT_DIRS
-    .map((d, i) => String.fromCharCode(GLYPH_BASE + i * 4 + Math.max(0, STATES.indexOf(session.hud?.[d] ?? "off"))))
-    .join("");
+/** Bus string: gate + one marker per direction/state + the readable text. */
+function hudBus(session) {
+  const marks = PROMPT_DIRS.map((d) => hudMarker(d, session.hud?.[d] ?? "off")).join("");
+  return `${PCT_MARKER}${marks}§7挣脱 §f${strugglePct(session)}%`;
 }
 
 function showPrompt(player, session) {
-  const left = Math.max(0, Math.ceil((session.promptTick + session.promptTimer - system.currentTick) / 20));
   try {
-    player.onScreenDisplay.setTitle(`${PCT_MARKER}§7挣脱 §f${strugglePct(session)}%`, {
-      subtitle: `${promptGlyphs(session)} §7${left}s`,
+    player.onScreenDisplay.setTitle(hudBus(session), {
       fadeInDuration: 0,
       stayDuration: 30,
       fadeOutDuration: 0
@@ -282,7 +282,7 @@ function showPrompt(player, session) {
   } catch { /* ignore */ }
 }
 
-/** Clears the subtitle prompt + the corner percentage (release / escape / death). */
+/** Clears the HUD bus (release / escape / death). */
 function clearPrompt(player) {
   try {
     player.onScreenDisplay.setTitle(" ", { subtitle: " ", fadeInDuration: 0, stayDuration: 1, fadeOutDuration: 0 });
