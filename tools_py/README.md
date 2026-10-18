@@ -27,7 +27,7 @@ python tools_py\pipeline.py 10.18.0
 | `generate_community.js` | `generate_community.py` |
 | `generate_variants.js` | `generate_variants.py` |
 | `nbt_to_data.js` | `nbt_to_data.py` |
-| `build.ps1` | `build.py` |
+| `build.ps1`（转发） | `build.py`（别名） |
 | `build.js` | `build_config.py` |
 | `dist_resolver.js` | `dist_resolver.py` |
 | （无） | `pipeline.py`（总控） |

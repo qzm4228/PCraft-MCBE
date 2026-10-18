@@ -1,54 +1,31 @@
-# Builds the addon(s). Produces:
-#   dist/PCraftRevorn_BP.mcpack
-#   dist/PCraftRevorn_RP.mcpack
-#   dist/PCraftRevornGender_BP.mcpack
-#   dist/PCraftRevornGender_RP.mcpack
-#   dist/VCraft_BP.mcpack
-#   dist/VCraft_RP.mcpack
-#   dist/PCraftRevorn.mcaddon   (all packs, importable bundle)
+# Builds the addon packages for every target in config/targets.json.
 #
-# Uses forward-slash zip entry names (required by Minecraft's importer).
+# Delegates to tools_py/build_config.py: one packer, one version source
+# (config/version.json). The legacy zipper that produced an unversioned
+# dist/PCraftRevorn.mcaddon is retired; use the target-suffixed packages
+#   dist/PCraftRevorn_<version>_<target>.mcaddon
+# that the builder writes.
+#
+# Usage:
+#   .\build.ps1                      every target
+#   .\build.ps1 -Target 1.21.100     a single target (repeat for more)
+#   .\build.ps1 -List                show targets + dist.json hits
+#   .\build.ps1 -Version 10.18.0     one-off override (config stays as is)
+param(
+  [string[]]$Target = @(),
+  [string]$Version,
+  [switch]$List
+)
+
 $ErrorActionPreference = 'Stop'
-$root = $PSScriptRoot
-$dist = Join-Path $root 'dist'
-if (-not (Test-Path -LiteralPath $dist)) { New-Item -ItemType Directory -Path $dist | Out-Null }
 
-Add-Type -AssemblyName System.IO.Compression
-Add-Type -AssemblyName System.IO.Compression.FileSystem
+$python = Get-Command python -ErrorAction SilentlyContinue
+if (-not $python) { throw 'Python 3 not found on PATH (tools_py/build_config.py needs it).' }
 
-function New-Zip([string]$source, [string]$dest) {
-  if (Test-Path -LiteralPath $dest) { Remove-Item -LiteralPath $dest -Force }
-  $base = (Resolve-Path -LiteralPath $source).Path
-  $zip = [System.IO.Compression.ZipFile]::Open($dest, [System.IO.Compression.ZipArchiveMode]::Create)
-  try {
-    Get-ChildItem -LiteralPath $base -Recurse -File | ForEach-Object {
-      $rel = $_.FullName.Substring($base.Length + 1).Replace('\', '/')
-      $entry = $zip.CreateEntry($rel, [System.IO.Compression.CompressionLevel]::Optimal)
-      $out = $entry.Open()
-      $in = [System.IO.File]::OpenRead($_.FullName)
-      try { $in.CopyTo($out) } finally { $in.Dispose(); $out.Dispose() }
-    }
-  } finally { $zip.Dispose() }
-}
+$buildArgs = @()
+if ($List) { $buildArgs += '--list' }
+foreach ($t in $Target) { $buildArgs += @('--target', $t) }
+if ($Version) { $buildArgs += $Version }
 
-New-Zip (Join-Path $root 'behavior_pack') (Join-Path $dist 'PCraftRevorn_BP.mcpack')
-New-Zip (Join-Path $root 'resource_pack') (Join-Path $dist 'PCraftRevorn_RP.mcpack')
-New-Zip (Join-Path $root 'gender_pack\behavior_pack') (Join-Path $dist 'PCraftRevornGender_BP.mcpack')
-New-Zip (Join-Path $root 'gender_pack\resource_pack') (Join-Path $dist 'PCraftRevornGender_RP.mcpack')
-New-Zip (Join-Path $root 'vcraft_pack\behavior_pack') (Join-Path $dist 'VCraft_BP.mcpack')
-New-Zip (Join-Path $root 'vcraft_pack\resource_pack') (Join-Path $dist 'VCraft_RP.mcpack')
-
-# .mcaddon = a zip containing all pack folders at the top level
-$stage = Join-Path $dist '_stage'
-if (Test-Path -LiteralPath $stage) { Remove-Item -Recurse -Force -LiteralPath $stage }
-New-Item -ItemType Directory -Path $stage | Out-Null
-Copy-Item -Recurse (Join-Path $root 'behavior_pack') (Join-Path $stage 'PCraftRevorn_BP')
-Copy-Item -Recurse (Join-Path $root 'resource_pack') (Join-Path $stage 'PCraftRevorn_RP')
-Copy-Item -Recurse (Join-Path $root 'gender_pack\behavior_pack') (Join-Path $stage 'PCraftRevornGender_BP')
-Copy-Item -Recurse (Join-Path $root 'gender_pack\resource_pack') (Join-Path $stage 'PCraftRevornGender_RP')
-Copy-Item -Recurse (Join-Path $root 'vcraft_pack\behavior_pack') (Join-Path $stage 'VCraft_BP')
-Copy-Item -Recurse (Join-Path $root 'vcraft_pack\resource_pack') (Join-Path $stage 'VCraft_RP')
-New-Zip $stage (Join-Path $dist 'PCraftRevorn.mcaddon')
-Remove-Item -Recurse -Force -LiteralPath $stage
-
-Write-Host "Built packages in $dist"
+& $python.Path (Join-Path $PSScriptRoot 'tools_py\build_config.py') @buildArgs
+exit $LASTEXITCODE

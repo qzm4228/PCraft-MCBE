@@ -139,7 +139,7 @@ resource_pack/
 
 | 规范 | 说明 |
 |---|---|
-| zip 条目分隔符 | **必须正斜杠** `/`（`Compress-Archive` 在旧版会用反斜杠，Bedrock 拒绝导入）→ 本仓库 `build.ps1` 手写 zip 条目 |
+| zip 条目分隔符 | **必须正斜杠** `/`（`Compress-Archive` 在旧版会用反斜杠，Bedrock 拒绝导入）→ 本仓库 `tools_py/build_config.py` 写 zip 条目时统一转换 |
 | 扩展名 | `.mcpack` 单包；`.mcaddon` 多包（顶层放各包文件夹） |
 | 导入行为 | 同 uuid+version 不覆盖；升级版本号才替换 |
 | 开发测试 | `development_behavior_packs` / `development_resource_packs`（每次启动刷新）→ 本仓库 `link_dev.ps1` 用 junction 链接 |
@@ -251,7 +251,7 @@ resource_pack/
 | UI 跨包冲突 | PCraft 占 `additional_screen_content`、性别占 `main_screen_content` | **统一到一个包**，或串联同一 `$additional_screen_content` |
 | HUD “Vore 键” | 已试「HUD 屏 + 发 `/vcraft:menu`」 | 若 HUD 屏写不了 `#message_text_box`，回退到聊天栏按钮（已验证） |
 | 脚本 API | 2.0.0 | 不轻易升 2.1.0（引擎版本门槛） |
-| 打包 | 正斜杠 zip | 保持 `build.ps1` 的手写 zip |
+| 打包 | 正斜杠 zip | 统一走 `tools_py/build_config.py`（`build.ps1` 只转发） |
 
 ---
 

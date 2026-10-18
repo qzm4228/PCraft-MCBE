@@ -21,6 +21,13 @@ if (-not (Test-Path $configFile)) {
     exit 1
 }
 
+# 版本号只写在 config/version.json
+$versionFile = Join-Path $root 'config/version.json'
+if (Test-Path $versionFile) {
+    $ver = (Get-Content $versionFile -Raw | ConvertFrom-Json).version
+    Write-Host "🏷️ 版本: $ver (config/version.json)"
+}
+
 Write-Host "🔧 读取配置: $configFile"
 Write-Host "📦 启动 Python 构建系统..."
 Write-Host ""

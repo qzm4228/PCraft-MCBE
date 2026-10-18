@@ -96,11 +96,12 @@ def load_targets() -> tuple[str, list[dict]]:
 # --------------------------------------------------------------------------- #
 # manifest / texts
 # --------------------------------------------------------------------------- #
-def build_manifest(pack: dict, target: dict, baseline: bool = False) -> dict:
+def build_manifest(pack: dict, target: dict, baseline: bool = False,
+                   version_label: str | None = None) -> dict:
     """Return the pack manifest with config + target applied (in memory)."""
     base = ROOT / pack["base_dir"]
     manifest = read_json(base / "manifest.json")
-    version = parse_version(pack["version"])
+    version = parse_version(version_label or pack["version"])
     header = manifest.setdefault("header", {})
     header["name"] = "pack.name"
     header["description"] = "pack.description"
@@ -122,9 +123,15 @@ def build_manifest(pack: dict, target: dict, baseline: bool = False) -> dict:
 
 
 def write_source_manifest(pack: dict) -> None:
-    """Apply the *baseline* manifest + localized texts to the source tree."""
+    """Apply the *baseline* manifest + localized texts to the source tree.
+
+    The version always comes from config/version.json, never from a one-off
+    ``--version`` build override, so the source tree stays clean.
+    """
     base = ROOT / pack["base_dir"]
-    write_json(base / "manifest.json", build_manifest(pack, {}, baseline=True))
+    write_json(base / "manifest.json",
+               build_manifest(pack, {}, baseline=True,
+                              version_label=read_version(str(pack["version"]))))
 
     display = pack.get("display_name", {})
     desc = pack.get("description", {})

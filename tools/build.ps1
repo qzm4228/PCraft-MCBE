@@ -1,53 +1,34 @@
-# Builds dist/*.mcpack and dist/*.mcaddon.
+# Builds dist/*.mcpack + dist/*.mcaddon through the config-driven builder.
 #
-# Bedrock requires zip entries to use forward slashes ("/"); PowerShell's
-# Compress-Archive can write backslashes, so entries are written explicitly
-# via System.IO.Compression with normalized paths.
-param([string]$Version = '261002-beta-2')
-
-$ErrorActionPreference = 'Stop'
-Add-Type -AssemblyName System.IO.Compression
-Add-Type -AssemblyName System.IO.Compression.FileSystem
-
-$root = Split-Path -Parent $PSScriptRoot
-$dist = Join-Path $root 'dist'
-New-Item -ItemType Directory -Force -Path $dist | Out-Null
-
-function New-Zip([string]$outFile, $entries) {
-  if (Test-Path $outFile) { Remove-Item $outFile -Force }
-  $fs = [IO.File]::Open($outFile, [IO.FileMode]::Create)
-  $zip = New-Object IO.Compression.ZipArchive($fs, [IO.Compression.ZipArchiveMode]::Create)
-  try {
-    foreach ($e in $entries) {
-      $base = (Resolve-Path $e.dir).Path.TrimEnd('\')
-      Get-ChildItem $base -Recurse -File | ForEach-Object {
-        $rel = $_.FullName.Substring($base.Length + 1).Replace('\', '/')
-        $name = if ($e.name) { $e.name + '/' + $rel } else { $rel }
-        $entry = $zip.CreateEntry($name, [IO.Compression.CompressionLevel]::Optimal)
-        $s = $entry.Open()
-        try {
-          $bytes = [IO.File]::ReadAllBytes($_.FullName)
-          $s.Write($bytes, 0, $bytes.Length)
-        } finally { $s.Dispose() }
-      }
-    }
-  } finally { $zip.Dispose(); $fs.Dispose() }
-}
-
-$packs = @(
-  @{ name = 'PCraftRevorn_BP';       dir = Join-Path $root 'behavior_pack' },
-  @{ name = 'PCraftRevorn_RP';       dir = Join-Path $root 'resource_pack' },
-  @{ name = 'PCraftRevornGender_BP'; dir = Join-Path $root 'gender_pack\behavior_pack' },
-  @{ name = 'PCraftRevornGender_RP'; dir = Join-Path $root 'gender_pack\resource_pack' },
-  @{ name = 'VCraft_BP';             dir = Join-Path $root 'vcraft_pack\behavior_pack' },
-  @{ name = 'VCraft_RP';             dir = Join-Path $root 'vcraft_pack\resource_pack' }
+# All packing lives in tools_py/build_config.py -- the same code that
+# pipeline.py, build.py and build_win.ps1 use. It reads config/packs.json and
+# config/targets.json, and the version comes from config/version.json, so this
+# script never owns or hardcodes a version.
+#
+# The old inline zipper is retired: it defaulted to '261002-beta-2', ignored
+# targets and skipped the manifest / localisation pass.
+#
+# Usage:
+#   .\tools\build.ps1                      every target in config/targets.json
+#   .\tools\build.ps1 -Target 1.21.100     one target (repeat -Target for more)
+#   .\tools\build.ps1 -List                show targets + dist.json hits
+#   .\tools\build.ps1 -Version 10.18.0     one-off override (config stays as is)
+param(
+  [string[]]$Target = @(),
+  [string]$Version,
+  [switch]$List
 )
 
-foreach ($p in $packs) {
-  New-Zip (Join-Path $dist ($p.name + '.mcpack')) @(@{ name = ''; dir = $p.dir })
-}
-New-Zip (Join-Path $dist 'PCraftRevorn.mcaddon') ($packs | ForEach-Object { @{ name = $_.name; dir = $_.dir } })
-Copy-Item (Join-Path $dist 'PCraftRevorn.mcaddon') (Join-Path $dist ('PCraftRevorn_' + $Version + '.mcaddon')) -Force
+$ErrorActionPreference = 'Stop'
+$root = Split-Path -Parent $PSScriptRoot
 
-Write-Host "Built dist packages (version $Version)."
-Get-ChildItem $dist -File | ForEach-Object { '{0,10:N0} KB  {1}' -f ($_.Length / 1KB), $_.Name }
+$python = Get-Command python -ErrorAction SilentlyContinue
+if (-not $python) { throw 'Python 3 not found on PATH (tools_py/build_config.py needs it).' }
+
+$buildArgs = @()
+if ($List) { $buildArgs += '--list' }
+foreach ($t in $Target) { $buildArgs += @('--target', $t) }
+if ($Version) { $buildArgs += $Version }
+
+& $python.Path (Join-Path $root 'tools_py\build_config.py') @buildArgs
+exit $LASTEXITCODE

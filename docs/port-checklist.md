@@ -23,7 +23,7 @@
 | P6 | 世界生成（结构） | ✅ 脚本实现（jigsaw 无法移植，改为脚本近似：数据表放置 + 脚本刷出） |
 | P7 | 指南书 / 发酵桶 UI（form）+ 配置 | 🟡 首版（指南书表单、发酵桶交互、设置表单） |
 
-生成的包：`dist/PCraftRevorn.mcaddon`（需 `build.ps1`）。
+生成的包：`dist/PCraftRevorn_<版本>_<目标>.mcaddon`（`tools_py/pipeline.py`，或 `build.ps1` / `build_win.ps1` 直接调 `build_config.py`）。
 scripts 模块已写入 manifest，依赖 `@minecraft/server 2.0.0` + `@minecraft/server-ui 2.0.0`
 （**1.21.100.6 的确切版本待游戏内确认**；若加载失败，按 §6 调整版本号）。
 
@@ -125,7 +125,7 @@ scripts 模块已写入 manifest，依赖 `@minecraft/server 2.0.0` + `@minecraf
 
 调试命令：`/scriptevent pcraftrevorn:form|guide|settings|swallow`
 
-打包：`build.ps1`（已修正为 **正斜杠 zip 条目**，否则 Bedrock 无法导入）。
+打包：`python tools_py/pipeline.py`（`build.ps1` / `build_win.ps1` 只是转发到 `build_config.py`）；zip 条目统一 **正斜杠**，否则 Bedrock 无法导入。
 
 ## 1.10 P6 世界生成（脚本实现）
 
