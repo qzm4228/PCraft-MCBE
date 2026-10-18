@@ -280,29 +280,18 @@ function hudBus(session) {
   return `${BLACK_GATE}${marks}§0${strugglePct(session)}%`;
 }
 
-const ARROW_TEXT = { up: "↑", down: "↓", left: "←", right: "→" };
-
 function showPrompt(player, session) {
-  // action bar: the readout that always works (plain engine text, no JSON-UI)
-  const arrow = session.awaiting ? ARROW_TEXT[session.promptDir] ?? "" : "";
+  // The whole HUD rides the action bar (poggy's pattern): the RP replaces
+  // hud_actionbar_text, which receives $actionbar_text from the engine, so the
+  // arrow and the percentage are drawn there and no /title is involved at all.
   try {
-    player.onScreenDisplay.setActionBar(`§7${arrow} §f挣脱 §e${strugglePct(session)}%`);
-  } catch { /* ignore */ }
-  // title: data bus for the JSON-UI overlay (hidden by hud_title_text patch)
-  try {
-    player.onScreenDisplay.setTitle(hudBus(session), {
-      fadeInDuration: 0,
-      stayDuration: 30,
-      fadeOutDuration: 0
-    });
+    player.onScreenDisplay.setActionBar(hudBus(session));
   } catch { /* ignore */ }
 }
 
 /** Clears the HUD bus (release / escape / death). */
 function clearPrompt(player) {
-  try {
-    player.onScreenDisplay.setTitle(" ", { subtitle: " ", fadeInDuration: 0, stayDuration: 1, fadeOutDuration: 0 });
-  } catch { /* ignore */ }
+  try { player.onScreenDisplay.setActionBar(" "); } catch { /* ignore */ }
 }
 
 /**

@@ -1,168 +1,27 @@
 {
   "namespace": "hud",
 
-  // PCraftRevorn vore HUD (JSON-UI), modelled on VCM's VoreMinigameOverlay:
-  // one 48x48 arrow in the middle (up red / right cyan / down magenta / left
-  // green) and the escape percentage in the bottom-right corner.
+  // PCraftRevorn vore HUD, modelled on
+  //   * VCM's VoreMinigameOverlay (one coloured arrow + numbers), and
+  //   * poggy's 高亮信息显示 (ui/hud_screen.json): the readout is carried by the
+  //     action bar and this file replaces `hud_actionbar_text`, which the engine
+  //     re-creates for every action-bar message with `$actionbar_text` set.
   //
-  // Data channel and title suppression follow WAILA GT's hud_screen.json:
-  // hud_title_text gets the global binding inserted at the FRONT (so #text is
-  // already populated when our visibility test runs -- the mistake in the
-  // earlier builds) plus a view binding that hides any title carrying our token.
-  //
-  // Bus string: "§0__pcr:" + 4 x "§2§r§<hex>§r" + "§0<NN>%"
-  "hud_content": {
-    "modifications": [
-      {
-        "operation": "insert_after",
-        "control_name": "root_panel",
-        "value": [
-          { "pcr_struggle_arrow@hud.pcr_struggle_arrow": {} },
-          { "pcr_struggle_pct@hud.pcr_struggle_pct": {} }
-        ]
-      }
-    ]
-  },
-
-  // ---- hide our own title payload (WAILA GT pattern) ----------------------
-  "hud_title_text": {
-    "modifications": [
-      {
-        "array_name": "bindings",
-        "operation": "insert_front",
-        "value": [
-          {
-            "binding_type": "global",
-            "binding_name": "#hud_title_text_string",
-            "binding_name_override": "#text"
-          }
-        ]
-      },
-      {
-        "array_name": "bindings",
-        "operation": "insert_back",
-        "value": [
-          {
-            "binding_type": "view",
-            "source_property_name": "(not ((#text - '__pcr:') = #text))",
-            "target_property_name": "#visible"
-          }
-        ]
-      }
-    ]
-  },
-
-  // ---- the arrow (screen centre, like the mod) ----------------------------
-  "pcr_struggle_arrow": {
+  // No /title is used at all, so nothing can leak into the middle of the screen.
+  // Bus: "§0__pcr:" + 4 markers + "§0<NN>%"; the panel hides itself unless the
+  // token is present, so other action-bar messages are not swallowed by it.
+  "hud_actionbar_text": {
     "type": "panel",
-    "size": [ 48, 48 ],
-    "anchor_from": "center",
-    "anchor_to": "center",
+    "size": [ 150, 26 ],
+    "anchor_from": "top_middle",
+    "anchor_to": "top_middle",
+    "offset": [ 0, 46 ],
     "layer": 40,
-    "controls": [
-        {
-          "arrow_up": {
-            "type": "image",
-            "size": [ 48, 48 ],
-            "anchor_from": "center",
-            "anchor_to": "center",
-            "offset": [ -3, -7 ],
-            "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_up",
-            "property_bag": { "#pcr_bus": "" },
-            "bindings": [
-              { "binding_type": "global", "binding_name": "#hud_title_text_string",
-                "binding_name_override": "#pcr_bus" },
-              {
-                "binding_type": "view",
-                "source_property_name": "(not ((#pcr_bus - '§2§r§1§r') = #pcr_bus))",
-                "target_property_name": "#visible"
-              }
-            ]
-          }
-        },
-        {
-          "arrow_right": {
-            "type": "image",
-            "size": [ 48, 48 ],
-            "anchor_from": "center",
-            "anchor_to": "center",
-            "offset": [ -3, -7 ],
-            "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_right",
-            "property_bag": { "#pcr_bus": "" },
-            "bindings": [
-              { "binding_type": "global", "binding_name": "#hud_title_text_string",
-                "binding_name_override": "#pcr_bus" },
-              {
-                "binding_type": "view",
-                "source_property_name": "(not ((#pcr_bus - '§2§r§d§r') = #pcr_bus))",
-                "target_property_name": "#visible"
-              }
-            ]
-          }
-        },
-        {
-          "arrow_down": {
-            "type": "image",
-            "size": [ 48, 48 ],
-            "anchor_from": "center",
-            "anchor_to": "center",
-            "offset": [ -3, -7 ],
-            "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_down",
-            "property_bag": { "#pcr_bus": "" },
-            "bindings": [
-              { "binding_type": "global", "binding_name": "#hud_title_text_string",
-                "binding_name_override": "#pcr_bus" },
-              {
-                "binding_type": "view",
-                "source_property_name": "(not ((#pcr_bus - '§2§r§5§r') = #pcr_bus))",
-                "target_property_name": "#visible"
-              }
-            ]
-          }
-        },
-        {
-          "arrow_left": {
-            "type": "image",
-            "size": [ 48, 48 ],
-            "anchor_from": "center",
-            "anchor_to": "center",
-            "offset": [ -3, -7 ],
-            "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_left",
-            "property_bag": { "#pcr_bus": "" },
-            "bindings": [
-              { "binding_type": "global", "binding_name": "#hud_title_text_string",
-                "binding_name_override": "#pcr_bus" },
-              {
-                "binding_type": "view",
-                "source_property_name": "(not ((#pcr_bus - '§2§r§9§r') = #pcr_bus))",
-                "target_property_name": "#visible"
-              }
-            ]
-          }
-        }
-    ]
-  },
-
-  // ---- escape percentage (bottom-right) ----------------------------------
-  "pcr_struggle_pct": {
-    "type": "panel",
-    "size": [ 120, 18 ],
-    "anchor_from": "bottom_right",
-    "anchor_to": "bottom_right",
-    "offset": [ -6, -8 ],
-    "layer": 40,
-    "property_bag": { "#pcr_bus": "" },
-    "bindings": [
-      { "binding_type": "global", "binding_name": "#hud_title_text_string", "binding_name_override": "#pcr_bus" },
-      {
-        "binding_type": "view",
-        "source_property_name": "(not ((#pcr_bus - '__pcr:') = #pcr_bus))",
-        "target_property_name": "#visible"
-      }
-    ],
+    "$atext": "$actionbar_text",
+    "visible": "(not (($atext - '__pcr:') = $atext))",
     "controls": [
       {
-        "pcr_pct_bg": {
+        "pcr_bg": {
           "type": "image",
           "texture": "textures/ui/Black",
           "size": [ "100%", "100%" ],
@@ -171,16 +30,67 @@
         }
       },
       {
-        "pcr_pct_label": {
+        "pcr_arrow": {
+          "type": "panel",
+          "size": [ 22, 22 ],
+          "anchor_from": "left_middle",
+          "anchor_to": "left_middle",
+          "offset": [ 5, 0 ],
+          "layer": 2,
+          "controls": [
+          {
+            "arrow_up": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_up",
+              "$atext": "$actionbar_text",
+              "visible": "(not (($atext - '§2§r§1§r') = $atext))"
+            }
+          },
+          {
+            "arrow_down": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_down",
+              "$atext": "$actionbar_text",
+              "visible": "(not (($atext - '§2§r§5§r') = $atext))"
+            }
+          },
+          {
+            "arrow_left": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_left",
+              "$atext": "$actionbar_text",
+              "visible": "(not (($atext - '§2§r§9§r') = $atext))"
+            }
+          },
+          {
+            "arrow_right": {
+              "type": "image",
+              "size": [ "100%", "100%" ],
+              "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_right",
+              "$atext": "$actionbar_text",
+              "visible": "(not (($atext - '§2§r§d§r') = $atext))"
+            }
+          }
+          ]
+        }
+      },
+      {
+        "pcr_label": {
           "type": "label",
           "size": [ "100%", "100%" ],
-          "text": "('挣脱 ' + ((#pcr_bus - '§0__pcr:') - '§0'))",
+          "anchor_from": "left_middle",
+          "anchor_to": "left_middle",
+          "offset": [ 32, 0 ],
+          "layer": 2,
           "font_size": "large",
           "color": [ 1, 1, 1, 1 ],
           "shadow": true,
-          "anchor_from": "center",
-          "anchor_to": "center",
-          "layer": 2
+          "localize": false,
+          "$atext": "$actionbar_text",
+          "text": "('挣脱 ' + (($atext - '§0__pcr:') - '§0'))"
         }
       }
     ]
