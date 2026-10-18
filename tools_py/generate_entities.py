@@ -48,6 +48,9 @@ except Exception:  # noqa: BLE001
     except Exception:  # noqa: BLE001
         generateCommunity = None
 
+# shared PNG helpers (a superset of this module's own: they also read palette PNGs)
+from generate_community import decode_png_rgba, write_png  # noqa: E402
+
 try:  # pragma: no cover - depends on parallel ports existing
     from generate_variants import generateVariants
 except Exception:  # noqa: BLE001
@@ -697,6 +700,40 @@ def genAttachables():
 # (handled by generate_variants.js), not a standalone entity. ----
 
 
+# ---- struggle prompt font (subtitle glyphs) ----
+# Bedrock maps RP/font/glyph_E2.png to the U+E200..U+E2FF private-use page as a
+# 16x16 grid (E0/E1 hold the vanilla emoji sheet), so the 16 struggle sprites
+# become text glyphs: U+E200 + dir*4 + state, dir = up/down/left/right and
+# state = off/idle/correct/incorrect.
+HUD_DIR = RP / "textures" / "ui" / "pcraftrevorn" / "hud"
+GLYPH_DIRS = ["up", "down", "left", "right"]
+GLYPH_STATES = ["off", "idle", "correct", "incorrect"]
+
+
+def genStruggleFont():
+    cell = 48  # the sprites are 48x48; 16 cells => a 768x768 page
+    size = cell * 16
+    buf = bytearray(size * size * 4)
+    for di, d in enumerate(GLYPH_DIRS):
+        for si, s in enumerate(GLYPH_STATES):
+            src = HUD_DIR / f"struggle_{d}_{s}.png"
+            if not exists(src):
+                continue
+            img = decode_png_rgba(src.read_bytes())
+            if not img:
+                print(f"missing/unreadable sprite: {src.name}", file=sys.stderr)
+                continue
+            idx = di * 4 + si
+            gx, gy = (idx % 16) * cell, (idx // 16) * cell
+            for y in range(min(cell, img["h"])):
+                n = min(cell, img["w"]) * 4
+                row_src = y * img["w"] * 4
+                row_dst = (gy + y) * size * 4 + gx * 4
+                buf[row_dst:row_dst + n] = img["data"][row_src:row_src + n]
+    ensure_dir(RP / "font")
+    write_png(RP / "font" / "glyph_E2.png", size, size, bytes(buf))
+
+
 def main():
     if not exists(MOD):
         print("Missing .work/mod. Run tools/extract.ps1 first.", file=sys.stderr)
@@ -709,6 +746,7 @@ def main():
         RP / "animations", RP / "animation_controllers",
         RP / "render_controllers", RP / "attachables",
         RP / "textures" / "entity" / "pcraftrevorn",
+        RP / "font",
         RP / "subpacks",
     ]:
         rmrf(d)
@@ -718,6 +756,7 @@ def main():
     genSpawnRules()
     genSkinData()
     genAttachables()
+    genStruggleFont()
     if generateCommunity is not None:
         generateCommunity()
     else:

@@ -50,14 +50,6 @@
               "filters": {
                 "test": "is_family",
                 "subject": "other",
-                "value": "player"
-              },
-              "max_dist": 24
-            },
-            {
-              "filters": {
-                "test": "is_family",
-                "subject": "other",
                 "value": "villager"
               },
               "max_dist": 24
@@ -164,9 +156,10 @@
         "table": "loot_tables/entities/slime_girl.json"
       },
       "minecraft:tameable": {
-        "probability": 1,
+        "probability": 0.2,
         "tame_items": [
-          "pcraftrevorn:cupids_arrow"
+          "pcraftrevorn:cupids_arrow",
+          "minecraft:slime_ball"
         ],
         "tame_event": {
           "event": "pcraftrevorn:on_tame",

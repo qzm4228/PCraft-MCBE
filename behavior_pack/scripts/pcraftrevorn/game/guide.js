@@ -34,6 +34,16 @@ Object.assign(NAMES, VCM.names ?? {});
 Object.assign(LORE, VCM.lore ?? {});
 const PRED_ORDER = Object.keys(NAMES);
 
+// VCM import: who is neutral and who can be tamed with what (data/vcm.js).
+const NEUTRAL = new Set(VCM.neutral ?? []);
+const TAME = VCM.tame ?? {};
+const VCM_IDS = new Set(VCM.predatorIds ?? []);
+const ITEM_NAMES = {
+  "pcraftrevorn:cupids_arrow": "丘比特之箭",
+  "minecraft:slime_ball": "史莱姆球"
+};
+const itemLabel = (id) => ITEM_NAMES[id] ?? id.split(":").pop();
+
 export async function openGuide(player) {
   while (true) {
     const res = await showPcForm(player, {
@@ -50,10 +60,22 @@ export async function openGuide(player) {
 
 async function openDetail(player, id) {
   const variants = Object.keys(SKINS[id] || {}).length;
-  const body = [`§7名字：§f${NAMES[id]}`, `§7外观款式：§f${variants}`, "", `§8${LORE[id] ?? ""}`].join("\n");
+  const lines = [`§7名字：§f${NAMES[id]}`, `§7外观款式：§f${variants}`];
+  if (NEUTRAL.has(id)) {
+    lines.push("§7脾气：§f中立 §8（不主动袭击玩家，被打了会还手）");
+  }
+  const tame = TAME[id];
+  if (tame) {
+    const items = (tame.items ?? []).map(itemLabel).join("§7 / §f");
+    const pct = Math.round((tame.chance ?? 1) * 100);
+    lines.push(`§7驯服：§f手持${items}§f右键它 §8· §f${pct}% §7成功，没成功就多试几次`);
+  } else if (VCM_IDS.has(id)) {
+    lines.push("§7驯服：§8不可驯服");
+  }
+  lines.push("", `§8${LORE[id] ?? ""}`);
   await showPcForm(player, {
     title: NAMES[id],
-    body,
+    body: lines.join("\n"),
     level: 0,
     buttons: [{ id: "__back", label: "§a返回" }]
   });

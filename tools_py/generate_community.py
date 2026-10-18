@@ -111,6 +111,8 @@ def decode_png_rgba(buf: bytes):
     off = 8
     w = h = bit = color = interlace = 0
     idat = []
+    plte = []
+    trns = b""
     while off < len(buf):
         length = int.from_bytes(buf[off:off + 4], "big")
         typ = buf[off + 4:off + 8].decode("ascii")
@@ -121,6 +123,10 @@ def decode_png_rgba(buf: bytes):
             bit = d[8]
             color = d[9]
             interlace = d[12]
+        elif typ == "PLTE":
+            plte = [tuple(d[i:i + 3]) for i in range(0, len(d) - 2, 3)]
+        elif typ == "tRNS":
+            trns = d
         elif typ == "IDAT":
             idat.append(d)
         elif typ == "IEND":
@@ -128,7 +134,7 @@ def decode_png_rgba(buf: bytes):
         off += 12 + length
     if bit != 8 or interlace:
         return None
-    ch = {2: 3, 6: 4}.get(color)
+    ch = {0: 1, 2: 3, 3: 1, 6: 4}.get(color)
     if not ch:
         return None
     raw = zlib.decompress(b"".join(idat))
@@ -167,6 +173,17 @@ def decode_png_rgba(buf: bytes):
                 out[o + 1] = line[s + 1]
                 out[o + 2] = line[s + 2]
                 out[o + 3] = line[s + 3]
+            elif color == 3:
+                idx = line[s]
+                r, g, b = plte[idx] if idx < len(plte) else (0, 0, 0)
+                out[o] = r
+                out[o + 1] = g
+                out[o + 2] = b
+                out[o + 3] = trns[idx] if idx < len(trns) else 255
+            elif color == 0:
+                v = line[s]
+                out[o] = out[o + 1] = out[o + 2] = v
+                out[o + 3] = 255
             else:
                 out[o] = line[s]
                 out[o + 1] = line[s + 1]
@@ -564,7 +581,13 @@ def behavior(c, skin_max: int):
         "pcraftrevorn:on_release": {"add": {"component_groups": ["pcraftrevorn:aggressive"]}, "remove": {"component_groups": ["pcraftrevorn:prey_holder"]}},
     }
     if b["tameable"]:
-        components["minecraft:tameable"] = {"probability": 1, "tame_items": ["pcraftrevorn:cupids_arrow"], "tame_event": {"event": "pcraftrevorn:on_tame", "target": "self"}}
+        components["minecraft:tameable"] = {
+            # VCM's bat girl / slime girl tame on a 20 % roll per interaction, so
+            # the chance is per-creature data (default: always works, as before).
+            "probability": b.get("tameProb", 1),
+            "tame_items": b.get("tameItems") or ["pcraftrevorn:cupids_arrow"],
+            "tame_event": {"event": "pcraftrevorn:on_tame", "target": "self"},
+        }
         groups["pcraftrevorn:tamed"] = {"minecraft:is_tamed": {}, "minecraft:behavior.follow_owner": {"priority": 6, "speed_multiplier": 1, "start_distance": 10, "stop_distance": 2}}
         events["pcraftrevorn:on_tame"] = {"add": {"component_groups": ["pcraftrevorn:tamed"]}}
     return {

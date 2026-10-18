@@ -41,23 +41,7 @@
               "filters": {
                 "test": "is_family",
                 "subject": "other",
-                "value": "player"
-              },
-              "max_dist": 16
-            },
-            {
-              "filters": {
-                "test": "is_family",
-                "subject": "other",
                 "value": "villager"
-              },
-              "max_dist": 16
-            },
-            {
-              "filters": {
-                "test": "is_family",
-                "subject": "other",
-                "value": "iron_golem"
               },
               "max_dist": 16
             },

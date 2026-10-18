@@ -41,14 +41,6 @@
               "filters": {
                 "test": "is_family",
                 "subject": "other",
-                "value": "player"
-              },
-              "max_dist": 16
-            },
-            {
-              "filters": {
-                "test": "is_family",
-                "subject": "other",
                 "value": "villager"
               },
               "max_dist": 16
@@ -79,15 +71,6 @@
               ]
             }
           ]
-        }
-      },
-      "pcraftrevorn:tamed": {
-        "minecraft:is_tamed": {},
-        "minecraft:behavior.follow_owner": {
-          "priority": 6,
-          "speed_multiplier": 1,
-          "start_distance": 10,
-          "stop_distance": 2
         }
       }
     },
@@ -151,16 +134,6 @@
       "minecraft:behavior.random_look_around": {
         "priority": 5
       },
-      "minecraft:tameable": {
-        "probability": 1,
-        "tame_items": [
-          "pcraftrevorn:cupids_arrow"
-        ],
-        "tame_event": {
-          "event": "pcraftrevorn:on_tame",
-          "target": "self"
-        }
-      },
       "minecraft:scale": {
         "value": 2.0
       }
@@ -194,13 +167,6 @@
         "remove": {
           "component_groups": [
             "pcraftrevorn:prey_holder"
-          ]
-        }
-      },
-      "pcraftrevorn:on_tame": {
-        "add": {
-          "component_groups": [
-            "pcraftrevorn:tamed"
           ]
         }
       }

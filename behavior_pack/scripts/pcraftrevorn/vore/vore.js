@@ -14,7 +14,7 @@ import { world, system, EntityDamageCause, EquipmentSlot } from "@minecraft/serv
 import { assignSkin, playAnim, getNum, setNum, localId } from "../skin/assign.js";
 import { getCfg } from "../game/config.js";
 import { addWgProgress } from "../game/wg.js";
-import { newPrompt, pressDir, failPrompt, labelFor, animFor, allOff } from "./struggle.js";
+import { newPrompt, pressDir, failPrompt, STATES, animFor, allOff } from "./struggle.js";
 import {
   dirOfItem, giveStruggleItems, ensureStruggleItems,
   clearStruggleItems, stashInventory, unstashInventory, isStruggleItem,
@@ -246,9 +246,37 @@ function refreshBelly(session) {
   if (getNum(pred, "pc:full") !== 1) { setNum(pred, "pc:full", 1); assignSkin(pred, true); }
 }
 
-function promptBar(session) {
+// ---- struggle prompt on the subtitle line -----------------------------------
+// The old JSON-UI HUD crashed the client when a boss bar spawned, so the prompt
+// is drawn with the pack's own font instead: RP/font/glyph_E2.png maps
+// U+E200..U+E20F to the 16 struggle sprites (up/down/left/right x
+// off/idle/correct/incorrect), i.e. exactly the `hud` state the session keeps.
+const GLYPH_BASE = 0xE200;
+const PROMPT_DIRS = ["up", "down", "left", "right"];
+
+function promptGlyphs(session) {
+  return PROMPT_DIRS
+    .map((d, i) => String.fromCharCode(GLYPH_BASE + i * 4 + Math.max(0, STATES.indexOf(session.hud?.[d] ?? "off"))))
+    .join("");
+}
+
+function showPrompt(player, session) {
   const left = Math.max(0, Math.ceil((session.promptTick + session.promptTimer - system.currentTick) / 20));
-  return `§e使用 §f${labelFor(session.required)} §e方向道具 §7(${left}s)  §8[快捷栏 1=↑ 2=↓ 3=← 4=→]`;
+  try {
+    player.onScreenDisplay.setTitle("§r", {
+      subtitle: `${promptGlyphs(session)} §7${left}s`,
+      fadeInDuration: 0,
+      stayDuration: 30,
+      fadeOutDuration: 0
+    });
+  } catch { /* ignore */ }
+}
+
+/** Clears the subtitle prompt (release / escape / end of the meal). */
+function clearPrompt(player) {
+  try {
+    player.onScreenDisplay.setTitle("§r", { subtitle: " ", fadeInDuration: 0, stayDuration: 1, fadeOutDuration: 0 });
+  } catch { /* ignore */ }
 }
 
 /**
@@ -272,6 +300,8 @@ function promptWindow(cfg, predator) {
 /** Feeds one pressed direction into the open prompt. */
 function handlePress(player, session, dir, pred, now) {
   const outcome = pressDir(session, dir, now);
+  // repaint the subtitle at once so the press feedback (correct/incorrect) shows
+  showPrompt(player, session);
   if (outcome.result === "success") {
     session.struggles += 1;
     session.digest = Math.max(0, session.digest - CONFIG.struggleReduction);
@@ -398,11 +428,12 @@ function digestTick() {
       if (session.awaiting) {
         if (now - session.promptTick > session.promptTimer) playAnim(pred, failPrompt(session, now));
         session.msgTimer = (session.msgTimer + 1) % 10;
-        if (session.msgTimer === 0) { try { player.onScreenDisplay.setActionBar(promptBar(session)); } catch { /* ignore */ } }
+        if (session.msgTimer === 0) showPrompt(player, session);
       } else if (session.cooldown > 0) {
         session.cooldown -= 1;
       } else {
         playAnim(pred, newPrompt(session, now, session.promptTimer));
+        showPrompt(player, session);
         session.cooldown = CONFIG.promptCooldownMin + Math.floor(Math.random() * (CONFIG.promptCooldownMax - CONFIG.promptCooldownMin));
       }
     }
@@ -412,6 +443,7 @@ function digestTick() {
       sessions.delete(pid);
       dismount(player, session);
       removeBar(session);
+      clearPrompt(player);
       try { player.setDynamicProperty("pc:pred", ""); } catch { /* ignore */ }
       clearEffects(player);
       setThirdPerson(player, false);
@@ -455,6 +487,7 @@ export function release(player, regurgitate) {
   clearEffects(player);
   setThirdPerson(player, false);
   try { player.onScreenDisplay.setActionBar(" "); } catch { /* ignore */ }
+  clearPrompt(player);
 
   // hand the prey its belongings back: keys out first, then the stash, slot for slot
   clearStruggleItems(player);
@@ -784,7 +817,13 @@ export function wireVoreEvents() {
 
     if (victim.typeId === "minecraft:player") {
       if (sessions.has(victim.id)) return;
-      const chance = getNum(predator, "pc:swallow", (getCfg(victim).swallow ?? 25) / 100);
+      // VCM swallows outright as soon as the prey is down to 10 HP; the port
+      // keeps a per-hit chance above that and guarantees it at or below 10.
+      let chance = getNum(predator, "pc:swallow", (getCfg(victim).swallow ?? 25) / 100);
+      try {
+        const hp = victim.getComponent("minecraft:health");
+        if (hp && hp.currentValue <= 10) chance = 1;
+      } catch { /* ignore */ }
       if (Math.random() > chance) return;
       startSwallow(victim, predator);
       return;

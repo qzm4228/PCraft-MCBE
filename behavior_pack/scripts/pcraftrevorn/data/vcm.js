@@ -59,7 +59,7 @@ export const VCM = {
   },
   "stats": {
     "bat_girl": {
-      "swallow": 0.28,
+      "swallow": 0.6,
       "struggles": 15,
       "difficulty": 0.3,
       "acid": 6.0,
@@ -69,7 +69,7 @@ export const VCM = {
       "wg2": 999
     },
     "bunny_girl": {
-      "swallow": 0.26,
+      "swallow": 0.6,
       "struggles": 15,
       "difficulty": 0.2,
       "acid": 6.0,
@@ -79,7 +79,7 @@ export const VCM = {
       "wg2": 999
     },
     "cat_girl": {
-      "swallow": 0.26,
+      "swallow": 0.6,
       "struggles": 15,
       "difficulty": 0.25,
       "acid": 6.0,
@@ -89,7 +89,7 @@ export const VCM = {
       "wg2": 999
     },
     "druid": {
-      "swallow": 0.25,
+      "swallow": 0.6,
       "struggles": 15,
       "difficulty": 0.35,
       "acid": 6.0,
@@ -99,7 +99,7 @@ export const VCM = {
       "wg2": 999
     },
     "lamia_vcm": {
-      "swallow": 0.35,
+      "swallow": 0.65,
       "struggles": 17,
       "difficulty": 0.45,
       "acid": 6.0,
@@ -109,7 +109,7 @@ export const VCM = {
       "wg2": 999
     },
     "slime_girl": {
-      "swallow": 0.28,
+      "swallow": 0.6,
       "struggles": 15,
       "difficulty": 0.3,
       "acid": 6.0,
@@ -207,6 +207,29 @@ export const VCM = {
   },
   "tamedSkins": [
     "bat_girl"
+  ],
+  "tame": {
+    "bat_girl": {
+      "items": [
+        "pcraftrevorn:cupids_arrow"
+      ],
+      "chance": 0.2
+    },
+    "slime_girl": {
+      "items": [
+        "pcraftrevorn:cupids_arrow",
+        "minecraft:slime_ball"
+      ],
+      "chance": 0.2
+    }
+  },
+  "neutral": [
+    "bat_girl",
+    "bunny_girl",
+    "cat_girl",
+    "druid",
+    "lamia_vcm",
+    "slime_girl"
   ],
   "particles": {
     "leaves": {

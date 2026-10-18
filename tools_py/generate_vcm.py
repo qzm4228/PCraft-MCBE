@@ -61,10 +61,12 @@ ANIM_BELLY = [
 # escape score, and an attack trigger at HP <= 10. `acid` starts low and climbs
 # by `acidIncr` up to `acidMax`, so 6.0/10.5/0.02 lands on ~1190 ticks to fill
 # the 12000 point bar. wg 999 = never gains weight (VCM has no _wg textures).
-STATS = {"swallow": 0.28, "struggles": 15, "difficulty": 0.30,
+STATS = {"swallow": 0.60, "struggles": 15, "difficulty": 0.30,
          "acid": 6.0, "acidMax": 10.5, "acidIncr": 0.02, "wg1": 999, "wg2": 999}
 
-HUNT_PLAYER = ["player", "villager", "animal"]
+# VCM's girls are neutral: they hunt villagers/animals but only fight back when
+# hit (the druid keeps hunting hostile monsters and ignores players entirely).
+HUNT_PEACE = ["villager", "animal"]
 
 
 def _stats(**over):
@@ -93,7 +95,11 @@ CREATURES = [
         "animate": ANIM_BELLY,
         "behavior": {"hp": 20, "speed": 0.3, "dmg": 4, "follow": 32, "size": [0.35, 1.15],
                      "scale": 1.3, "loot": None, "tameable": True, "undead": False,
-                     "targets": HUNT_PLAYER},
+                     # neutral: hunts villagers/animals, only fights back when hit
+                     "neutral": True, "targets": HUNT_PEACE,
+                     # VCM: 20 % per interaction (feed it until it trusts you)
+                     "tameProb": 0.2, "tameItems": ["pcraftrevorn:cupids_arrow"],
+                     "tame": {"items": ["pcraftrevorn:cupids_arrow"], "chance": 0.2}},
         "stats": _stats(difficulty=0.30),
     },
     {
@@ -105,9 +111,9 @@ CREATURES = [
         ],
         "animate": ANIM_BELLY,
         "behavior": {"hp": 20, "speed": 0.3, "dmg": 3, "follow": 16, "size": [0.4, 0.95],
-                     "scale": 2.0, "loot": None, "tameable": True, "undead": False,
-                     "targets": HUNT_PLAYER},
-        "stats": _stats(swallow=0.26, difficulty=0.20),
+                     "scale": 2.0, "loot": None, "tameable": False, "undead": False,
+                     "neutral": True, "targets": HUNT_PEACE},
+        "stats": _stats(difficulty=0.20),
     },
     {
         "id": "cat_girl", "src": "neko", "name": "猫娘", "nameEn": "Cat Girl",
@@ -118,9 +124,9 @@ CREATURES = [
         ],
         "animate": ANIM_BELLY,
         "behavior": {"hp": 20, "speed": 0.3, "dmg": 5, "follow": 16, "size": [0.4, 0.95],
-                     "scale": 2.0, "loot": None, "tameable": True, "undead": False,
-                     "targets": HUNT_PLAYER},
-        "stats": _stats(swallow=0.26, difficulty=0.25),
+                     "scale": 2.0, "loot": None, "tameable": False, "undead": False,
+                     "neutral": True, "targets": HUNT_PEACE},
+        "stats": _stats(difficulty=0.25),
     },
     {
         # 0 base green, 1 autumn, 2 spring, 3 winter (VCM's own order)
@@ -135,14 +141,14 @@ CREATURES = [
         ],
         "animate": ANIM_BELLY,
         "behavior": {"hp": 20, "speed": 0.3, "dmg": 4, "follow": 16, "size": [0.4, 0.95],
-                     "scale": 2.0, "loot": None, "tameable": True, "undead": False,
-                     "targets": ["monster"],
+                     "scale": 2.0, "loot": None, "tameable": False, "undead": False,
+                     "neutral": True, "targets": ["monster"],
                      # VCM: fires on a 60 tick cooldown (3 s), 4..16 blocks out,
                      # and the projectile matches the seasonal variant
                      "shooter": ["druid_projectile", "autumn_druid_projectile",
                                  "spring_druid_projectile", "winter_druid_projectile"],
                      "shoot": {"interval": [3.0, 3.0], "radius": [4.0, 16.0]}},
-        "stats": _stats(swallow=0.25, difficulty=0.35),
+        "stats": _stats(difficulty=0.35),
     },
     {
         # VCM's own lamia. The community import already owns pcraftrevorn:lamia
@@ -156,8 +162,8 @@ CREATURES = [
         "animate": ANIM_BELLY,
         "behavior": {"hp": 40, "speed": 0.3, "dmg": 8, "follow": 16, "size": [0.4, 0.95],
                      "scale": 2.5, "loot": None, "tameable": False, "undead": False,
-                     "targets": ["player", "villager", "iron_golem", "animal"]},
-        "stats": _stats(swallow=0.35, struggles=17, difficulty=0.45),
+                     "neutral": True, "targets": HUNT_PEACE},
+        "stats": _stats(swallow=0.65, struggles=17, difficulty=0.45),
     },
     {
         # VCM's slime girl has no *_nobelly texture: her belly is numeric state
@@ -182,7 +188,11 @@ CREATURES = [
                     ("idle4", BELLY_SIZE + " >= 3 ? 1.0 : 0.0")],
         "behavior": {"hp": 20, "speed": 0.3, "dmg": 6, "follow": 24, "size": [1.0, 2.0],
                      "scale": 2.0, "loot": "slime_girl", "tameable": True, "undead": False,
-                     "targets": HUNT_PLAYER},
+                     "neutral": True, "targets": HUNT_PEACE,
+                     # VCM: 20 % per slime ball (the cupid arrow also works)
+                     "tameProb": 0.2,
+                     "tameItems": ["pcraftrevorn:cupids_arrow", "minecraft:slime_ball"],
+                     "tame": {"items": ["pcraftrevorn:cupids_arrow", "minecraft:slime_ball"], "chance": 0.2}},
         "stats": _stats(difficulty=0.30),
     },
 ]
@@ -617,7 +627,8 @@ def _gen_projectiles(extra_en: list, extra_zh: list) -> dict:
 def generate_vcm() -> None:
     reg = {"texBase": {}, "gendered": [], "variants": {}, "endKind": {}, "animPrefix": {},
            "counterMax": {}, "stats": {}, "names": {}, "lore": {}, "predatorIds": [],
-           "skins": {}, "texMax": {}, "shooter": {}, "tamedSkins": []}
+           "skins": {}, "texMax": {}, "shooter": {}, "tamedSkins": [],
+           "tame": {}, "neutral": []}
     atlas = read_json(RP / "textures" / "item_texture.json")
     bp_texts = [BP / "texts" / "en_US.lang", BP / "texts" / "zh_CN.lang"]
     extra_en, extra_zh = [], []
@@ -718,6 +729,11 @@ def generate_vcm() -> None:
                 "attack_radius_min": shoot["radius"][0],
             }
             reg["shooter"][cid] = [f"{NS}:{p}" for p in ids]
+        # guide data: who is neutral, who can be tamed and with what
+        if c["behavior"].get("neutral"):
+            reg["neutral"].append(cid)
+        if c["behavior"].get("tame"):
+            reg["tame"][cid] = dict(c["behavior"]["tame"])
         write_json(BP / "entities" / (cid + ".json"), ent)
 
         # spawn egg - tinted from the ForgeSpawnEggItem colours so it matches Java

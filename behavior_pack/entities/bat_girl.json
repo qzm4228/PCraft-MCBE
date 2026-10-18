@@ -46,14 +46,6 @@
               "filters": {
                 "test": "is_family",
                 "subject": "other",
-                "value": "player"
-              },
-              "max_dist": 32
-            },
-            {
-              "filters": {
-                "test": "is_family",
-                "subject": "other",
                 "value": "villager"
               },
               "max_dist": 32
@@ -157,7 +149,7 @@
         "priority": 5
       },
       "minecraft:tameable": {
-        "probability": 1,
+        "probability": 0.2,
         "tame_items": [
           "pcraftrevorn:cupids_arrow"
         ],
