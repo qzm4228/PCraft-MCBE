@@ -1,10 +1,15 @@
 """PCraftRevorn — Python production pipeline.
 
 Usage:
-    python tools_py/pipeline.py                 # build whatever config/packs.json says
-    python tools_py/pipeline.py 261005-beta-1   # bump version everywhere, then build
+    python tools_py/pipeline.py                 # build whatever config/version.json says
+    python tools_py/pipeline.py 10.18.0         # set that version, then build
 
-Steps: (bump version) -> generate -> generate_entities -> nbt_to_data -> build
+The version lives in exactly one place: ``config/version.json``. The generators
+read it directly (``_common.read_version``) and the builder stamps it into every
+manifest and into the dist file names, so a release edits one line -- or passes
+the new label on the command line, which rewrites that one line for you.
+
+Steps: generate -> generate_entities -> nbt_to_data -> build
 ``build`` is the config-driven builder (``tools_py/build_config.py``) which applies
 ``config/packs.json`` to every manifest before packing. The Node tools under
 ``tools/`` remain as the reference implementation.
@@ -19,11 +24,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
-CONFIG = ROOT / "config" / "packs.json"
-
-# generators that embed the version label (JS reference + Python port kept in sync)
-GENERATORS = [ROOT / "tools" / "generate.js", HERE / "generate.py"]
-LABEL_RE = r"26100\d-beta-\d+"
+VERSION_FILE = ROOT / "config" / "version.json"
 
 
 def parse_version(value) -> tuple[int, int, int]:
@@ -37,25 +38,20 @@ def parse_version(value) -> tuple[int, int, int]:
     raise SystemExit(f"[pipeline] bad version string: {s!r}")
 
 
-def read_config() -> dict:
-    return json.loads(CONFIG.read_text(encoding="utf-8"))
+def read_version() -> str:
+    try:
+        raw = json.loads(VERSION_FILE.read_text(encoding="utf-8")).get("version")
+    except (OSError, ValueError):
+        raw = None
+    return str(raw or "0.1.0").strip()
 
 
-def set_config_version(label: str) -> None:
-    config = read_config()
-    for pack in config.values():
-        pack["version"] = label
-    CONFIG.write_text(json.dumps(config, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-
-
-def set_generator_version(label: str, triple: tuple[int, int, int]) -> None:
-    for g in GENERATORS:
-        if not g.exists():
-            continue
-        s = g.read_text(encoding="utf-8")
-        s = re.sub(r"PACK_VERSION = \[[^\]]*\]", "PACK_VERSION = [%d, %d, %d]" % triple, s)
-        s = re.sub(LABEL_RE, label, s)
-        g.write_text(s, encoding="utf-8")
+def write_version(label: str) -> None:
+    parse_version(label)  # validate before touching the file
+    VERSION_FILE.write_text(
+        json.dumps({"version": label}, indent=2) + "\n", encoding="utf-8"
+    )
+    print(f"[pipeline] version.json -> {label}")
 
 
 def run(script: str, *args: str) -> None:
@@ -66,15 +62,12 @@ def run(script: str, *args: str) -> None:
 
 
 def main() -> None:
-    args = sys.argv[1:]
+    args = [a for a in sys.argv[1:] if a.strip()]
     if args:
-        label = args[0]
-        set_config_version(label)
-    else:
-        label = str(next(iter(read_config().values()))["version"])
-    triple = parse_version(label)
-    set_generator_version(label, triple)
-    print(f"[pipeline] version = {label} {triple}")
+        write_version(args[0].strip())
+
+    label = read_version()
+    print(f"[pipeline] version = {label} {parse_version(label)} (config/version.json)")
 
     run("generate.py")
     run("generate_entities.py")

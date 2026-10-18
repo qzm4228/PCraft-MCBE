@@ -28,6 +28,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import ROOT, NS, ensure_dir, write_text, read_json, exists, rmrf, copy
+from _common import read_version, version_parts
 from _common import write_json as _raw_write_json
 
 
@@ -1066,15 +1067,16 @@ UUID = {
     "rpHeader": "e9a8f5d4-a061-4dc4-af50-4d5e6f708192",
     "rpRes": "fab9a6e5-b172-4ed5-b061-5e6f70819203",
 }
-# Build version: date-based beta. Bedrock v2 manifests require an integer triple,
-# so "10.17.1" is encoded as [261002, 0, 1] with the label kept in the name.
-PACK_VERSION = [10, 17, 1]
+# Version comes from config/version.json (label for names, integer triple for
+# manifests). Nothing else in the repo hardcodes it.
+PACK_VERSION_LABEL = read_version()
+PACK_VERSION = version_parts(PACK_VERSION_LABEL)
 
 
 def gen_manifests() -> None:
     write_json(BP / "manifest.json", {
         "format_version": 2,
-        "header": {"name": "PCraftRevorn §2砂墨§r §7· 10.17.1", "description": "荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。", "uuid": UUID["bpHeader"], "version": PACK_VERSION, "min_engine_version": [1, 21, 100]},
+        "header": {"name": f"PCraftRevorn §2砂墨§r §7· {PACK_VERSION_LABEL}", "description": "荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。", "uuid": UUID["bpHeader"], "version": PACK_VERSION, "min_engine_version": [1, 21, 100]},
         "modules": [
             {"type": "data", "uuid": UUID["bpData"], "version": PACK_VERSION},
             {"type": "script", "language": "javascript", "uuid": UUID["bpScript"], "entry": "scripts/main.js", "version": PACK_VERSION},
@@ -1088,7 +1090,7 @@ def gen_manifests() -> None:
     })
     write_json(RP / "manifest.json", {
         "format_version": 2,
-        "header": {"name": "PCraftRevorn 资源 §2砂墨§r §7· 10.17.1", "description": "荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。", "uuid": UUID["rpHeader"], "version": PACK_VERSION, "min_engine_version": [1, 21, 100]},
+        "header": {"name": f"PCraftRevorn 资源 §2砂墨§r §7· {PACK_VERSION_LABEL}", "description": "荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。", "uuid": UUID["rpHeader"], "version": PACK_VERSION, "min_engine_version": [1, 21, 100]},
         "modules": [{"type": "resources", "uuid": UUID["rpRes"], "version": PACK_VERSION}],
         "metadata": {"authors": ["砂墨SandMo", "Bilibili: 砂墨", "原创: MysticSummoner"], "license": "AFL-3.0"},
     })

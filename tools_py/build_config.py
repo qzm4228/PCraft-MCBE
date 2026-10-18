@@ -30,6 +30,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import dist_resolver  # noqa: E402
+from _common import read_version  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "config" / "packs.json"
@@ -235,6 +236,11 @@ def main(argv=None) -> int:
     if not CONFIG.exists():
         raise SystemExit(f"[build_config] missing config: {CONFIG}")
     config = read_json(CONFIG)
+    # config/version.json wins over the per-pack entries, so a release edits one line
+    global_version = read_version(str(next(iter(config.values())).get("version", "0.1.0")))
+    for pack in config.values():
+        pack["version"] = global_version
+    print(f"[build_config] version {global_version} (config/version.json)")
     if version_override:
         for pack in config.values():
             pack["version"] = version_override

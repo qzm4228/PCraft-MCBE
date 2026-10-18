@@ -7,12 +7,16 @@
 
 ```bat
 python tools_py\pipeline.py
-:: 或指定版本（会同步改写 tools/generate.js、tools_py/generate.py 与性别/VCraft 清单）
-python tools_py\pipeline.py 261005-beta-1
-python tools_py\pipeline.py 261005-beta-1 261005 0 1
+:: 或换版本（只写 config/version.json，其余全部读它）
+python tools_py\pipeline.py 10.18.0
 ```
 
-流程：`set version → generate → generate_entities → nbt_to_data → build`
+**版本号只写在 `config/version.json`**（`{ "version": "10.17.1" }`）：生成器读标签 +
+整数三元组（`[10,17,1]`），`build_config.py` / `build.js` 把它写进每个 manifest 和
+`PCraftRevorn_<版本>_<目标>.mcaddon` 文件名。`config/packs.json` 里没有版本字段，
+生成器里也没有硬编码版本。
+
+流程：`generate → generate_entities → nbt_to_data → build`
 
 ## 与 Node 版的对应关系
 
@@ -26,7 +30,7 @@ python tools_py\pipeline.py 261005-beta-1 261005 0 1
 | `build.ps1` | `build.py` |
 | `build.js` | `build_config.py` |
 | `dist_resolver.js` | `dist_resolver.py` |
-| （无） | `pipeline.py`（总控 + 版本号统一） |
+| （无） | `pipeline.py`（总控） |
 | （无） | `_common.py`（共享小工具） |
 | （无） | `check_dist.py` / `test_dist.py`（一致性校验/单测） |
 

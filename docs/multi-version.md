@@ -79,7 +79,20 @@
 - 命中 `1.26.x` → 用 `hud_screen.json.1.26` 的内容，仍以 `hud_screen.json` 之名打包。
 - 变体源文件不会被单独打包。
 
-## 四、验证清单（每加一个 target 跑一次）
+## 四、版本号单一来源
+
+版本号只写在 **`config/version.json`**：
+
+```json
+{ "version": "10.17.1" }
+```
+
+- `tools_py/pipeline.py` 读这一行；带参数时（`python tools_py/pipeline.py 10.18.0`）先把新版本写回去，再跑整条流水线。
+- `tools_py/generate.py` / `tools/generate.js` 直接读它生成 manifest 的版本三元组（`[10,17,1]`）和包名里的 `· 10.17.1` 标签。
+- `tools_py/build_config.py` / `tools/build.js` 用它覆盖每个组件，产出 `dist/PCraftRevorn_<版本>_<目标>.mcaddon`。
+- `config/packs.json` **不再**保存 `version` 字段，生成器里也没有硬编码版本——升级只改/传一处。
+
+## 五、验证清单（每加一个 target 跑一次）
 
 1. `python tools_py/build_config.py --target <id>` → 装对应版本游戏。
 2. 逐项确认：
@@ -89,7 +102,7 @@
      - 若某按钮消失 → 原版控件名变了 → 在该目录 `dist.json` 加一个变体。
 3. 记录：新增变体后跑 `python tools_py/check_dist.py` 确认两套工具仍一致。
 
-## 五、长期风险与建议
+## 六、长期风险与建议
 
 - **Ore UI 迁移**：不要继续加深对原版界面的改动。能换成**原生表单**（`ActionFormData` /
   `ModalFormData`，即 `server_form`，由脚本打开）的交互尽量换成原生表单；自定义 JSON-UI 只做

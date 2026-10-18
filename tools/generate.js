@@ -19,6 +19,20 @@ const path = require('path');
 const zlib = require('zlib');
 
 const ROOT = path.resolve(__dirname, '..');
+// single source of truth for the version: config/version.json
+const VERSION_LABEL = (() => {
+  try {
+    const v = JSON.parse(fs.readFileSync(path.join(ROOT, 'config', 'version.json'), 'utf8')).version;
+    return String(v || '0.1.0').trim();
+  } catch { return '0.1.0'; }
+})();
+function versionParts(label) {
+  let m = /^(\d{6})-beta-(\d+)$/.exec(label);
+  if (m) return [Number(m[1]), 0, Number(m[2])];
+  m = /^(\d+)\.(\d+)\.(\d+)$/.exec(label);
+  if (m) return [Number(m[1]), Number(m[2]), Number(m[3])];
+  throw new Error('bad version string: ' + label + ' (see config/version.json)');
+}
 const MOD = path.join(ROOT, '.work', 'mod');
 const SRC_ASSETS = path.join(MOD, 'assets', 'pcraftrevorn');
 const SRC_DATA = path.join(MOD, 'data', 'pcraftrevorn');
@@ -720,13 +734,12 @@ const UUID = {
   rpHeader: 'e9a8f5d4-a061-4dc4-af50-4d5e6f708192',
   rpRes: 'fab9a6e5-b172-4ed5-b061-5e6f70819203'
 };
-// Build version: date-based beta. Bedrock v2 manifests require an integer triple,
-// so "10.17.1" is encoded as [261002, 0, 1] with the label kept in the name.
-const PACK_VERSION = [10, 17, 1];
+// version comes from config/version.json (label for names, triple for manifests)
+const PACK_VERSION = versionParts(VERSION_LABEL);
 function genManifests() {
   writeJSON(path.join(BP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn §2砂墨§r §7· 10.17.1', description: '荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。', uuid: UUID.bpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
+    header: { name: `PCraftRevorn §2砂墨§r §7· ${VERSION_LABEL}`, description: '荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。', uuid: UUID.bpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
     modules: [
       { type: 'data', uuid: UUID.bpData, version: PACK_VERSION },
       { type: 'script', language: 'javascript', uuid: UUID.bpScript, entry: 'scripts/main.js', version: PACK_VERSION }
@@ -740,7 +753,7 @@ function genManifests() {
   });
   writeJSON(path.join(RP, 'manifest.json'), {
     format_version: 2,
-    header: { name: 'PCraftRevorn 资源 §2砂墨§r §7· 10.17.1', description: '荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。', uuid: UUID.rpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
+    header: { name: `PCraftRevorn 资源 §2砂墨§r §7· ${VERSION_LABEL}`, description: '荒野里多了一群把你当点心的新邻居。带上指南书，看清谁在盯着你——再决定是喂熟它，还是喂饱它。', uuid: UUID.rpHeader, version: PACK_VERSION, min_engine_version: [1, 21, 100] },
     modules: [{ type: 'resources', uuid: UUID.rpRes, version: PACK_VERSION }],
     metadata: { authors: ['砂墨SandMo', 'Bilibili: 砂墨', '原创: MysticSummoner'], license: 'AFL-3.0' }
   });

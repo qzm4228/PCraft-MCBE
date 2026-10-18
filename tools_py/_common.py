@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 from pathlib import Path
 
@@ -62,3 +63,30 @@ def copy(src, dst) -> None:
 
 def rel(path) -> str:
     return os.path.relpath(path, ROOT)
+
+
+# ---- product version ------------------------------------------------------
+# Single source of truth: config/version.json ({ "version": "10.17.1" }).
+# Everything (manifests, dist file names, the pack name label) reads it, so a
+# release only edits that one line.
+VERSION_FILE = ROOT / "config" / "version.json"
+
+
+def read_version(default: str = "0.1.0") -> str:
+    try:
+        v = read_json(VERSION_FILE).get("version")
+    except Exception:  # noqa: BLE001
+        v = None
+    return str(v or default).strip()
+
+
+def version_parts(label: str) -> list[int]:
+    """'10.17.1' -> [10, 17, 1]; legacy '261010-beta-1' -> [261010, 0, 1]."""
+    s = str(label).strip()
+    m = re.match(r"^(\d{6})-beta-(\d+)$", s)
+    if m:
+        return [int(m.group(1)), 0, int(m.group(2))]
+    m = re.match(r"^(\d+)\.(\d+)\.(\d+)$", s)
+    if m:
+        return [int(m.group(1)), int(m.group(2)), int(m.group(3))]
+    raise SystemExit(f"bad version string: {s!r} (see config/version.json)")

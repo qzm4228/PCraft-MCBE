@@ -204,6 +204,10 @@ function main() {
     else versionOverride = a;
   }
   const config = readJson(CONFIG);
+  // config/version.json wins over the per-pack entries (single source of truth)
+  let globalVersion = null;
+  try { globalVersion = String(readJson(path.join(ROOT, "config", "version.json")).version || "").trim() || null; } catch { /* optional */ }
+  if (globalVersion) for (const p of Object.values(config)) p.version = globalVersion;
   if (versionOverride) for (const p of Object.values(config)) p.version = versionOverride;
   const { targets } = loadTargets();
 
