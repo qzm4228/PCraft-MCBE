@@ -221,6 +221,12 @@
   `U+E200 + 方向*4 + 状态` 拼成 subtitle 行（`onScreenDisplay.setTitle("§r", { subtitle })`），
   不用 JSON-UI、不依赖 Boss 血条，也就绕开了上一版崩溃的那条路径。
   旧的四向 HUD 定义仍留在 `pcraftrevorn_hud.json` 里（注释掉的 patch），等有安全挂点再启用。
+- **右下角挣脱百分比（JSON-UI）**：Bedrock 里唯一全局可读的 HUD 字符串是 `#hud_title_text_string`，
+  所以脚本把 `§0§r§2§r§7挣脱 §fNN%` 写进 **title**（同时把箭头放进 subtitle，一次 `setTitle` 全给）。
+  `hud_title_text` 被重定义成「带该标记就隐藏」的 label（中间不再重复大字），
+  `pcr_struggle_pct` 面板（`root_panel` 里 `insert_back`，bottom_right、112×18、半透明黑底）
+  绑定同一个字符串显示在右下角；换行/时机由 `showPrompt()` 每 10 tick 刷新，结束时 `clearPrompt()` 清空。
+  不带标记的 title（本包的「被吞入」、其它包的消息）照常显示。
 
 
 

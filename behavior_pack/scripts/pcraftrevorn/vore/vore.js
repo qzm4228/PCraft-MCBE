@@ -253,6 +253,16 @@ function refreshBelly(session) {
 // off/idle/correct/incorrect), i.e. exactly the `hud` state the session keeps.
 const GLYPH_BASE = 0xE200;
 const PROMPT_DIRS = ["up", "down", "left", "right"];
+// The title string is the only HUD text Bedrock exposes globally
+// (#hud_title_text_string), so the percentage rides it: marked titles are hidden
+// in the centre by hud_title_text and drawn bottom-right by pcr_struggle_pct.
+const PCT_MARKER = "§0§r§2§r";
+
+/** Escape progress, 0..100 (good struggles out of the required count). */
+function strugglePct(session) {
+  const need = Math.max(1, session.needed ?? 1);
+  return Math.max(0, Math.min(100, Math.round(((session.struggles ?? 0) / need) * 100)));
+}
 
 function promptGlyphs(session) {
   return PROMPT_DIRS
@@ -263,7 +273,7 @@ function promptGlyphs(session) {
 function showPrompt(player, session) {
   const left = Math.max(0, Math.ceil((session.promptTick + session.promptTimer - system.currentTick) / 20));
   try {
-    player.onScreenDisplay.setTitle("§r", {
+    player.onScreenDisplay.setTitle(`${PCT_MARKER}§7挣脱 §f${strugglePct(session)}%`, {
       subtitle: `${promptGlyphs(session)} §7${left}s`,
       fadeInDuration: 0,
       stayDuration: 30,
@@ -272,10 +282,10 @@ function showPrompt(player, session) {
   } catch { /* ignore */ }
 }
 
-/** Clears the subtitle prompt (release / escape / end of the meal). */
+/** Clears the subtitle prompt + the corner percentage (release / escape / death). */
 function clearPrompt(player) {
   try {
-    player.onScreenDisplay.setTitle("§r", { subtitle: " ", fadeInDuration: 0, stayDuration: 1, fadeOutDuration: 0 });
+    player.onScreenDisplay.setTitle(" ", { subtitle: " ", fadeInDuration: 0, stayDuration: 1, fadeOutDuration: 0 });
   } catch { /* ignore */ }
 }
 
@@ -425,10 +435,12 @@ function digestTick() {
     // struggle only starts after the swallow animation has finished
     if (now >= session.swallowEndAt) {
       ensureStruggleItems(player); // keys are locked, but never leave the prey stuck
+      // the arrow row + percentage refresh on their own timer so they stay on
+      // screen between prompts
+      session.msgTimer = (session.msgTimer + 1) % 10;
+      if (session.msgTimer === 0) showPrompt(player, session);
       if (session.awaiting) {
         if (now - session.promptTick > session.promptTimer) playAnim(pred, failPrompt(session, now));
-        session.msgTimer = (session.msgTimer + 1) % 10;
-        if (session.msgTimer === 0) showPrompt(player, session);
       } else if (session.cooldown > 0) {
         session.cooldown -= 1;
       } else {
