@@ -223,10 +223,11 @@
   旧的四向 HUD 定义仍留在 `pcraftrevorn_hud.json` 里（注释掉的 patch），等有安全挂点再启用。
 - **右下角挣脱百分比（JSON-UI）**：Bedrock 里唯一全局可读的 HUD 字符串是 `#hud_title_text_string`，
   所以脚本把 `§0§r§2§r§7挣脱 §fNN%` 写进 **title**（同时把箭头放进 subtitle，一次 `setTitle` 全给）。
-  `hud_title_text` 被重定义成「带该标记就隐藏」的 label（中间不再重复大字），
-  `pcr_struggle_pct` 面板（`root_panel` 里 `insert_back`，bottom_right、112×18、半透明黑底）
-  绑定同一个字符串显示在右下角；换行/时机由 `showPrompt()` 每 10 tick 刷新，结束时 `clearPrompt()` 清空。
-  不带标记的 title（本包的「被吞入」、其它包的消息）照常显示。
+  UI 侧**完全参照 VCraft 的写法**：只在 `hud_content` 里 `insert_after root_panel` 插入 `pcr_struggle_pct`
+  （bottom_right、112×18、半透明黑底），**不重定义任何原版控件**；标题中间那份用
+  `hud_title_text` 的 `modifications: [{remove: title_frame}]` 去掉（modification 失败最多重复显示，不会坏 HUD）。
+  （10.17.1 曾把 `hud_title_text` 整个重定义成 label，导致整个 HUD 加载失败，已回退并改为上述写法。）
+  百分比 = 成功挣脱次数 / 需要次数，每 10 tick 刷新，结束时 `clearPrompt()` 清空。
 
 
 
