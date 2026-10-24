@@ -39,12 +39,9 @@ const title = (female) => `${MARKER}${female ? "1" : "0"}Female Gender Mod`;
 // it comes back as soon as that menu closes.
 // ---------------------------------------------------------------------------
 const HUD_TITLE = "PCraft HUD";
-// The icons are sent through the form button (ActionFormData.button) and drawn
-// by JSON-UI from #form_button_texture -- the same path MSIFvAPI uses.
-const HUD_BUTTONS = [
-  { text: "", icon: "textures/pcraftrevorn_gender/gui/hud_gender" },
-  { text: "", icon: "textures/pcraftrevorn_gender/gui/hud_vore" },
-];
+// The art is drawn directly by JSON-UI from $tex / $tex_pressed (see
+// ui/gender_menu.json); no icon is sent through the form button.
+const HUD_BUTTONS = ["", ""];
 const HUD_SWALLOW_TAG = "vcraft:want_swallow";
 // unset = auto (touch only), 1 = forced on, 0 = forced off
 const HUD_FORCE_PROP = "pcraftrevorn:hud_force";
@@ -250,7 +247,7 @@ async function hudLoop(player) {
     let r;
     try {
       const form = new ActionFormData().title(HUD_TITLE);
-      for (const b of HUD_BUTTONS) form.button(b.text, b.icon);
+      for (const label of HUD_BUTTONS) form.button(label);
       r = await form.show(player);
     } catch { r = undefined; }
     if (!hudActive.has(id)) return;
