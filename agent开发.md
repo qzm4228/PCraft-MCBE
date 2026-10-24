@@ -70,6 +70,32 @@ HUD 可见性：默认**仅触屏**（`clientSystemInfo.platformType === "Mobile
   - HUD 的 Vore 按钮通过 `vcraft:want_swallow` 标签触发；
   - 手持 `vcraft:maw` 右键和 `/vcraft:swallow` 走同一函数。
 
+## 打包结构（单 BP + 单 RP）
+
+最终交付的 `.mcaddon` 里**只有一个 BP 和一个 RP**：
+
+```
+PCraftRevorn_BP/     (data 模块 + script 模块)
+PCraftRevorn_RP/     (resources 模块)
+```
+
+合并由 `tools_py/build_config.py` 完成，配置在 `config/packs.json` 的 `merged_bp` / `merged_rp`：
+
+- `merge` 列出要合并的源目录（BP：`behavior_pack`、`gender_pack/behavior_pack`、`vcraft_pack/behavior_pack`；RP 同理）；
+- 三个 `scripts/main.js` 分别重命名为 `main_pcraft.js` / `main_gender.js` / `main_vcraft.js`，并生成新的 `scripts/main.js`：
+  ```js
+  import "./main_pcraft.js";
+  import "./main_gender.js";
+  import "./main_vcraft.js";
+  ```
+- `texts/*.lang` 按键合并（跳过各自的 `pack.name` / `pack.description`，由合并包统一写）；
+- `ui/_ui_defs.json` 取并集；
+- `sounds/sound_definitions.json` 合并 `sound_definitions`；
+- `textures/item_texture.json` 合并 `texture_data`；
+- `manifest.json` 由 builder 生成：BP = data + script（依赖 `@minecraft/server`、`@minecraft/server-ui`），RP = resources。
+
+单个源包的 `.mcpack` 仍会生成，仅作参考；**交付物以 `PCraftRevorn_<version>_<target>.mcaddon` 为准**。
+
 ## 版本与构建
 
 - 版本唯一来源：`config/version.json`，不要改别处的版本号；
