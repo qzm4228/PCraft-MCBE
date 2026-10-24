@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.rabbit",
-        "texture_width": 128,
-        "texture_height": 128,
+        "texture_width": 121,
+        "texture_height": 123,
         "visible_bounds_width": 4,
         "visible_bounds_height": 4.5,
         "visible_bounds_offset": [

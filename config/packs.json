@@ -27,6 +27,7 @@
     },
     "base_dir": "resource_pack",
     "uuid": "e9a8f5d4-a061-4dc4-af50-4d5e6f708192",
+    "textures_tiers": true,
     "min_engine_version": [
       1,
       21,
