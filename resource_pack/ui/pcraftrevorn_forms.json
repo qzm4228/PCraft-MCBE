@@ -3,10 +3,9 @@
   "third_party_server_screen@common.base_screen": {
     "$screen_content": "server_form.main_screen_content",
     "$additional_screen_content": "server_form.pcraftrevorn_additional_content",
-    // Non-blocking overlay screen. This exact set is copied from vanilla
-    // 1.21.100.6 `debug_screen` -- the only vanilla screen that pops up over
-    // gameplay with a working button while the game below keeps receiving
-    // input.
+    // Non-blocking overlay screen: the non-modal subset of vanilla 1.21.100.6
+    // `debug_screen` (the one vanilla screen that pops up over gameplay with a
+    // working button while the game below keeps receiving input).
     //
     // IMPORTANT: these flags MUST be literal booleans. Writing a Molang
     // expression here is not supported by the engine: a non-empty string is
@@ -15,13 +14,16 @@
     // HUD bar "knock out" the touch controls no matter how the buttons were
     // laid out.
     "send_telemetry": false,
-    "screen_not_flushable": true,
     "is_showing_menu": false,
     "absorbs_input": false,
     "render_only_when_topmost": false,
     "render_game_behind": true,
-    "screen_draws_last": true,
     "always_accepts_input": true,
+    // Deliberately NOT `screen_not_flushable` / `screen_draws_last`: those are
+    // overlay-only flags (debug_screen uses them because it must never be
+    // closed). On a form screen they stop the previous form from being flushed
+    // and put it back on top, so opening the options form from the guide left
+    // both screens stacked and unclickable.
     "low_frequency_rendering": true,
     // Vanilla screens draw a centered loading bar while the screen opens
     // (`common.base_screen` -> loading_bars_background, gated on
