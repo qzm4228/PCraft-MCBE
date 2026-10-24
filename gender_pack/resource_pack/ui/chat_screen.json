@@ -1,0 +1,283 @@
+// Chat-screen menu (top-right panel) using the 18th's "fake input" trick: a
+// button appends its custom command to the chat box and sends it, so the
+// command runs through the normal custom-command path. Pure JSON-UI.
+{
+  "namespace": "chat",
+
+  "pcraftrevorn_chat_button@common.button": {
+    "$command|default": "/pcraftrevorn:gender",
+    "$text|default": "§b性别",
+    "$is_chat_not_command|default": false,
+    "$pressed_button_name": "button.nodata",
+    "size": [ 44, 22 ],
+    "controls": [
+      {
+        "default": {
+          "type": "image",
+          "texture": "textures/ui/White",
+          "color": [ 0.12, 0.12, 0.16, 0.9 ],
+          "controls": [
+            {
+              "label": {
+                "type": "label",
+                "text": "$text",
+                "anchor_from": "center",
+                "anchor_to": "center",
+                "color": [ 1, 1, 1 ],
+                "layer": 4,
+                "font_scale_factor": 0.85
+              }
+            }
+          ]
+        }
+      },
+      {
+        "hover": {
+          "type": "image",
+          "texture": "textures/ui/White",
+          "color": [ 0.26, 0.32, 0.42, 0.95 ],
+          "controls": [
+            {
+              "label": {
+                "type": "label",
+                "text": "$text",
+                "anchor_from": "center",
+                "anchor_to": "center",
+                "color": [ 1, 1, 1 ],
+                "layer": 4,
+                "font_scale_factor": 0.85
+              }
+            }
+          ]
+        }
+      },
+      {
+        "pressed": {
+          "type": "image",
+          "texture": "textures/ui/White",
+          "color": [ 0.06, 0.06, 0.08, 1 ],
+          "offset": [ 0, 1 ],
+          "controls": [
+            {
+              "label": {
+                "type": "label",
+                "text": "$text",
+                "anchor_from": "center",
+                "anchor_to": "center",
+                "color": [ 1, 1, 1 ],
+                "layer": 4,
+                "font_scale_factor": 0.85
+              }
+            }
+          ]
+        }
+      },
+      {
+        "text_edit_box": {
+          "type": "edit_box",
+          "text_box_name": "#message_text_box",
+          "max_length": 2147483647,
+          "can_be_deselected": true,
+          "text_control": "text_control",
+          "always_listening": true,
+          "focus_enabled": true,
+          "size": [ "100%sm", "100%sm" ],
+          "layer": 3,
+          "$button_mappings|default": [
+            {
+              "from_button_id": "button.menu_select",
+              "to_button_id": "button.keyboard_toggle",
+              "handle_select": true,
+              "handle_deselect": false,
+              "mapping_type": "pressed"
+            },
+            {
+              "from_button_id": "button.menu_select",
+              "to_button_id": "button.text_edit_box_selected",
+              "handle_select": false,
+              "handle_deselect": true,
+              "mapping_type": "pressed"
+            },
+            {
+              "from_button_id": "button.menu_cancel",
+              "to_button_id": "button.menu_select",
+              "handle_select": false,
+              "handle_deselect": true,
+              "mapping_type": "global"
+            }
+          ],
+          "button_mappings": "$button_mappings",
+          "variables": [
+            {
+              "requires": "$touch",
+              "$button_mappings": [
+                {
+                  "from_button_id": "button.menu_select",
+                  "to_button_id": "button.keyboard_toggle",
+                  "handle_select": true,
+                  "handle_deselect": false,
+                  "mapping_type": "pressed"
+                },
+                {
+                  "from_button_id": "button.menu_select",
+                  "to_button_id": "button.text_edit_box_selected",
+                  "handle_select": false,
+                  "handle_deselect": true,
+                  "mapping_type": "pressed"
+                },
+                {
+                  "from_button_id": "button.menu_ok",
+                  "to_button_id": "button.text_edit_box_selected",
+                  "handle_select": false,
+                  "handle_deselect": true,
+                  "mapping_type": "pressed"
+                },
+                {
+                  "from_button_id": "button.menu_cancel",
+                  "to_button_id": "button.menu_select",
+                  "handle_select": false,
+                  "handle_deselect": true,
+                  "mapping_type": "global"
+                }
+              ]
+            }
+          ],
+          "selected": "#selected",
+          "bindings": [
+            {
+              "binding_type": "view",
+              "source_property_name": "(#selected or not #selected)",
+              "target_property_name": "#selected"
+            }
+          ],
+          "controls": [
+            {
+              "text_control": {
+                "type": "label",
+                "text": "#item_name",
+                "visible": false,
+                "localize": false,
+                "property_bag": {
+                  "#property_field": "#item_name"
+                },
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "display_text",
+                    "source_property_name": "#item_name",
+                    "target_property_name": "#text_content"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#text_content + ' ') + $command)",
+                    "ignored": "$is_chat_not_command",
+                    "target_property_name": "#item_name_with_command"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#text_content + $command))",
+                    "ignored": "(not $is_chat_not_command)",
+                    "target_property_name": "#item_name_with_command"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "#item_name_with_command",
+                    "target_property_name": "#item_name"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "sendbutton@common_buttons.light_text_button": {
+          "layer": 0,
+          "propagate_alpha": true,
+          "always_listen_to_input": true,
+          "alpha": 0,
+          "size": [ "100%sm", "100%sm" ],
+          "ignored": "$is_chat_not_command",
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "$button_text": "exit",
+          "button_mappings": [
+            {
+              "from_button_id": "button.menu_select",
+              "to_button_id": "button.send",
+              "consume_event": false,
+              "mapping_type": "pressed",
+              "scope": "global"
+            }
+          ]
+        }
+      }
+    ]
+  },
+
+  // Top-right panel. The panel background is a rounded-ish dark plate and the
+  // three buttons stack vertically inside it.
+  "pcraftrevorn_panel": {
+    "type": "panel",
+    "anchor_from": "top_right",
+    "anchor_to": "top_right",
+    "offset": [ -6, 24 ],
+    "size": [ "100%c + 8px", "100%c + 8px" ],
+    "controls": [
+      {
+        "bg": {
+          "type": "image",
+          "texture": "textures/ui/White",
+          "color": [ 0.07, 0.07, 0.1 ],
+          "alpha": 0.82,
+          "size": [ "100%", "100%" ]
+        }
+      },
+      {
+        "buttons": {
+          "type": "stack_panel",
+          "orientation": "vertical",
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "size": [ "100%c", "100%c" ],
+          "controls": [
+            {
+              "hud@chat.pcraftrevorn_chat_button": {
+                "$command": "/pcraftrevorn:hud",
+                "$text": "§eHUD"
+              }
+            },
+            {
+              "gender@chat.pcraftrevorn_chat_button": {
+                "$command": "/pcraftrevorn:gender",
+                "$text": "§b性别"
+              }
+            },
+            {
+              "swallow@chat.pcraftrevorn_chat_button": {
+                "$command": "/vcraft:swallow",
+                "$text": "§dVore"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+
+  "chat_screen_content": {
+    "modifications": [
+      {
+        "array_name": "controls",
+        "operation": "insert_back",
+        "value": [
+          {
+            "pcraftrevorn_panel@chat.pcraftrevorn_panel": {
+              "layer": 6
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

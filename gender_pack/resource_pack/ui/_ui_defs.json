@@ -2,6 +2,7 @@
   "ui_defs": [
     "ui/gender_menu.json",
     "ui/hud_screen.json",
-    "ui/ui_common.json"
+    "ui/ui_common.json",
+    "ui/chat_screen.json"
   ]
 }
