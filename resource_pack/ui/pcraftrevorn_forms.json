@@ -3,6 +3,15 @@
   "third_party_server_screen@common.base_screen": {
     "$screen_content": "server_form.main_screen_content",
     "$additional_screen_content": "server_form.pcraftrevorn_additional_content",
+    // On touch the form screen stays non-modal: the PCraft HUD buttons are a
+    // persistent form (see gender_pack/ui/gender_menu.json) and must not freeze
+    // gameplay. Buttons/toggles/sliders still swallow taps on their own
+    // (gender_pack/ui/ui_common.json). Keyboard/mouse keeps the normal modal
+    // form behaviour so the cursor can reach the buttons.
+    "is_showing_menu": "(not ($touch and (not $is_pregame)))",
+    "absorbs_input": "(not ($touch and (not $is_pregame)))",
+    "render_only_when_topmost": "(not ($touch and (not $is_pregame)))",
+    "render_game_behind": true,
     "button_mappings": [
       {
         "from_button_id": "button.menu_cancel",

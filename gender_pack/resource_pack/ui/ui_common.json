@@ -1,0 +1,22 @@
+{
+  "namespace": "common",
+
+  // The form screen is non-modal on touch (so the HUD button bar can sit on top
+  // of gameplay). Interactive controls must still swallow taps themselves,
+  // otherwise tapping a button would also swing/mine in the world behind it.
+  "button": {
+    "prevent_touch_input": true
+  },
+  "toggle": {
+    "prevent_touch_input": true
+  },
+  "slider": {
+    "prevent_touch_input": true
+  },
+  "text_edit_box": {
+    "prevent_touch_input": true
+  },
+  "close_button": {
+    "prevent_touch_input": true
+  }
+}

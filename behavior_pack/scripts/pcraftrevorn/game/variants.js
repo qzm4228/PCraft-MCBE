@@ -6,7 +6,7 @@
 // the active set per species; the choice is a world dynamic property applied to
 // every loaded creature of that species via `pcraftrevorn:set`.
 import { world, system } from "@minecraft/server";
-import { ActionFormData } from "@minecraft/server-ui";
+import { ActionFormData, uiManager } from "@minecraft/server-ui";
 import { VARIANTS } from "../data/variants.js";
 import { assignSkin, applyWorldSet, getNum } from "../skin/assign.js";
 
@@ -37,6 +37,7 @@ function openSpecies(player, species) {
   form.button(`§f原版${cur === 0 ? " §a✔" : ""}`);
   vs.sets.forEach((s, i) => { form.button(`§f${s.name} §7(${s.count})${cur === i + 1 ? " §a✔" : ""}`); actions.push({ set: i + 1 }); });
   form.button("§7返回"); actions.push({ set: -1 });
+  try { uiManager.closeAllForms(player); } catch { /* older ui module */ }
   form.show(player).then((r) => {
     if (r.canceled) return;
     const a = actions[r.selection];
@@ -59,6 +60,7 @@ export function openVariants(player) {
     form.button(`§f${LABEL[sp] ?? sp} §7- ${label}`);
   }
   form.button("§7关闭");
+  try { uiManager.closeAllForms(player); } catch { /* older ui module */ }
   form.show(player).then((r) => {
     if (r.canceled || r.selection >= species.length) return;
     system.run(() => openSpecies(player, species[r.selection]));

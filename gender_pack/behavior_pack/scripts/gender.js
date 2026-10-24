@@ -16,7 +16,7 @@
 // Mod look (ui/gender_menu.json). The form title carries an invisible marker so
 // the UI knows it is a gender menu.
 import { world, system, CommandPermissionLevel, CustomCommandStatus, DisplaySlotId } from "@minecraft/server";
-import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
+import { ActionFormData, ModalFormData, uiManager } from "@minecraft/server-ui";
 
 const OBJECTIVE = "pc_state";
 const SEX_MAX = 5;
@@ -25,14 +25,36 @@ const PRESET_COUNT = 12;
 // preset 1 (skin 1) + female (sex 4 = size 3)  =>  1*10 + 4
 const DEFAULT_STATE = 14;
 const OPEN_TAG = "pcgender:open";
-// Payload sent by the chat-screen button (resource_pack/ui/chat_screen.json).
-const BUTTON_TOKEN = "pcgender_open";
 const SOUNDS_OFF_TAG = "pcgender:sounds_off";
 const HURT_SOUND = "pcraftrevorn_gender.female_hurt";
 
 // Title state bus read by resource_pack/ui/gender_menu.json.
 const MARKER = "§3§r";
 const title = (female) => `${MARKER}${female ? "1" : "0"}Female Gender Mod`;
+
+// ---------------------------------------------------------------------------
+// HUD button bar (MSIFvAPI style: a persistent, transparent ActionFormData
+// whose buttons are drawn by JSON-UI -- see ui/gender_menu.json "PCraft HUD").
+// Only one form can be open per player, so every menu we open pauses the bar;
+// it comes back as soon as that menu closes.
+// ---------------------------------------------------------------------------
+const HUD_TITLE = "PCraft HUD";
+const HUD_BUTTONS = ["性别", "菜单", "关闭 HUD"];
+const HUD_VCRAFT_MENU_TAG = "vcraft:open_menu";
+const hudActive = new Set();
+const menuSession = new Set();
+
+const sleep = (ticks) => new Promise((resolve) => system.runTimeout(resolve, Math.max(1, ticks | 0)));
+const isBusy = (r) => String(r?.cancelationReason ?? "").includes("Busy");
+function closeForms(player) {
+  try { uiManager.closeAllForms(player); } catch { /* older ui module */ }
+}
+function beginSession(player) {
+  try { menuSession.add(player.id); } catch { /* ignore */ }
+}
+function endSession(player) {
+  try { menuSession.delete(player.id); } catch { /* ignore */ }
+}
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v | 0));
 const sexOf = (state) => state % 10;
@@ -129,14 +151,14 @@ function openSizeMenu(player) {
   for (let i = 0; i <= 4; i++) form.button(`体型 ${i}${i === size ? " §a✔" : ""}`);
   form.button("§7返回");
   form.show(player).then((r) => {
-    if (r.canceled) return;
+    if (r.canceled) { endSession(player); return; }
     if (r.selection >= 0 && r.selection <= 4) {
       setState(player, encode(skinOf(st), r.selection + 1));
       system.run(() => openSizeMenu(player));
     } else {
       system.run(() => openGenderMenu(player));
     }
-  }).catch(() => { /* ignore */ });
+  }).catch(() => { endSession(player); });
 }
 
 function openRotationMenu(player) {
@@ -145,14 +167,14 @@ function openRotationMenu(player) {
   for (let i = 0; i <= 4; i++) form.button(`胸旋转 ${i}${i === rot ? " §a✔" : ""}`);
   form.button("§7返回");
   form.show(player).then((r) => {
-    if (r.canceled) return;
+    if (r.canceled) { endSession(player); return; }
     if (r.selection >= 0 && r.selection <= 4) {
       setRot(player, r.selection);
       system.run(() => openRotationMenu(player));
     } else {
       system.run(() => openGenderMenu(player));
     }
-  }).catch(() => { /* ignore */ });
+  }).catch(() => { endSession(player); });
 }
 
 function openSkinMenu(player) {
@@ -163,11 +185,11 @@ function openSkinMenu(player) {
   const form = new ModalFormData().title("性别 / 皮肤预设");
   form.slider("皮肤预设", 0, PRESET_COUNT, { valueStep: 1, defaultValue: cur, tooltip: "0 = 原版皮肤，1-12 = 预设" });
   form.show(player).then((r) => {
-    if (r.canceled) return;
+    if (r.canceled) { endSession(player); return; }
     const sel = Math.max(0, Math.min(PRESET_COUNT, Number(r.formValues?.[0] ?? cur)));
     setState(player, encode(sel, sexOf(st)));
     system.run(() => openGenderMenu(player));
-  }).catch(() => { /* ignore */ });
+  }).catch(() => { endSession(player); });
 }
 
 function openGenderMenu(player) {
@@ -189,7 +211,7 @@ function openGenderMenu(player) {
   form.button("§7关闭"); actions.push("close");
 
   form.show(player).then((r) => {
-    if (r.canceled) return;
+    if (r.canceled) { endSession(player); return; }
     switch (actions[r.selection]) {
       case "gender":
         setState(player, encode(skin, female ? 0 : (size > 0 ? size + 1 : 1)));
@@ -206,9 +228,73 @@ function openGenderMenu(player) {
         system.run(() => openGenderMenu(player));
         break;
       default:
-        break; // close
+        endSession(player); // close
+        break;
     }
-  }).catch(() => { /* player left / busy */ });
+  }).catch(() => { endSession(player); });
+}
+
+// ---- HUD button bar -------------------------------------------------------
+async function hudLoop(player) {
+  const id = player.id;
+  while (hudActive.has(id)) {
+    try { if (!player.isValid) return; } catch { return; }
+    if (menuSession.has(id)) { await sleep(10); continue; }
+    let r;
+    try {
+      const form = new ActionFormData().title(HUD_TITLE);
+      for (const label of HUD_BUTTONS) form.button(label);
+      r = await form.show(player);
+    } catch { r = undefined; }
+    if (!hudActive.has(id)) return;
+    if (!r || r.canceled) {
+      // Busy = another form or the chat screen is open -> wait; closed by the
+      // player -> just reopen (the bar is meant to be persistent).
+      await sleep(isBusy(r) ? 20 : 10);
+      continue;
+    }
+    if (r.selection === 0) {
+      beginSession(player);
+      try { openGenderMenu(player); } catch { endSession(player); }
+    } else if (r.selection === 1) {
+      beginSession(player);
+      try { player.addTag(HUD_VCRAFT_MENU_TAG); } catch { /* ignore */ }
+      // VCraft polls the tag within a few ticks and opens its menu. Release the
+      // session after a grace period; the bar then stays busy until that menu
+      // is closed and reopens by itself.
+      await sleep(60);
+      endSession(player);
+    } else {
+      // "关闭 HUD" -- mainly for keyboard/mouse, where the bar is a modal menu.
+      hudActive.delete(id);
+      try { player.sendMessage("§7[PCraft] HUD 已关闭，可用 /pcraftrevorn:gender 打开性别菜单。"); } catch { /* ignore */ }
+    }
+  }
+}
+
+function startHud(player) {
+  try {
+    if (hudActive.has(player.id)) return;
+    hudActive.add(player.id);
+    const id = player.id;
+    system.runTimeout(() => { if (hudActive.has(id)) hudLoop(player); }, 40);
+  } catch { /* ignore */ }
+}
+
+function stopHud(playerOrId) {
+  try {
+    const id = typeof playerOrId === "string" ? playerOrId : playerOrId.id;
+    hudActive.delete(id);
+    menuSession.delete(id);
+  } catch { /* ignore */ }
+}
+
+// Close the HUD (if it is open) and open the wardrobe menu. Used by the command
+// and by the ?gender shortcut.
+function openMenu(player) {
+  closeForms(player);
+  beginSession(player);
+  openGenderMenu(player);
 }
 
 export function wireGender() {
@@ -228,7 +314,7 @@ export function wireGender() {
           { name: "pcraftrevorn:gender", description: "打开性别 / 体型设置", permissionLevel: CommandPermissionLevel.Any, cheatsRequired: false },
           (origin) => {
             const p = origin.sourceEntity;
-            if (p?.typeId === "minecraft:player") { system.run(() => openGenderMenu(p)); return { status: CustomCommandStatus.Success }; }
+            if (p?.typeId === "minecraft:player") { system.run(() => openMenu(p)); return { status: CustomCommandStatus.Success }; }
             return { status: CustomCommandStatus.Failure, message: "只能由玩家执行。" };
           }
         );
@@ -253,7 +339,7 @@ export function wireGender() {
       if (!hasState(player)) setState(player, DEFAULT_STATE);
       if (player.hasTag(OPEN_TAG)) {
         try { player.removeTag(OPEN_TAG); } catch { /* ignore */ }
-        system.run(() => openGenderMenu(player));
+        system.run(() => openMenu(player));
       }
     }
   }, 10);
@@ -262,7 +348,12 @@ export function wireGender() {
   // so re-apply on spawn and periodically as a safety net.
   world.afterEvents.playerSpawn.subscribe((ev) => {
     system.run(() => applyChest(ev.player, getState(ev.player)));
+    startHud(ev.player);
   });
+  try {
+    world.afterEvents.playerLeave.subscribe((ev) => stopHud(ev.playerId));
+  } catch { /* older event shape */ }
+  system.runTimeout(() => { for (const p of world.getAllPlayers()) startHud(p); }, 60);
   system.runInterval(() => {
     for (const player of world.getAllPlayers()) {
       applyChest(player, getState(player));

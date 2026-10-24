@@ -5,7 +5,13 @@
 // The belly mesh (owned by the gender pack's minecraft:player) is driven by the
 // pc_belly scoreboard (0 = flat .. 8 = full), derived from the prey's health.
 import { world, system, DisplaySlotId, CommandPermissionLevel, CustomCommandStatus, ItemStack, EntityDamageCause } from "@minecraft/server";
-import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
+import { ActionFormData, ModalFormData, uiManager } from "@minecraft/server-ui";
+
+// The PCraft HUD button bar is a persistent form (see the gender pack); only
+// one form can be open per player, so close it before opening a VCraft menu.
+function closeHud(player) {
+  try { uiManager.closeAllForms(player); } catch { /* older ui module */ }
+}
 
 const GUT_ENTITY = "vcraft:gut";
 const MAW_ITEM = "vcraft:maw";   // hold + right-click to swallow what you aim at
@@ -297,6 +303,7 @@ function openTrinketMenu(player) {
     }
   }
   form.button("§7关闭"); actions.push({ op: "close" });
+  closeHud(player);
   form.show(player).then((r) => {
     if (r.canceled) return;
     const a = actions[r.selection];
@@ -543,6 +550,7 @@ function openMainMenu(player) {
   form.button("§f胃袋");
   form.button("§f饰品");
   form.button("§7关闭");
+  closeHud(player);
   form.show(player).then((r) => {
     if (r.canceled) return;
     if (r.selection === 0) system.run(() => openConfigMenu(player));
@@ -558,6 +566,7 @@ function openConfigMenu(player) {
   form.toggle("自动消化", { defaultValue: cfgGet(player, CFG.digest, true) });
   form.toggle("死亡时保留猎物", { defaultValue: cfgGet(player, CFG.keep, false) });
   form.toggle("消化后增大胸部（体型）", { defaultValue: cfgGet(player, CFG.grow, false) });
+  closeHud(player);
   form.show(player).then((r) => {
     if (r.canceled) return;
     cfgSet(player, CFG.belly, r.formValues?.[0]);
@@ -593,12 +602,14 @@ function openPreyMenu(player) {
   if (rs.length === 0) {
     form.body("§7胃袋是空的。");
     form.button("§7关闭");
+    closeHud(player);
     form.show(player).catch(() => { /* ignore */ });
     return;
   }
   form.body(`§f猎物 ${rs.length}/${capacity(player)} · 吸收 ${getAbsorb(player)}`);
   for (const r of rs) form.button(`§f放出：§7${r.typeId.replace("minecraft:", "")}`);
   form.button("§7关闭");
+  closeHud(player);
   form.show(player).then((res) => {
     if (res.canceled || res.selection >= rs.length) return;
     const prey = rs[res.selection];
@@ -610,6 +621,14 @@ function openPreyMenu(player) {
 }
 
 export function wireVcraft() {
+  // Entry used by the PCraft HUD button bar (gender pack).
+  system.runInterval(() => {
+    for (const player of world.getAllPlayers()) {
+      if (!player.hasTag("vcraft:open_menu")) continue;
+      try { player.removeTag("vcraft:open_menu"); } catch { /* ignore */ }
+      system.run(() => openMainMenu(player));
+    }
+  }, 10);
   // Belly rendering is command-driven (Plan B) and no longer uses query.scoreboard,
   // so we must NOT claim a display slot here — that would clobber the gender pack's
   // pc_state objective (still used for skin selection). The pc_belly objective is

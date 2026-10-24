@@ -1,5 +1,12 @@
-import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
+import { ActionFormData, ModalFormData, uiManager } from "@minecraft/server-ui";
 import { buildTitle } from "../constants.js";
+
+// The PCraft HUD button bar is a persistent form (see the gender pack). Only
+// one form can be open per player, so every entry point closes it first and the
+// bar reopens by itself when this form is closed.
+function closeHud(player) {
+  try { uiManager.closeAllForms(player); } catch { /* older ui module */ }
+}
 
 /**
  * Shows a PCraftRevorn-styled action form.
@@ -16,6 +23,7 @@ export async function showPcForm(player, { title = "", body = "", level = 0, but
     if (b.icon) form.button(b.label, b.icon);
     else form.button(b.label);
   }
+  closeHud(player);
   const res = await form.show(player);
   if (res.canceled) return { canceled: true };
   const button = buttons[res.selection];
@@ -30,6 +38,7 @@ export async function showPcModal(player, { title = "", level = 0, controls = []
     else if (c.kind === "slider") form.slider(c.label, c.min, c.max, { valueStep: c.step ?? 1, defaultValue: c.default ?? c.min });
     else if (c.kind === "text") form.textField(c.label, c.placeholder ?? "", { default: c.default ?? "" });
   }
+  closeHud(player);
   const res = await form.show(player);
   if (res.canceled) return { canceled: true };
   return { canceled: false, values: res.formValues ?? [] };

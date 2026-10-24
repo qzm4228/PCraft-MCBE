@@ -1,6 +1,16 @@
 {
   "namespace": "server_form",
 
+  // ---------------------------------------------------------------------------
+  // One file owns the whole server_form look:
+  //   * the vanilla form (every other addon / our own guide & settings forms)
+  //   * the Female Gender Mod wardrobe panel (title starts with "§3§r")
+  //   * the PCraft HUD button bar (title is exactly "PCraft HUD")
+  // The three never overlap because each one is gated on its own title marker,
+  // so the HUD form and the gender panel can share the same definitions without
+  // fighting over `long_form`.
+  // ---------------------------------------------------------------------------
+
   "main_screen_content": {
     "type": "panel",
     "size": [ "100%", "100%" ],
@@ -18,24 +28,184 @@
     ]
   },
 
-  "long_form@common_dialogs.main_panel_no_buttons": {
-    "$title_panel": "common_dialogs.standard_title_label",
-    "$title_size": [ "100% - 15px", 10 ],
-    "$title_max_size": [ "100% - 15px", 10 ],
-    "size": [ 225, 200 ],
-    "$text_name": "#title_text",
-    "$title_text_binding_type": "none",
-    "$child_control": "server_form.long_form_panel",
-    "layer": 2,
+  // The factory instantiates this panel; everything inside is centered/anchored
+  // by us because the wrapper itself is full screen.
+  "long_form": {
+    "type": "panel",
+    "size": [ "100%", "100%" ],
+    "controls": [
+      {
+        "form@common_dialogs.main_panel_no_buttons": {
+          "$title_panel": "common_dialogs.standard_title_label",
+          "$title_size": [ "100% - 15px", 10 ],
+          "$title_max_size": [ "100% - 15px", 10 ],
+          "size": [ 225, 200 ],
+          "$text_name": "#title_text",
+          "$title_text_binding_type": "none",
+          "$child_control": "server_form.long_form_panel",
+          "layer": 2,
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "bindings": [
+            { "binding_name": "#title_text" },
+            {
+              "binding_type": "view",
+              "source_property_name": "(((#title_text - '§3§r') = #title_text) and ((#title_text - 'PCraft HUD') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      { "hud_buttons@server_form.hud_buttons": {} }
+    ]
+  },
+
+  // ---- HUD button bar (FemaleGenderMod entry) -------------------------------
+
+  "hud_buttons": {
+    "type": "panel",
+    "size": [ "100%", "100%" ],
     "bindings": [
       { "binding_name": "#title_text" },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '§3§r') = #title_text)",
+        "source_property_name": "((#title_text - 'PCraft HUD') = #title_text)",
         "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "slot0@server_form.hud_button_slot": {
+          "offset": [ 6, 44 ],
+          "$slot": 0
+        }
+      },
+      {
+        "slot1@server_form.hud_button_slot": {
+          "offset": [ 6, 68 ],
+          "$slot": 1
+        }
+      },
+      {
+        "slot2@server_form.hud_button_slot": {
+          "offset": [ 6, 92 ],
+          "$slot": 2
+        }
       }
     ]
   },
+
+  "hud_button_slot": {
+    "type": "collection_panel",
+    "collection_name": "form_buttons",
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "size": [ 46, 20 ],
+    "controls": [
+      {
+        "btn@server_form.hud_button": {
+          "collection_index": "$slot"
+        }
+      }
+    ]
+  },
+
+  "hud_button@common.button": {
+    "size": [ "100%", "100%" ],
+    "$pressed_button_name": "button.form_button_click",
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "form_buttons"
+      }
+    ],
+    "controls": [
+      {
+        "default": {
+          "type": "image",
+          "texture": "textures/ui/White",
+          "color": [ 0.12, 0.12, 0.16, 0.85 ],
+          "controls": [
+            {
+              "label": {
+                "type": "label",
+                "anchor_from": "center",
+                "anchor_to": "center",
+                "color": [ 1, 1, 1 ],
+                "layer": 4,
+                "font_scale_factor": 0.8,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons",
+                    "binding_name": "#form_button_text",
+                    "binding_name_override": "#text"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "hover": {
+          "type": "image",
+          "texture": "textures/ui/White",
+          "color": [ 0.3, 0.34, 0.44, 1 ],
+          "controls": [
+            {
+              "label": {
+                "type": "label",
+                "anchor_from": "center",
+                "anchor_to": "center",
+                "color": [ 1, 1, 1 ],
+                "layer": 4,
+                "font_scale_factor": 0.8,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons",
+                    "binding_name": "#form_button_text",
+                    "binding_name_override": "#text"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "pressed": {
+          "type": "image",
+          "texture": "textures/ui/White",
+          "color": [ 0.08, 0.08, 0.1, 1 ],
+          "offset": [ 0, 1 ],
+          "controls": [
+            {
+              "label": {
+                "type": "label",
+                "anchor_from": "center",
+                "anchor_to": "center",
+                "color": [ 1, 1, 1 ],
+                "layer": 4,
+                "font_scale_factor": 0.8,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons",
+                    "binding_name": "#form_button_text",
+                    "binding_name_override": "#text"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+
+  // ---- Female Gender Mod wardrobe panel -------------------------------------
 
   "gender_root": {
     "type": "panel",
@@ -50,6 +220,13 @@
       }
     ],
     "controls": [
+      {
+        "shield": {
+          "type": "input_panel",
+          "size": [ "100%", "100%" ],
+          "prevent_touch_input": true
+        }
+      },
       {
         "dim": {
           "type": "image",
