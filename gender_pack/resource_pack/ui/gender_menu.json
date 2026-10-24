@@ -69,7 +69,7 @@
       { "binding_name": "#title_text" },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - 'PCraft HUD') = #title_text)",
+        "source_property_name": "(#title_text = 'PCraft HUD')",
         "target_property_name": "#visible"
       }
     ],
