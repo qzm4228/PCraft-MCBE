@@ -118,39 +118,28 @@
     ]
   },
 
-  "hud_icon_button@common.button": {
+  // Same proven structure as MSIFvAPI's button module: the clickable element is
+  // common_buttons.light_text_button with button.form_button_click + the
+  // collection_details binding. The hand-drawn 22x22 PNG is used as the button
+  // texture (default/hover share it, pressed uses the _pressed variant).
+  "hud_icon_button@common_buttons.light_text_button": {
     "size": [ "100%", "100%" ],
     "$pressed_button_name": "button.form_button_click",
-    "$tex": "textures/ui/White",
-    "$tex_pressed": "textures/ui/White",
+    "$button_text": "",
+    "$button_text_binding_type": "collection",
+    "$button_text_grid_collection_name": "form_buttons",
+    "$button_text_max_size": [ "100%", 1 ],
+    "$border_visible": false,
+    "$default_button_texture": "$tex",
+    "$hover_button_texture": "$tex",
+    "$pressed_button_texture": "$tex_pressed",
+    "$default_text_color": [ 1, 1, 1 ],
+    "$hover_text_color": [ 1, 1, 1 ],
+    "$pressed_text_color": [ 1, 1, 1 ],
     "bindings": [
       {
         "binding_type": "collection_details",
         "binding_collection_name": "form_buttons"
-      }
-    ],
-    "controls": [
-      {
-        "default": {
-          "type": "image",
-          "texture": "$tex",
-          "size": [ "100%", "100%" ]
-        }
-      },
-      {
-        "hover": {
-          "type": "image",
-          "texture": "$tex",
-          "size": [ "100%", "100%" ]
-        }
-      },
-      {
-        "pressed": {
-          "type": "image",
-          "texture": "$tex_pressed",
-          "size": [ "100%", "100%" ],
-          "offset": [ 0, 1 ]
-        }
       }
     ]
   },
