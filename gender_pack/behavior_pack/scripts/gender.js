@@ -251,11 +251,15 @@ async function hudLoop(player) {
       r = await form.show(player);
     } catch { r = undefined; }
     if (!hudActive.has(id)) return;
-    if (!r || r.canceled) {
-      // Busy = another form or the chat screen is open -> wait; closed by the
-      // player -> just reopen (the bar is meant to be persistent).
-      await sleep(isBusy(r) ? 20 : 10);
-      continue;
+    if (!r) { await sleep(10); continue; }
+    if (r.canceled) {
+      // Busy = the chat / another form is open -> retry. A real cancel is the
+      // player dismissing the bar: stop here (MSIFvAPI does the same) so the
+      // vanilla touch controls come back; /pcraftrevorn:hud re-opens it.
+      if (isBusy(r)) { await sleep(20); continue; }
+      hudActive.delete(id);
+      try { player.sendMessage("§7[PCraft] HUD 已收起，输入 /pcraftrevorn:hud 可重新打开。"); } catch { /* ignore */ }
+      return;
     }
     if (r.selection === 0) {
       beginSession(player);
