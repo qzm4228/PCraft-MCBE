@@ -371,16 +371,15 @@ function lookTarget(player, dist) {
   return undefined;
 }
 
-// Instant swallow: no timed progress and no need to keep the target in view.
-// Prefers whatever the player is looking at, otherwise the nearest valid prey.
+// Instant swallow: you must be aiming at the target, but there is no timed
+// progress bar and you do not have to keep looking at it while it fills.
 function instantSwallow(player) {
   if (!player || player.typeId !== "minecraft:player") return;
-  const looked = lookTarget(player, 6);
-  const valid = (e) => e && (e.typeId === "minecraft:player" || isPreyCandidate(e, player));
-  const target = valid(looked) ? looked : nearestPrey(player, 5);
-  if (!target) { player.sendMessage("§7[VCraft] 附近没有可吞的生物。"); return; }
-  if (target.typeId === "minecraft:player") swallowPlayer(player, target);
-  else swallow(player, target);
+  const target = lookTarget(player, 6);
+  if (!target) { player.sendMessage("§7[VCraft] 没有对准可吞的生物。"); return; }
+  if (target.typeId === "minecraft:player") { swallowPlayer(player, target); return; }
+  if (!isPreyCandidate(target, player)) { player.sendMessage("§7[VCraft] 这个目标不能吞。"); return; }
+  swallow(player, target);
 }
 // Hold vcraft:maw and right-click to start swallowing whatever you are aiming at.
 // Ported from the original: swallowing is a timed progress (0..60) that fills at
@@ -672,7 +671,7 @@ export function wireVcraft() {
             return { status: CustomCommandStatus.Failure, message: "只能由玩家执行。" };
           }
         );
-        reg("vcraft:swallow", "吞下附近的一只生物", swallow);
+        reg("vcraft:swallow", "吞下正在瞄准的生物", instantSwallow);
         reg("vcraft:release", "放出胃袋里的所有猎物", releaseAll);
         reg("vcraft:prey", "打开胃袋面板", openPreyMenu);
         reg("vcraft:trinkets", "打开饰品面板", openTrinketMenu);
