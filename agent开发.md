@@ -83,6 +83,14 @@
   设 `prevent_touch_input: true`。`hud_buttons` 是普通 `panel`，**不吃触摸**。
 - 全屏 `input_panel` 只有 `gender_root/shield`（性别菜单的遮罩）；标题不含 `§3§r` 时它是隐藏的。
 
+原版屏幕打开时会在**屏幕正中**画一条加载条（`common.base_screen` 的
+`loading_bars_background`，由 `$use_loading_bars` 控制，默认 `true`）。我们的表单是常驻的，
+这条会反复闪，所以和 `debug_screen` 一样关掉：
+
+```jsonc
+"$use_loading_bars": false
+```
+
 结果：表单浮在游戏上，只有点在按钮 / 开关 / 滑条上时那一小块被消费，其余触摸全部透传给摇杆和视角。
 
 验证：`python .work/audit_hud_buttons.py` 会检查这些标志都是字面量布尔值，且没有任何一个写成字符串。

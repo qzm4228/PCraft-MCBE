@@ -23,6 +23,11 @@
     "screen_draws_last": true,
     "always_accepts_input": true,
     "low_frequency_rendering": true,
+    // Vanilla screens draw a centered loading bar while the screen opens
+    // (`common.base_screen` -> loading_bars_background, gated on
+    // `$use_loading_bars`). Our form is persistent, so that bar just flickers
+    // in the middle of the screen. debug_screen turns it off the same way.
+    "$use_loading_bars": false,
     "$screen_animations": [],
     "$background_animations": [],
     "button_mappings": [
