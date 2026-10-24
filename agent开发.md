@@ -44,20 +44,48 @@
 
 ## 触控输入（HUD 不能挡摇杆 / 转视角）
 
-HUD 的持久表单在触屏上是**非模态**的，而且只有按钮本身吃触摸：
+**屏幕标志必须是字面量布尔值，不能写 Molang 字符串。**
 
-- `third_party_server_screen`（`resource_pack/ui/pcraftrevorn_forms.json`）：
-  `is_showing_menu` / `absorbs_input` / `render_only_when_topmost` 都是
-  `(not ($touch and (not $is_pregame)))` —— 触屏游戏内全为 `false`；`render_game_behind: true`。
-- `hud_screen`（`gender_pack/resource_pack/ui/hud_screen.json`）：
+原版 1.21.100.6 里唯一「弹在游戏上、带可点按钮、底下照常收输入」的屏幕是
+`debug_screen`（`resource_pack/ui/debug_screen.json`，`access_button` 就是它上面的可点按钮）：
+
+```jsonc
+"debug_screen@common.base_screen": {
+  "send_telemetry": false,
+  "screen_not_flushable": true,
+  "render_game_behind": true,
+  "is_showing_menu": false,
+  "low_frequency_rendering": true,
+  "is_modal": true,
+  "should_steal_mouse": false,
+  "render_only_when_topmost": false,
+  "screen_draws_last": true,
+  "always_accepts_input": true,
+  "$screen_animations": [],
+  "$use_loading_bars": false
+}
+```
+
+（`holographic_postrender_screen` 是另一个同类例子。）
+
+这套字面量照抄进 `third_party_server_screen`（`resource_pack/ui/pcraftrevorn_forms.json`）：
+`is_showing_menu: false`、`absorbs_input: false`、`render_only_when_topmost: false`、
+`render_game_behind: true`、`always_accepts_input: true`、`screen_draws_last: true`、
+`screen_not_flushable: true`。
+
+- ❌ **绝对不要在这些标志上写表达式**（以前写过 `(not ($touch and (not $is_pregame)))`）。
+  引擎不按表达式求值，非空字符串就是「真」，于是 `absorbs_input` 变成 `true`，
+  **整屏吞掉所有触摸，摇杆和转视角全部失效**。这就是「HUD 顶掉触控」的真正原因。
+- `hud_screen`（`gender_pack/resource_pack/ui/hud_screen.json`）同样只用字面量：
   `always_accepts_input: true`、`absorbs_input: false`、`is_showing_menu: false`、
-  `render_only_when_topmost: false`。这样表单盖在 HUD 上时，HUD 屏幕仍然接收摇杆/视角输入。
+  `render_only_when_topmost: false`。
 - `ui_common.json` 只给 `button` / `toggle` / `slider` / `text_edit_box` / `close_button`
   设 `prevent_touch_input: true`。`hud_buttons` 是普通 `panel`，**不吃触摸**。
-- 全屏 `input_panel` 只有 `gender_root/shield`（性别菜单的遮罩）；标题不含 `§3§r` 时它是隐藏的，
-  所以 HUD 打开时不会挡住摇杆/视角。
+- 全屏 `input_panel` 只有 `gender_root/shield`（性别菜单的遮罩）；标题不含 `§3§r` 时它是隐藏的。
 
-结论：HUD 打开时摇杆、转视角、其他触摸操作都不受影响；只有点在 22×22 按钮上时那一小块会被按钮消费。
+结果：表单浮在游戏上，只有点在按钮 / 开关 / 滑条上时那一小块被消费，其余触摸全部透传给摇杆和视角。
+
+验证：`python .work/audit_hud_buttons.py` 会检查这些标志都是字面量布尔值，且没有任何一个写成字符串。
 
 ## 入口
 

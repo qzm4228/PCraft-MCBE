@@ -3,16 +3,26 @@
   "third_party_server_screen@common.base_screen": {
     "$screen_content": "server_form.main_screen_content",
     "$additional_screen_content": "server_form.pcraftrevorn_additional_content",
-    // On touch the form screen stays non-modal: the PCraft HUD buttons are a
-    // persistent form (see gender_pack/ui/gender_menu.json) and must not freeze
-    // gameplay. Buttons/toggles/sliders still swallow taps on their own
-    // (gender_pack/ui/ui_common.json). Keyboard/mouse keeps the normal modal
-    // form behaviour so the cursor can reach the buttons.
-    "is_showing_menu": "(not ($touch and (not $is_pregame)))",
-    "absorbs_input": "(not ($touch and (not $is_pregame)))",
-    "render_only_when_topmost": "(not ($touch and (not $is_pregame)))",
-    "low_frequency_rendering": true,
+    // Non-blocking overlay screen. This exact set is copied from vanilla
+    // 1.21.100.6 `debug_screen` -- the only vanilla screen that pops up over
+    // gameplay with a working button while the game below keeps receiving
+    // input.
+    //
+    // IMPORTANT: these flags MUST be literal booleans. Writing a Molang
+    // expression here is not supported by the engine: a non-empty string is
+    // truthy, so `absorbs_input` becomes true and the screen swallows every
+    // touch -- the joystick and camera die. That was the bug that made the
+    // HUD bar "knock out" the touch controls no matter how the buttons were
+    // laid out.
+    "send_telemetry": false,
+    "screen_not_flushable": true,
+    "is_showing_menu": false,
+    "absorbs_input": false,
+    "render_only_when_topmost": false,
     "render_game_behind": true,
+    "screen_draws_last": true,
+    "always_accepts_input": true,
+    "low_frequency_rendering": true,
     "$screen_animations": [],
     "$background_animations": [],
     "button_mappings": [
