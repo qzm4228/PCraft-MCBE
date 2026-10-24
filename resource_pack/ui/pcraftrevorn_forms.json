@@ -11,6 +11,7 @@
     "is_showing_menu": "(not ($touch and (not $is_pregame)))",
     "absorbs_input": "(not ($touch and (not $is_pregame)))",
     "render_only_when_topmost": "(not ($touch and (not $is_pregame)))",
+    "low_frequency_rendering": true,
     "render_game_behind": true,
     "$screen_animations": [],
     "$background_animations": [],
