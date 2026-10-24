@@ -31,7 +31,7 @@
       { "binding_name": "#title_text" },
       {
         "binding_type": "view",
-        "source_property_name": "((#title_text - '§3§r') = #title_text)",
+        "source_property_name": "((#title_text - 'PCraft Gender Mod') = #title_text)",
         "target_property_name": "#visible"
       }
     ]
@@ -40,12 +40,12 @@
   "gender_root": {
     "type": "panel",
     "size": [ "100%", "100%" ],
-    "layer": 5,
+    "layer": 20,
     "bindings": [
       { "binding_name": "#title_text" },
       {
         "binding_type": "view",
-        "source_property_name": "(not ((#title_text - '§3§r') = #title_text))",
+        "source_property_name": "(not ((#title_text - 'PCraft Gender Mod') = #title_text))",
         "target_property_name": "#visible"
       }
     ],
@@ -82,7 +82,7 @@
             { "binding_name": "#title_text" },
             {
               "binding_type": "view",
-              "source_property_name": "(not ((#title_text - '§3§r1') = #title_text))",
+              "source_property_name": "(not ((#title_text - 'PCraft Gender Mod Female') = #title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -99,7 +99,7 @@
             { "binding_name": "#title_text" },
             {
               "binding_type": "view",
-              "source_property_name": "((#title_text - '§3§r1') = #title_text)",
+              "source_property_name": "((#title_text - 'PCraft Gender Mod Female') = #title_text)",
               "target_property_name": "#visible"
             }
           ]
