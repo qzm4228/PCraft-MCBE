@@ -77,34 +77,27 @@
       {
         "gender@server_form.hud_icon_slot": {
           "offset": [ -30, 44 ],
-          "$slot": 0,
-          "$tex": "textures/pcraftrevorn_gender/gui/hud_gender",
-          "$tex_pressed": "textures/pcraftrevorn_gender/gui/hud_gender_pressed"
+          "$slot": 0
         }
       },
       {
         "vore@server_form.hud_icon_slot": {
           "offset": [ -30, 72 ],
-          "$slot": 1,
-          "$tex": "textures/pcraftrevorn_gender/gui/hud_vore",
-          "$tex_pressed": "textures/pcraftrevorn_gender/gui/hud_vore_pressed"
+          "$slot": 1
         }
       }
     ]
   },
 
-  // 22x22 art buttons (gender / vore). Default and hover use the normal art,
-  // pressed uses the pressed variant; no label text on these.
-  // 22x22 art buttons (gender / vore), anchored to the right edge with a margin
-  // so they are not flush against the screen border.
+  // 22x22 buttons (gender / vore), anchored to the right edge with a margin so
+  // they are not flush against the screen border. The drawn art is the form
+  // button's icon (#form_button_texture), layered on a bare click target.
   "hud_icon_slot": {
     "type": "collection_panel",
     "collection_name": "form_buttons",
     "anchor_from": "top_right",
     "anchor_to": "top_right",
     "size": [ 22, 22 ],
-    "$tex": "textures/ui/White",
-    "$tex_pressed": "textures/ui/White",
     "controls": [
       {
         "btn@server_form.hud_icon_button": {
@@ -117,8 +110,6 @@
   "hud_icon_button@common.button": {
     "size": [ "100%", "100%" ],
     "$pressed_button_name": "button.form_button_click",
-    "$tex": "textures/ui/White",
-    "$tex_pressed": "textures/ui/White",
     "bindings": [
       {
         "binding_type": "collection_details",
@@ -127,134 +118,26 @@
     ],
     "controls": [
       {
-        "default": {
+        "icon": {
           "type": "image",
-          "texture": "$tex",
-          "size": [ "100%", "100%" ]
-        }
-      },
-      {
-        "hover": {
-          "type": "image",
-          "texture": "$tex",
-          "size": [ "100%", "100%" ]
-        }
-      },
-      {
-        "pressed": {
-          "type": "image",
-          "texture": "$tex_pressed",
           "size": [ "100%", "100%" ],
-          "offset": [ 0, 1 ]
-        }
-      }
-    ]
-  },
-
-  // Text button used for "关闭 HUD" (46x20).
-  "hud_button_slot": {
-    "type": "collection_panel",
-    "collection_name": "form_buttons",
-    "anchor_from": "top_left",
-    "anchor_to": "top_left",
-    "size": [ 46, 20 ],
-    "controls": [
-      {
-        "btn@server_form.hud_button": {
-          "collection_index": "$slot"
-        }
-      }
-    ]
-  },
-
-  "hud_button@common.button": {
-    "size": [ "100%", "100%" ],
-    "$pressed_button_name": "button.form_button_click",
-    "bindings": [
-      {
-        "binding_type": "collection_details",
-        "binding_collection_name": "form_buttons"
-      }
-    ],
-    "controls": [
-      {
-        "default": {
-          "type": "image",
-          "texture": "textures/ui/White",
-          "color": [ 0.12, 0.12, 0.16, 0.85 ],
-          "controls": [
+          "bindings": [
             {
-              "label": {
-                "type": "label",
-                "anchor_from": "center",
-                "anchor_to": "center",
-                "color": [ 1, 1, 1 ],
-                "layer": 4,
-                "font_scale_factor": 0.8,
-                "bindings": [
-                  {
-                    "binding_type": "collection",
-                    "binding_collection_name": "form_buttons",
-                    "binding_name": "#form_button_text",
-                    "binding_name_override": "#text"
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "hover": {
-          "type": "image",
-          "texture": "textures/ui/White",
-          "color": [ 0.3, 0.34, 0.44, 1 ],
-          "controls": [
+              "binding_name": "#form_button_texture",
+              "binding_name_override": "#texture",
+              "binding_type": "collection",
+              "binding_collection_name": "form_buttons"
+            },
             {
-              "label": {
-                "type": "label",
-                "anchor_from": "center",
-                "anchor_to": "center",
-                "color": [ 1, 1, 1 ],
-                "layer": 4,
-                "font_scale_factor": 0.8,
-                "bindings": [
-                  {
-                    "binding_type": "collection",
-                    "binding_collection_name": "form_buttons",
-                    "binding_name": "#form_button_text",
-                    "binding_name_override": "#text"
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "pressed": {
-          "type": "image",
-          "texture": "textures/ui/White",
-          "color": [ 0.08, 0.08, 0.1, 1 ],
-          "offset": [ 0, 1 ],
-          "controls": [
+              "binding_name": "#form_button_texture_file_system",
+              "binding_name_override": "#texture_file_system",
+              "binding_type": "collection",
+              "binding_collection_name": "form_buttons"
+            },
             {
-              "label": {
-                "type": "label",
-                "anchor_from": "center",
-                "anchor_to": "center",
-                "color": [ 1, 1, 1 ],
-                "layer": 4,
-                "font_scale_factor": 0.8,
-                "bindings": [
-                  {
-                    "binding_type": "collection",
-                    "binding_collection_name": "form_buttons",
-                    "binding_name": "#form_button_text",
-                    "binding_name_override": "#text"
-                  }
-                ]
-              }
+              "binding_type": "view",
+              "source_property_name": "(not ((#texture = '') or (#texture = 'loading')))",
+              "target_property_name": "#visible"
             }
           ]
         }
