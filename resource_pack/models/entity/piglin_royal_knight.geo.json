@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.piglin_royal_knight",
-        "texture_width": 110,
-        "texture_height": 120,
+        "texture_width": 128,
+        "texture_height": 128,
         "visible_bounds_width": 3,
         "visible_bounds_height": 4.5,
         "visible_bounds_offset": [

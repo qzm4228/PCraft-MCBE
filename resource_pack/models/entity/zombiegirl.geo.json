@@ -4,7 +4,7 @@
     {
       "description": {
         "identifier": "geometry.zombiegirl",
-        "texture_width": 118,
+        "texture_width": 128,
         "texture_height": 128,
         "visible_bounds_width": 2,
         "visible_bounds_height": 3.5,
