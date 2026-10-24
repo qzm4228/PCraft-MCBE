@@ -13,7 +13,7 @@
       "bones": [
         { "name": "body", "pivot": [0, 24, 0] },
         { "name": "gut", "parent": "body", "pivot": [0, 18, 0] },
-        { "name": "vore1", "parent": "gut", "pivot": [0, 18, 0] },
+        { "name": "vore1", "parent": "gut", "pivot": [0, 18, 0], "rotation": [5, 0, 0] },
         {
           "name": "bottom",
           "parent": "vore1",
