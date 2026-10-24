@@ -271,9 +271,10 @@ def merge_entries(cfg: dict, target: dict, version_label: str) -> list[tuple[str
                 mains.append(src)
                 continue
             if _TEXT_LANG.match(rel):
-                lang = rel.split("/")[-1]
+                lang = rel.split("/")[-1][:-5]  # strip ".lang"
                 if lang not in langs:
                     langs[lang] = {}
+                if lang not in lang_order:
                     lang_order.append(lang)
                 for k, v in _read_lang(src).items():
                     if k in ("pack.name", "pack.description"):
