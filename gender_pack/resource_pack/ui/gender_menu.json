@@ -77,17 +77,13 @@
       {
         "gender@server_form.hud_icon_slot": {
           "offset": [ 6, 44 ],
-          "$slot": 0,
-          "$tex": "textures/pcraftrevorn_gender/gui/hud_gender",
-          "$tex_pressed": "textures/pcraftrevorn_gender/gui/hud_gender_pressed"
+          "$slot": 0
         }
       },
       {
         "vore@server_form.hud_icon_slot": {
           "offset": [ 6, 72 ],
-          "$slot": 1,
-          "$tex": "textures/pcraftrevorn_gender/gui/hud_vore",
-          "$tex_pressed": "textures/pcraftrevorn_gender/gui/hud_vore_pressed"
+          "$slot": 1
         }
       },
       {
@@ -106,9 +102,7 @@
     "collection_name": "form_buttons",
     "anchor_from": "top_left",
     "anchor_to": "top_left",
-    "size": [ 22, 22 ],
-    "$tex": "textures/ui/White",
-    "$tex_pressed": "textures/ui/White",
+    "size": [ 24, 24 ],
     "controls": [
       {
         "btn@server_form.hud_icon_button": {
@@ -118,28 +112,61 @@
     ]
   },
 
-  // Same proven structure as MSIFvAPI's button module: the clickable element is
-  // common_buttons.light_text_button with button.form_button_click + the
-  // collection_details binding. The hand-drawn 22x22 PNG is used as the button
-  // texture (default/hover share it, pressed uses the _pressed variant).
-  "hud_icon_button@common_buttons.light_text_button": {
+  // MSIFvAPI button-module structure, verbatim: a light_text_button carries the
+  // frame (and is the click target), an image layered on top draws the form
+  // button's icon (#form_button_texture).
+  "hud_icon_button": {
+    "type": "panel",
     "size": [ "100%", "100%" ],
-    "$pressed_button_name": "button.form_button_click",
-    "$button_text": "",
-    "$button_text_binding_type": "collection",
-    "$button_text_grid_collection_name": "form_buttons",
-    "$button_text_max_size": [ "100%", 1 ],
-    "$border_visible": false,
-    "$default_button_texture": "$tex",
-    "$hover_button_texture": "$tex",
-    "$pressed_button_texture": "$tex_pressed",
-    "$default_text_color": [ 1, 1, 1 ],
-    "$hover_text_color": [ 1, 1, 1 ],
-    "$pressed_text_color": [ 1, 1, 1 ],
-    "bindings": [
+    "controls": [
       {
-        "binding_type": "collection_details",
-        "binding_collection_name": "form_buttons"
+        "form_button@common_buttons.light_text_button": {
+          "size": [ "100%", "100%" ],
+          "$default_button_texture": "textures/pcraftrevorn_gender/gui/frame",
+          "$hover_button_texture": "textures/pcraftrevorn_gender/gui/frame",
+          "$pressed_button_texture": "textures/pcraftrevorn_gender/gui/frame",
+          "$locked_button_texture": "",
+          "$pressed_button_name": "button.form_button_click",
+          "$button_text": "",
+          "$button_text_binding_type": "collection",
+          "$button_text_grid_collection_name": "form_buttons",
+          "$button_text_max_size": [ "100%", 1 ],
+          "$border_visible": false,
+          "bindings": [
+            {
+              "binding_type": "collection_details",
+              "binding_collection_name": "form_buttons"
+            }
+          ]
+        }
+      },
+      {
+        "icon": {
+          "type": "image",
+          "layer": 40,
+          "size": [ 22, 22 ],
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "bindings": [
+            {
+              "binding_name": "#form_button_texture",
+              "binding_name_override": "#texture",
+              "binding_type": "collection",
+              "binding_collection_name": "form_buttons"
+            },
+            {
+              "binding_name": "#form_button_texture_file_system",
+              "binding_name_override": "#texture_file_system",
+              "binding_type": "collection",
+              "binding_collection_name": "form_buttons"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#texture = '') or (#texture = 'loading')))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
       }
     ]
   },
