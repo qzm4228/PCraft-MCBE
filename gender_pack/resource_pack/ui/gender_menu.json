@@ -64,7 +64,9 @@
 
   "hud_buttons": {
     "type": "panel",
-    "size": [ "100%", "100%" ],
+    "anchor_from": "top_right",
+    "anchor_to": "top_right",
+    "size": [ 90, 120 ],
     "bindings": [
       { "binding_name": "#title_text" },
       {

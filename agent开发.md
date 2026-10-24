@@ -42,6 +42,23 @@
 - ✅ 贴图路径直接写死；按钮用 `common.button` + 常亮 `image`。
 - ✅ 显隐判断用「包含」而不是「等于」，避免标题后缀导致匹配失败。
 
+## 触控输入（HUD 不能挡摇杆 / 转视角）
+
+HUD 的持久表单在触屏上是**非模态**的，而且只有按钮本身吃触摸：
+
+- `third_party_server_screen`（`resource_pack/ui/pcraftrevorn_forms.json`）：
+  `is_showing_menu` / `absorbs_input` / `render_only_when_topmost` 都是
+  `(not ($touch and (not $is_pregame)))` —— 触屏游戏内全为 `false`；`render_game_behind: true`。
+- `hud_screen`（`gender_pack/resource_pack/ui/hud_screen.json`）：
+  `always_accepts_input: true`、`absorbs_input: false`、`is_showing_menu: false`、
+  `render_only_when_topmost: false`。这样表单盖在 HUD 上时，HUD 屏幕仍然接收摇杆/视角输入。
+- `ui_common.json` 只给 `button` / `toggle` / `slider` / `text_edit_box` / `close_button`
+  设 `prevent_touch_input: true`。`hud_buttons` 是普通 `panel`，**不吃触摸**。
+- 全屏 `input_panel` 只有 `gender_root/shield`（性别菜单的遮罩）；标题不含 `§3§r` 时它是隐藏的，
+  所以 HUD 打开时不会挡住摇杆/视角。
+
+结论：HUD 打开时摇杆、转视角、其他触摸操作都不受影响；只有点在 22×22 按钮上时那一小块会被按钮消费。
+
 ## 入口
 
 全部是自定义指令，没有聊天文字口令（`?xxx`）、没有 `/scriptevent` 入口。
