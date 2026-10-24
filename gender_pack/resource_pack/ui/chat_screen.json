@@ -1,6 +1,6 @@
-// Chat-screen buttons (the "fake input" trick from the 18th's build): each
+// Chat-screen menu (top-right panel) using the 18th's "fake input" trick: a
 // button appends its custom command to the chat box and sends it, so the
-// command runs through the normal custom-command path. JSON-UI only.
+// command runs through the normal custom-command path. Pure JSON-UI.
 {
   "namespace": "chat",
 
@@ -9,7 +9,7 @@
     "$text|default": "§b性别",
     "$is_chat_not_command|default": false,
     "$pressed_button_name": "button.nodata",
-    "size": [ 36, 27 ],
+    "size": [ 44, 22 ],
     "controls": [
       {
         "default": {
@@ -215,28 +215,65 @@
     ]
   },
 
-  "chat_bottom_panel": {
+  // Top-right panel. The panel background is a rounded-ish dark plate and the
+  // three buttons stack vertically inside it.
+  "pcraftrevorn_panel": {
+    "type": "panel",
+    "anchor_from": "top_right",
+    "anchor_to": "top_right",
+    "offset": [ -6, 24 ],
+    "size": [ "100%c + 8px", "100%c + 8px" ],
+    "controls": [
+      {
+        "bg": {
+          "type": "image",
+          "texture": "textures/ui/White",
+          "color": [ 0.07, 0.07, 0.1 ],
+          "alpha": 0.82,
+          "size": [ "100%", "100%" ]
+        }
+      },
+      {
+        "buttons": {
+          "type": "stack_panel",
+          "orientation": "vertical",
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "size": [ "100%c", "100%c" ],
+          "controls": [
+            {
+              "hud@chat.pcraftrevorn_chat_button": {
+                "$command": "/pcraftrevorn:hud",
+                "$text": "§eHUD"
+              }
+            },
+            {
+              "gender@chat.pcraftrevorn_chat_button": {
+                "$command": "/pcraftrevorn:gender",
+                "$text": "§b性别"
+              }
+            },
+            {
+              "swallow@chat.pcraftrevorn_chat_button": {
+                "$command": "/vcraft:swallow",
+                "$text": "§dVore"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+
+  "chat_screen_content": {
     "modifications": [
       {
-        "operation": "insert_after",
-        "control_name": "chat_settings",
+        "array_name": "controls",
+        "operation": "insert_back",
         "value": [
           {
-            "pcraftrevorn_hud_button@chat.pcraftrevorn_chat_button": {
-              "$command": "/pcraftrevorn:hud",
-              "$text": "§eHUD"
-            }
-          },
-          {
-            "pcraftrevorn_gender_button@chat.pcraftrevorn_chat_button": {
-              "$command": "/pcraftrevorn:gender",
-              "$text": "§b性别"
-            }
-          },
-          {
-            "pcraftrevorn_swallow_button@chat.pcraftrevorn_chat_button": {
-              "$command": "/vcraft:swallow",
-              "$text": "§dVore"
+            "pcraftrevorn_panel@chat.pcraftrevorn_panel": {
+              "layer": 6
             }
           }
         ]
