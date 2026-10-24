@@ -154,4 +154,4 @@ HUD 可见性：默认**仅触屏**（`clientSystemInfo.platformType === "Mobile
 
 - 版本唯一来源：`config/version.json`，不要改别处的版本号；
 - 只用 `python tools_py/pipeline.py`（不要单独跑 `generate.py`）；
-- 回归检查：`node tools/check.js`、`node tools/audit.js`、`python .work/audit_hud_buttons.py`、`python .work/artifact_check.py 1.26.50`。
+- 回归检查：`node tools/check.js`、`node tools/audit.js`、`python .work/audit_hud_buttons.py`、`python .work/artifact_check.py 1.26.50`、`python .work/validate_artifact.py <target>`（清单/资源引用/贴图分档/UV 越界/UI 注册，8 个目标都要过）。
