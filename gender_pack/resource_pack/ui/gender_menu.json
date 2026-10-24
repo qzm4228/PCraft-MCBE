@@ -75,49 +75,53 @@
     ],
     "controls": [
       {
-        "gender@server_form.hud_icon_slot": {
-          "offset": [ -30, 44 ],
-          "$slot": 0,
-          "$tex": "textures/pcraftrevorn_gender/gui/hud_gender",
-          "$tex_pressed": "textures/pcraftrevorn_gender/gui/hud_gender_pressed"
+        "gender@server_form.hud_gender_slot": {
+          "offset": [ -30, 44 ]
         }
       },
       {
-        "vore@server_form.hud_icon_slot": {
-          "offset": [ -30, 72 ],
-          "$slot": 1,
-          "$tex": "textures/pcraftrevorn_gender/gui/hud_vore",
-          "$tex_pressed": "textures/pcraftrevorn_gender/gui/hud_vore_pressed"
+        "vore@server_form.hud_vore_slot": {
+          "offset": [ -30, 72 ]
         }
       }
     ]
   },
 
-  // 22x22 drawn buttons (gender / vore), anchored to the right edge with a
-  // margin. The art is used directly as the button's default / hover / pressed
-  // image -- no form-level icon, no frame.
-  "hud_icon_slot": {
+  // 22x22 drawn buttons (gender / vore), right-aligned with a margin. The
+  // textures are hard-coded per button -- no $variables, no form-level icon.
+  "hud_gender_slot": {
     "type": "collection_panel",
     "collection_name": "form_buttons",
     "anchor_from": "top_right",
     "anchor_to": "top_right",
     "size": [ 22, 22 ],
-    "$tex": "textures/ui/White",
-    "$tex_pressed": "textures/ui/White",
     "controls": [
       {
-        "btn@server_form.hud_icon_button": {
-          "collection_index": "$slot"
+        "btn@server_form.hud_gender_button": {
+          "collection_index": 0
         }
       }
     ]
   },
 
-  "hud_icon_button@common.button": {
+  "hud_vore_slot": {
+    "type": "collection_panel",
+    "collection_name": "form_buttons",
+    "anchor_from": "top_right",
+    "anchor_to": "top_right",
+    "size": [ 22, 22 ],
+    "controls": [
+      {
+        "btn@server_form.hud_vore_button": {
+          "collection_index": 1
+        }
+      }
+    ]
+  },
+
+  "hud_gender_button@common.button": {
     "size": [ "100%", "100%" ],
     "$pressed_button_name": "button.form_button_click",
-    "$tex": "textures/ui/White",
-    "$tex_pressed": "textures/ui/White",
     "bindings": [
       {
         "binding_type": "collection_details",
@@ -128,21 +132,56 @@
       {
         "default": {
           "type": "image",
-          "texture": "$tex",
+          "texture": "textures/pcraftrevorn_gender/gui/hud_gender",
           "size": [ "100%", "100%" ]
         }
       },
       {
         "hover": {
           "type": "image",
-          "texture": "$tex",
+          "texture": "textures/pcraftrevorn_gender/gui/hud_gender",
           "size": [ "100%", "100%" ]
         }
       },
       {
         "pressed": {
           "type": "image",
-          "texture": "$tex_pressed",
+          "texture": "textures/pcraftrevorn_gender/gui/hud_gender_pressed",
+          "size": [ "100%", "100%" ],
+          "offset": [ 0, 1 ]
+        }
+      }
+    ]
+  },
+
+  "hud_vore_button@common.button": {
+    "size": [ "100%", "100%" ],
+    "$pressed_button_name": "button.form_button_click",
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "form_buttons"
+      }
+    ],
+    "controls": [
+      {
+        "default": {
+          "type": "image",
+          "texture": "textures/pcraftrevorn_gender/gui/hud_vore",
+          "size": [ "100%", "100%" ]
+        }
+      },
+      {
+        "hover": {
+          "type": "image",
+          "texture": "textures/pcraftrevorn_gender/gui/hud_vore",
+          "size": [ "100%", "100%" ]
+        }
+      },
+      {
+        "pressed": {
+          "type": "image",
+          "texture": "textures/pcraftrevorn_gender/gui/hud_vore_pressed",
           "size": [ "100%", "100%" ],
           "offset": [ 0, 1 ]
         }
