@@ -370,6 +370,18 @@ function lookTarget(player, dist) {
   } catch { /* ignore */ }
   return undefined;
 }
+
+// Instant swallow: no timed progress and no need to keep the target in view.
+// Prefers whatever the player is looking at, otherwise the nearest valid prey.
+function instantSwallow(player) {
+  if (!player || player.typeId !== "minecraft:player") return;
+  const looked = lookTarget(player, 6);
+  const valid = (e) => e && (e.typeId === "minecraft:player" || isPreyCandidate(e, player));
+  const target = valid(looked) ? looked : nearestPrey(player, 5);
+  if (!target) { player.sendMessage("§7[VCraft] 附近没有可吞的生物。"); return; }
+  if (target.typeId === "minecraft:player") swallowPlayer(player, target);
+  else swallow(player, target);
+}
 // Hold vcraft:maw and right-click to start swallowing whatever you are aiming at.
 // Ported from the original: swallowing is a timed progress (0..60) that fills at
 // a rate depending on where you look (SwallowCalcProcedure) and on your rings.
@@ -624,6 +636,10 @@ export function wireVcraft() {
   // Entry used by the PCraft HUD button bar (gender pack).
   system.runInterval(() => {
     for (const player of world.getAllPlayers()) {
+      if (player.hasTag("vcraft:want_swallow")) {
+        try { player.removeTag("vcraft:want_swallow"); } catch { /* ignore */ }
+        system.run(() => { try { instantSwallow(player); } catch { /* ignore */ } });
+      }
       if (!player.hasTag("vcraft:open_menu")) continue;
       try { player.removeTag("vcraft:open_menu"); } catch { /* ignore */ }
       system.run(() => openMainMenu(player));
@@ -734,12 +750,12 @@ export function wireVcraft() {
   // right-clicking a creature directly.
   try {
     world.afterEvents.itemUse.subscribe((ev) => {
-      try { if (ev.itemStack?.typeId === MAW_ITEM) beginSwallow(ev.source); } catch { /* ignore */ }
+      try { if (ev.itemStack?.typeId === MAW_ITEM) instantSwallow(ev.source); } catch { /* ignore */ }
     });
   } catch { /* itemUse unavailable */ }
   try {
     world.afterEvents.playerInteractWithEntity.subscribe((ev) => {
-      try { if (ev.itemStack?.typeId === MAW_ITEM) beginSwallow(ev.player); } catch { /* ignore */ }
+      try { if (ev.itemStack?.typeId === MAW_ITEM) instantSwallow(ev.player); } catch { /* ignore */ }
     });
   } catch { /* playerInteractWithEntity unavailable */ }
 

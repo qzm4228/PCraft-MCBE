@@ -41,8 +41,10 @@ const title = (female) => `${MARKER}${female ? "1" : "0"}Female Gender Mod`;
 const HUD_TITLE = "PCraft HUD";
 // JSON-UI buttons (see ui/gender_menu.json) draw the art directly from $tex /
 // $tex_pressed passed per slot -- no icon is sent through the form button.
-const HUD_BUTTONS = ["", "", "关闭 HUD"];
-const HUD_VCRAFT_MENU_TAG = "vcraft:open_menu";
+const HUD_BUTTONS = ["", ""];
+const HUD_SWALLOW_TAG = "vcraft:want_swallow";
+// unset = auto (touch only), 1 = forced on, 0 = forced off
+const HUD_FORCE_PROP = "pcraftrevorn:hud_force";
 const hudActive = new Set();
 const menuSession = new Set();
 
@@ -259,24 +261,32 @@ async function hudLoop(player) {
       beginSession(player);
       try { openGenderMenu(player); } catch { endSession(player); }
     } else if (r.selection === 1) {
-      beginSession(player);
-      try { player.addTag(HUD_VCRAFT_MENU_TAG); } catch { /* ignore */ }
-      // VCraft polls the tag within a few ticks and opens its menu. Release the
-      // session after a grace period; the bar then stays busy until that menu
-      // is closed and reopens by itself.
-      await sleep(60);
-      endSession(player);
-    } else {
-      // "关闭 HUD" -- mainly for keyboard/mouse, where the bar is a modal menu.
-      hudActive.delete(id);
-      try { player.sendMessage("§7[PCraft] HUD 已关闭，可用 /pcraftrevorn:gender 打开性别菜单。"); } catch { /* ignore */ }
+      // Instant swallow: signal the main pack, which calls startSwallow on the
+      // nearest predator. No aim/hold minigame involved.
+      try { player.addTag(HUD_SWALLOW_TAG); } catch { /* ignore */ }
+      await sleep(10);
     }
   }
+}
+
+// HUD visibility: auto = touch devices only. The quick panel / ?hud can force it.
+function hudWanted(player) {
+  try {
+    const v = player.getDynamicProperty(HUD_FORCE_PROP);
+    if (v === 1) return true;
+    if (v === 0) return false;
+  } catch { /* ignore */ }
+  try {
+    const info = player.clientSystemInfo;
+    if (!info) return true; // API missing on this version -> keep the old behaviour
+    return info.platformType === "Mobile";
+  } catch { return true; }
 }
 
 function startHud(player) {
   try {
     if (hudActive.has(player.id)) return;
+    if (!hudWanted(player)) return;
     hudActive.add(player.id);
     const id = player.id;
     system.runTimeout(() => { if (hudActive.has(id)) hudLoop(player); }, 40);
@@ -297,6 +307,36 @@ function openMenu(player) {
   closeForms(player);
   beginSession(player);
   openGenderMenu(player);
+}
+
+// Quick panel: opened from the chat bar with ?pcm. It is a normal form (the HUD
+// JSON-UI buttons only work while the HUD form is open), and the HUD loop waits
+// on UserBusy while it is up.
+const QUICK_TITLE = "PCraft 面板";
+
+function toggleHud(player) {
+  const on = !hudActive.has(player.id);
+  try { player.setDynamicProperty(HUD_FORCE_PROP, on ? 1 : 0); } catch { /* ignore */ }
+  if (on) startHud(player);
+  else stopHud(player);
+  try { player.sendMessage(on ? "§7[PCraft] HUD 已开启。" : "§7[PCraft] HUD 已关闭。"); } catch { /* ignore */ }
+}
+
+async function openQuickPanel(player) {
+  closeForms(player);
+  let r;
+  try {
+    const form = new ActionFormData().title(QUICK_TITLE);
+    form.button("切换 电脑 / 手机 HUD");
+    form.button("打开性别面板");
+    form.button("吞食（最近目标）");
+    form.button("§7关闭");
+    r = await form.show(player);
+  } catch { r = undefined; }
+  if (!r || r.canceled) return;
+  if (r.selection === 0) toggleHud(player);
+  else if (r.selection === 1) openMenu(player);
+  else if (r.selection === 2) { try { player.addTag(HUD_SWALLOW_TAG); } catch { /* ignore */ } }
 }
 
 export function wireGender() {
@@ -329,6 +369,16 @@ export function wireGender() {
     world.beforeEvents.chatSend?.subscribe((ev) => {
       const raw = (ev.message || "").trim();
       const low = raw.toLowerCase();
+      if (low === "?pcm" || low === "?panel" || low === "?面板") {
+        ev.cancel = true;
+        system.run(() => { void openQuickPanel(ev.sender); });
+        return;
+      }
+      if (low === "?hud" || low === "?hud开关") {
+        ev.cancel = true;
+        system.run(() => toggleHud(ev.sender));
+        return;
+      }
       if (low !== "?gender" && low !== "?性别" && low !== "?settingmenu") return;
       ev.cancel = true;
       open(ev.sender);
