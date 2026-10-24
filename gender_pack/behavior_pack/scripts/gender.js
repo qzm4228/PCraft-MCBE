@@ -39,7 +39,7 @@ const title = (female) => `${MARKER}${female ? "1" : "0"}Female Gender Mod`;
 // it comes back as soon as that menu closes.
 // ---------------------------------------------------------------------------
 const HUD_TITLE = "PCraft HUD";
-const HUD_BUTTONS = ["性别", "菜单", "关闭 HUD"];
+const HUD_BUTTONS = ["", "", "关闭 HUD"];
 const HUD_VCRAFT_MENU_TAG = "vcraft:open_menu";
 const hudActive = new Set();
 const menuSession = new Set();

@@ -75,26 +75,87 @@
     ],
     "controls": [
       {
-        "slot0@server_form.hud_button_slot": {
+        "gender@server_form.hud_icon_slot": {
           "offset": [ 6, 44 ],
-          "$slot": 0
+          "$slot": 0,
+          "$tex": "textures/pcraftrevorn_gender/gui/hud_gender",
+          "$tex_pressed": "textures/pcraftrevorn_gender/gui/hud_gender_pressed"
         }
       },
       {
-        "slot1@server_form.hud_button_slot": {
-          "offset": [ 6, 68 ],
-          "$slot": 1
+        "vore@server_form.hud_icon_slot": {
+          "offset": [ 6, 72 ],
+          "$slot": 1,
+          "$tex": "textures/pcraftrevorn_gender/gui/hud_vore",
+          "$tex_pressed": "textures/pcraftrevorn_gender/gui/hud_vore_pressed"
         }
       },
       {
-        "slot2@server_form.hud_button_slot": {
-          "offset": [ 6, 92 ],
+        "close@server_form.hud_button_slot": {
+          "offset": [ 6, 100 ],
           "$slot": 2
         }
       }
     ]
   },
 
+  // 22x22 art buttons (gender / vore). Default and hover use the normal art,
+  // pressed uses the pressed variant; no label text on these.
+  "hud_icon_slot": {
+    "type": "collection_panel",
+    "collection_name": "form_buttons",
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "size": [ 22, 22 ],
+    "$tex": "textures/ui/White",
+    "$tex_pressed": "textures/ui/White",
+    "controls": [
+      {
+        "btn@server_form.hud_icon_button": {
+          "collection_index": "$slot"
+        }
+      }
+    ]
+  },
+
+  "hud_icon_button@common.button": {
+    "size": [ "100%", "100%" ],
+    "$pressed_button_name": "button.form_button_click",
+    "$tex": "textures/ui/White",
+    "$tex_pressed": "textures/ui/White",
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "form_buttons"
+      }
+    ],
+    "controls": [
+      {
+        "default": {
+          "type": "image",
+          "texture": "$tex",
+          "size": [ "100%", "100%" ]
+        }
+      },
+      {
+        "hover": {
+          "type": "image",
+          "texture": "$tex",
+          "size": [ "100%", "100%" ]
+        }
+      },
+      {
+        "pressed": {
+          "type": "image",
+          "texture": "$tex_pressed",
+          "size": [ "100%", "100%" ],
+          "offset": [ 0, 1 ]
+        }
+      }
+    ]
+  },
+
+  // Text button used for "关闭 HUD" (46x20).
   "hud_button_slot": {
     "type": "collection_panel",
     "collection_name": "form_buttons",
