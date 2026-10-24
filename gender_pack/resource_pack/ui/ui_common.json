@@ -4,10 +4,12 @@
   // The form screen is non-modal on touch (so the HUD button bar can sit on top
   // of gameplay). Interactive controls must still swallow taps themselves,
   // otherwise tapping a button would also swing/mine in the world behind it.
+  // `toggle@common.toggle_visuals` is the base the vanilla toggles actually
+  // inherit from (plain `toggle` is not enough).
   "button": {
     "prevent_touch_input": true
   },
-  "toggle": {
+  "toggle@common.toggle_visuals": {
     "prevent_touch_input": true
   },
   "slider": {

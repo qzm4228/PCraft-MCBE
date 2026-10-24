@@ -1,0 +1,19 @@
+{
+  "namespace": "hud",
+
+  // Same HUD-screen setup MSIFvAPI ships. Without it the HUD screen does not keep
+  // accepting input while the (non-modal) form screen is on top, so the HUD
+  // buttons behave like a menu instead of like an overlay.
+  "hud_screen@common.base_screen": {
+    "is_showing_menu": false,
+    "should_steal_mouse": true,
+    "low_frequency_rendering": true,
+    "absorbs_input": false,
+    "render_only_when_topmost": false,
+    "send_telemetry": false,
+    "$screen_animations": [],
+    "$background_animations": [],
+    "load_screen_immediately": true,
+    "always_accepts_input": true
+  }
+}

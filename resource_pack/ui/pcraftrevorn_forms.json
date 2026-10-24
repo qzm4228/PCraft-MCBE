@@ -12,6 +12,8 @@
     "absorbs_input": "(not ($touch and (not $is_pregame)))",
     "render_only_when_topmost": "(not ($touch and (not $is_pregame)))",
     "render_game_behind": true,
+    "$screen_animations": [],
+    "$background_animations": [],
     "button_mappings": [
       {
         "from_button_id": "button.menu_cancel",
