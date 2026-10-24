@@ -191,177 +191,12 @@ def pack_entries(pack: dict, target: dict, prefix: str = "") -> list[tuple[str, 
     return entries
 
 
-# --------------------------------------------------------------------------- #
-# merging (one BP + one RP)
-# --------------------------------------------------------------------------- #
-_TEXT_LANG = re.compile(r"^texts/[^/]+\.lang$")
-
-
-def _read_lang(src: Path) -> dict[str, str]:
-    out: dict[str, str] = {}
-    try:
-        lines = Path(src).read_text(encoding="utf-8").splitlines()
-    except OSError:
-        return out
-    for line in lines:
-        if "=" in line and not line.lstrip().startswith("#"):
-            k, v = line.split("=", 1)
-            out[k.strip()] = v
-    return out
-
-
-def build_merged_manifest(cfg: dict, target: dict, version_label: str) -> dict:
-    version = parse_version(version_label)
-    kind = cfg.get("kind", "bp")
-    mev = list(target.get("min_engine_version") or cfg.get("min_engine_version") or [1, 21, 100])
-    if kind == "bp":
-        modules = [
-            {"type": "data", "uuid": "c7e6d3b2-8e4f-4ba2-8d3e-2b3c4d5e6f70", "version": version},
-            {"type": "script", "language": "javascript",
-             "uuid": "d8f7e4c3-9f50-4cb3-9e4f-3c4d5e6f7081",
-             "entry": "scripts/main.js", "version": version},
-        ]
-        mods = target.get("modules", {})
-        deps = [
-            {"module_name": "@minecraft/server", "version": mods.get("@minecraft/server", "2.0.0")},
-            {"module_name": "@minecraft/server-ui", "version": mods.get("@minecraft/server-ui", "2.0.0")},
-        ]
-    else:
-        modules = [{"type": "resources", "uuid": "fab9a6e5-b172-4ed5-b061-5e6f70819203", "version": version}]
-        deps = []
-    return {
-        "format_version": 2,
-        "header": {
-            "name": "pack.name",
-            "description": "pack.description",
-            "uuid": cfg["uuid"],
-            "version": version,
-            "min_engine_version": mev,
-        },
-        "modules": modules,
-        "dependencies": deps,
-        "metadata": {
-            "authors": ["砂墨SandMo", "Bilibili: 砂墨", "原创: MysticSummoner"],
-            "license": "AFL-3.0",
-        },
-    }
-
-
-def merge_entries(cfg: dict, target: dict, version_label: str) -> list[tuple[str, object]]:
-    """Merge the configured source packs into a single set of pack entries."""
-    merged: dict[str, Path] = {}
-    langs: dict[str, dict[str, str]] = {}
-    lang_order: list[str] = []
-    ui_defs: list[str] = []
-    ui_seen: set[str] = set()
-    sounds: dict = {}
-    items: dict = {}
-    mains: list[Path] = []
-
-    for base_rel in cfg["merge"]:
-        base = ROOT / base_rel
-        fmap = dist_resolver.resolve(base, target["id"])
-        for rel, src in fmap.items():
-            if rel == "manifest.json":
-                continue
-            if rel in ("README.txt", "pack_icon.png"):
-                merged.setdefault(rel, src)
-                continue
-            if rel == "scripts/main.js":
-                mains.append(src)
-                continue
-            if _TEXT_LANG.match(rel):
-                lang = rel.split("/")[-1]
-                if lang not in langs:
-                    langs[lang] = {}
-                    lang_order.append(lang)
-                for k, v in _read_lang(src).items():
-                    if k in ("pack.name", "pack.description"):
-                        continue
-                    langs[lang][k] = v
-                continue
-            if rel == "texts/languages.json":
-                try:
-                    arr = json.loads(Path(src).read_text(encoding="utf-8"))
-                except Exception:
-                    arr = []
-                for x in arr:
-                    if x not in lang_order:
-                        lang_order.append(x)
-                continue
-            if rel == "ui/_ui_defs.json":
-                try:
-                    arr = json.loads(Path(src).read_text(encoding="utf-8")).get("ui_defs", [])
-                except Exception:
-                    arr = []
-                for x in arr:
-                    if x not in ui_seen:
-                        ui_seen.add(x)
-                        ui_defs.append(x)
-                continue
-            if rel == "sounds/sound_definitions.json":
-                try:
-                    d = json.loads(Path(src).read_text(encoding="utf-8")).get("sound_definitions", {})
-                except Exception:
-                    d = {}
-                sounds.update(d)
-                continue
-            if rel == "textures/item_texture.json":
-                try:
-                    d = json.loads(Path(src).read_text(encoding="utf-8"))
-                except Exception:
-                    d = {}
-                items.update(d.get("texture_data", {}))
-                continue
-            merged.setdefault(rel, src)
-
-    entries: list[tuple[str, object]] = []
-    entries.append(("manifest.json", json_bytes(build_merged_manifest(cfg, target, version_label))))
-
-    names = ["main_pcraft.js", "main_gender.js", "main_vcraft.js"]
-    entry_src = []
-    for idx, src in enumerate(mains):
-        name = names[idx] if idx < len(names) else f"main_{idx}.js"
-        merged[f"scripts/{name}"] = src
-        entry_src.append(f'import "./{name}";\n')
-    entries.append(("scripts/main.js", "".join(entry_src).encode("utf-8")))
-
-    for rel, src in merged.items():
-        if rel == "texts/languages.json":
-            continue
-        entries.append((rel, src))
-
-    if ui_defs:
-        entries.append(("ui/_ui_defs.json", json_bytes({"ui_defs": ui_defs})))
-    if sounds:
-        entries.append(("sounds/sound_definitions.json",
-                        json_bytes({"format_version": "1.14.0", "sound_definitions": sounds})))
-    if items:
-        entries.append(("textures/item_texture.json",
-                        json_bytes({"resource_pack_name": "vanilla", "texture_name": "atlas.items",
-                                    "texture_data": items})))
-
-    display = cfg.get("display_name", {})
-    desc = cfg.get("description", {})
-    for lang in lang_order:
-        kv = dict(langs.get(lang, {}))
-        kv["pack.name"] = display.get(lang) or display.get("en_US", "")
-        kv["pack.description"] = desc.get(lang) or desc.get("en_US", "")
-        entries.append((f"texts/{lang}.lang",
-                        ("\n".join(f"{k}={v}" for k, v in kv.items()) + "\n").encode("utf-8")))
-    entries.append(("texts/languages.json", json_bytes(lang_order)))
-    return entries
-
-
 def build_target(config: dict, target: dict) -> Path:
     tid = target["id"]
     label = str(next(iter(config.values()))["version"])
     print(f"[build_config] === target {tid} (min_engine {target.get('min_engine_version')}) ===")
 
-    source_packs = {k: v for k, v in config.items() if "base_dir" in v}
-    merged_packs = {k: v for k, v in config.items() if "merge" in v}
-
-    for key, pack in source_packs.items():
+    for key, pack in config.items():
         sel = dist_resolver.selections(ROOT / pack["base_dir"], tid)
         for row in sel:
             tag = "fallback" if row["fallback"] else row["key"]
@@ -370,23 +205,19 @@ def build_target(config: dict, target: dict) -> Path:
         for w in warns:
             print(f"   WARN {pack['output_name']}: {w}")
 
-    # individual mcpacks (kept for reference)
-    for key, pack in source_packs.items():
+    mcpacks = []
+    for key, pack in config.items():
         out = DIST / f"{pack['output_name']}_{tid}.mcpack"
         new_zip(out, pack_entries(pack, target))
+        mcpacks.append(out)
         print(f"   {out.name}")
 
-    # merged packs -> the mcaddon contains exactly one BP + one RP
     entries: list[tuple[str, object]] = []
-    for key, pack in merged_packs.items():
-        ents = merge_entries(pack, target, label)
-        out = DIST / f"{pack['output_name']}_{tid}.mcpack"
-        new_zip(out, ents)
-        print(f"   {out.name}  ({len(ents)} entries)")
-        entries.extend((f"{pack['folder_name']}/{arc}", src) for arc, src in ents)
+    for pack in config.values():
+        entries.extend(pack_entries(pack, target, prefix=pack["folder_name"]))
     bundle = DIST / f"PCraftRevorn_{label}_{tid}.mcaddon"
     new_zip(bundle, entries)
-    print(f"   {bundle.name}  (1 BP + 1 RP)")
+    print(f"   {bundle.name}")
     return bundle
 
 
@@ -426,21 +257,15 @@ def main(argv=None) -> int:
         for t in targets:
             print(t["id"], "min_engine", t.get("min_engine_version"), "modules", t.get("modules"))
             for key, pack in config.items():
-                if "base_dir" not in pack:
-                    continue
                 for row in dist_resolver.selections(ROOT / pack["base_dir"], t["id"]):
                     tag = "fallback" if row["fallback"] else row["key"]
                     print(f"   {pack['output_name']:<22} {row['file']:<40} [{tag}]")
-            for key, pack in config.items():
-                if "merge" in pack:
-                    print(f"   {pack['output_name']:<22} <- merge {pack['merge']}")
         return 0
 
     DIST.mkdir(parents=True, exist_ok=True)
     print("[build_config] applying baseline config to source manifests ...")
     for pack in config.values():
-        if "base_dir" in pack:
-            write_source_manifest(pack)
+        write_source_manifest(pack)
 
     chosen = [t for t in targets if not only or t["id"] in only] if only else targets
     if only and not chosen:
@@ -448,8 +273,7 @@ def main(argv=None) -> int:
 
     built = [build_target(config, t) for t in chosen]
 
-    print(f"\n[build_config] {len([p for p in config.values() if 'base_dir' in p])} source packs + "
-          f"{len([p for p in config.values() if 'merge' in p])} merged packs x {len(chosen)} target(s) built.")
+    print(f"\n[build_config] {len(config)} packs x {len(chosen)} target(s) built.")
     for f in sorted(built):
         print(f"{f.stat().st_size / 1024:>10,.0f} KB  {f.name}")
     return 0

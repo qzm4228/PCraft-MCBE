@@ -100,49 +100,5 @@
       21,
       100
     ]
-  },
-  "merged_bp": {
-    "kind": "bp",
-    "output_name": "PCraftRevorn_Merged_BP",
-    "folder_name": "PCraftRevorn_BP",
-    "display_name": {
-      "en_US": "PCraft+Internalised BP"
-    },
-    "description": {
-      "en_US": "PCraft+Internalised Behavior Pack - all systems merged into one pack."
-    },
-    "merge": [
-      "behavior_pack",
-      "gender_pack/behavior_pack",
-      "vcraft_pack/behavior_pack"
-    ],
-    "uuid": "b6f5c2a1-7d3e-4a91-9c2f-1a2b3c4d5e6f",
-    "min_engine_version": [
-      1,
-      21,
-      100
-    ]
-  },
-  "merged_rp": {
-    "kind": "rp",
-    "output_name": "PCraftRevorn_Merged_RP",
-    "folder_name": "PCraftRevorn_RP",
-    "display_name": {
-      "en_US": "PCraft+Internalised RP"
-    },
-    "description": {
-      "en_US": "PCraft+Internalised Resource Pack - all systems merged into one pack."
-    },
-    "merge": [
-      "resource_pack",
-      "gender_pack/resource_pack",
-      "vcraft_pack/resource_pack"
-    ],
-    "uuid": "e9a8f5d4-a061-4dc4-af50-4d5e6f708192",
-    "min_engine_version": [
-      1,
-      21,
-      100
-    ]
   }
 }
