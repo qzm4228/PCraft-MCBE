@@ -39,13 +39,9 @@ const title = (female) => `${MARKER}${female ? "1" : "0"}Female Gender Mod`;
 // it comes back as soon as that menu closes.
 // ---------------------------------------------------------------------------
 const HUD_TITLE = "PCraft HUD";
-// JSON-UI buttons (see ui/gender_menu.json) read the icon from the form button's
-// icon path (#form_button_texture), exactly like MSIFvAPI's button module.
-const HUD_BUTTONS = [
-  { text: "", icon: "textures/pcraftrevorn_gender/gui/hud_gender" },
-  { text: "", icon: "textures/pcraftrevorn_gender/gui/hud_vore" },
-  { text: "关闭 HUD", icon: "" },
-];
+// JSON-UI buttons (see ui/gender_menu.json) draw the art directly from $tex /
+// $tex_pressed passed per slot -- no icon is sent through the form button.
+const HUD_BUTTONS = ["", "", "关闭 HUD"];
 const HUD_VCRAFT_MENU_TAG = "vcraft:open_menu";
 const hudActive = new Set();
 const menuSession = new Set();
@@ -249,7 +245,7 @@ async function hudLoop(player) {
     let r;
     try {
       const form = new ActionFormData().title(HUD_TITLE);
-      for (const b of HUD_BUTTONS) form.button(b.text, b.icon);
+      for (const label of HUD_BUTTONS) form.button(label);
       r = await form.show(player);
     } catch { r = undefined; }
     if (!hudActive.has(id)) return;

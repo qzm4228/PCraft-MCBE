@@ -77,13 +77,17 @@
       {
         "gender@server_form.hud_icon_slot": {
           "offset": [ 6, 44 ],
-          "$slot": 0
+          "$slot": 0,
+          "$tex": "textures/pcraftrevorn_gender/gui/hud_gender",
+          "$tex_pressed": "textures/pcraftrevorn_gender/gui/hud_gender_pressed"
         }
       },
       {
         "vore@server_form.hud_icon_slot": {
           "offset": [ 6, 72 ],
-          "$slot": 1
+          "$slot": 1,
+          "$tex": "textures/pcraftrevorn_gender/gui/hud_vore",
+          "$tex_pressed": "textures/pcraftrevorn_gender/gui/hud_vore_pressed"
         }
       },
       {
@@ -97,12 +101,16 @@
 
   // 22x22 art buttons (gender / vore). Default and hover use the normal art,
   // pressed uses the pressed variant; no label text on these.
+  // 22x22 art buttons (gender / vore). Default and hover use the normal art,
+  // pressed uses the pressed variant; no label text on these.
   "hud_icon_slot": {
     "type": "collection_panel",
     "collection_name": "form_buttons",
     "anchor_from": "top_left",
     "anchor_to": "top_left",
-    "size": [ 24, 24 ],
+    "size": [ 22, 22 ],
+    "$tex": "textures/ui/White",
+    "$tex_pressed": "textures/ui/White",
     "controls": [
       {
         "btn@server_form.hud_icon_button": {
@@ -112,60 +120,38 @@
     ]
   },
 
-  // MSIFvAPI button-module structure, verbatim: a light_text_button carries the
-  // frame (and is the click target), an image layered on top draws the form
-  // button's icon (#form_button_texture).
-  "hud_icon_button": {
-    "type": "panel",
+  "hud_icon_button@common.button": {
     "size": [ "100%", "100%" ],
+    "$pressed_button_name": "button.form_button_click",
+    "$tex": "textures/ui/White",
+    "$tex_pressed": "textures/ui/White",
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "form_buttons"
+      }
+    ],
     "controls": [
       {
-        "form_button@common_buttons.light_text_button": {
-          "size": [ "100%", "100%" ],
-          "$default_button_texture": "textures/pcraftrevorn_gender/gui/frame",
-          "$hover_button_texture": "textures/pcraftrevorn_gender/gui/frame",
-          "$pressed_button_texture": "textures/pcraftrevorn_gender/gui/frame",
-          "$locked_button_texture": "",
-          "$pressed_button_name": "button.form_button_click",
-          "$button_text": "",
-          "$button_text_binding_type": "collection",
-          "$button_text_grid_collection_name": "form_buttons",
-          "$button_text_max_size": [ "100%", 1 ],
-          "$border_visible": false,
-          "bindings": [
-            {
-              "binding_type": "collection_details",
-              "binding_collection_name": "form_buttons"
-            }
-          ]
+        "default": {
+          "type": "image",
+          "texture": "$tex",
+          "size": [ "100%", "100%" ]
         }
       },
       {
-        "icon": {
+        "hover": {
           "type": "image",
-          "layer": 40,
-          "size": [ 22, 22 ],
-          "anchor_from": "center",
-          "anchor_to": "center",
-          "bindings": [
-            {
-              "binding_name": "#form_button_texture",
-              "binding_name_override": "#texture",
-              "binding_type": "collection",
-              "binding_collection_name": "form_buttons"
-            },
-            {
-              "binding_name": "#form_button_texture_file_system",
-              "binding_name_override": "#texture_file_system",
-              "binding_type": "collection",
-              "binding_collection_name": "form_buttons"
-            },
-            {
-              "binding_type": "view",
-              "source_property_name": "(not ((#texture = '') or (#texture = 'loading')))",
-              "target_property_name": "#visible"
-            }
-          ]
+          "texture": "$tex",
+          "size": [ "100%", "100%" ]
+        }
+      },
+      {
+        "pressed": {
+          "type": "image",
+          "texture": "$tex_pressed",
+          "size": [ "100%", "100%" ],
+          "offset": [ 0, 1 ]
         }
       }
     ]
