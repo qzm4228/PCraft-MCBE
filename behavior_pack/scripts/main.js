@@ -1,4 +1,4 @@
-import { system, world } from "@minecraft/server";
+import { system, world, CommandPermissionLevel, CustomCommandStatus } from "@minecraft/server";
 import { showPcForm } from "./pcraftrevorn/ui/forms.js";
 import { initPredator, localId } from "./pcraftrevorn/skin/assign.js";
 import { wireVoreEvents, isPredator, startSwallow, release, strugglePress } from "./pcraftrevorn/vore/vore.js";
@@ -105,23 +105,30 @@ world.afterEvents.itemUse.subscribe((ev) => {
   if (ev.itemStack?.typeId === "minecraft:stick") void runFormDemo(player);
 });
 
-system.afterEvents.scriptEventReceive.subscribe((ev) => {
-  const player = ev.sourceEntity;
-  if (player?.typeId !== "minecraft:player") return;
-  switch (ev.id) {
-    case "pcraftrevorn:form": void runFormDemo(player); break;
-    case "pcraftrevorn:guide": void openGuide(player); break;
-    case "pcraftrevorn:variants": void openVariants(player); break;
-    case "pcraftrevorn:settings": void openSettings(player); break;
-    case "pcraftrevorn:swallow": {
-      const pred = nearestPredator(player);
-      if (pred) startSwallow(player, pred);
-      else player.sendMessage("§7[PCraftRevorn] 附近没有掠食者。");
-      break;
-    }
-    case "pcraftrevorn:release": release(player, true); break;
-    default: break;
-  }
-}, { namespaces: ["pcraftrevorn"] });
+// Entry points: custom commands only (/pcraftrevorn:*).
+try {
+  system.beforeEvents.startup.subscribe((init) => {
+    try {
+      const reg = (name, desc, fn) => init.customCommandRegistry.registerCommand(
+        { name, description: desc, permissionLevel: CommandPermissionLevel.Any, cheatsRequired: false },
+        (origin) => {
+          const p = origin.sourceEntity;
+          if (p?.typeId === "minecraft:player") { system.run(() => fn(p)); return { status: CustomCommandStatus.Success }; }
+          return { status: CustomCommandStatus.Failure, message: "只能由玩家执行。" };
+        }
+      );
+      reg("pcraftrevorn:form", "打开表单演示", (p) => { void runFormDemo(p); });
+      reg("pcraftrevorn:guide", "打开指南", (p) => { void openGuide(p); });
+      reg("pcraftrevorn:variants", "打开变种面板", (p) => { void openVariants(p); });
+      reg("pcraftrevorn:settings", "打开设置", (p) => { void openSettings(p); });
+      reg("pcraftrevorn:swallow", "被最近的掠食者吞下", (p) => {
+        const pred = nearestPredator(p);
+        if (pred) startSwallow(p, pred);
+        else p.sendMessage("§7[PCraftRevorn] 附近没有掠食者。");
+      });
+      reg("pcraftrevorn:release", "从腹中脱身", (p) => release(p, true));
+    } catch { /* custom commands unsupported on this version */ }
+  });
+} catch { /* startup event unavailable on this version */ }
 
 console.warn(`[PCraftRevorn] scripts loaded. player="${localId("minecraft:player")}"`);

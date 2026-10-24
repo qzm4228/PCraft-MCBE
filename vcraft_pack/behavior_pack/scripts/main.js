@@ -682,27 +682,6 @@ export function wireVcraft() {
     });
   } catch { /* startup event unavailable on this version */ }
 
-  // Chat shortcuts (world.beforeEvents.chatSend is a Beta API; guard it).
-  try {
-  world.beforeEvents.chatSend?.subscribe((ev) => {
-    const raw = (ev.message || "").trim();
-    const m = raw.toLowerCase();
-    if (!["?swallow", "?release", "?prey", "?肚子", "?胃", "?trinkets", "?饰品", "?vcraft", "?设置", "?config", "?vcraftmenu", "?菜单"].includes(m)) return;
-    ev.cancel = true;
-    const player = ev.sender;
-    system.runTimeout(() => {
-      try {
-        if (m === "?swallow") swallow(player);
-        else if (m === "?release") releaseAll(player);
-        else if (m === "?trinkets" || m === "?饰品") openTrinketMenu(player);
-        else if (m === "?vcraft" || m === "?设置" || m === "?config") openConfigMenu(player);
-        else if (m === "?vcraftmenu" || m === "?菜单") openMainMenu(player);
-        else openPreyMenu(player);
-      } catch { /* ignore */ }
-    }, 5);
-  });
-  } catch { /* chatSend unavailable (Beta APIs off) */ }
-
   // Follow + hide + belly stage, every 2 ticks.
   system.runInterval(() => {
     for (const player of world.getAllPlayers()) {
@@ -776,25 +755,8 @@ export function wireVcraft() {
     }
   });
 
-  // Entries (test / commands).
-  system.afterEvents.scriptEventReceive.subscribe((ev) => {
-    const p = ev.sourceEntity;
-    if (p?.typeId !== "minecraft:player") return;
-    switch (ev.id) {
-      case "vcraft:swallow": swallow(p); break;
-      case "vcraft:release": releaseAll(p); break;
-      case "vcraft:trinkets": openTrinketMenu(p); break;
-      case "vcraft:config": openConfigMenu(p); break;
-      case "vcraft:menu": openMainMenu(p); break;
-      case "vcraft:belly": {
-        const n = Number(ev.message) || 0;
-        setBelly(p, n);
-        p.sendMessage(`§d[VCraft] 腹部阶段 = ${Math.max(0, Math.min(BELLY_MAX, n))} (0=平, ${BELLY_MAX}=满)`);
-        break;
-      }
-      default: break;
-    }
-  }, { namespaces: ["vcraft"] });
+  // Everything is exposed as a custom command (see the registration above);
+  // no /scriptevent or chat-token entry points.
 }
 
 wireVcraft();

@@ -269,7 +269,8 @@ async function hudLoop(player) {
   }
 }
 
-// HUD visibility: auto = touch devices only. The quick panel / ?hud can force it.
+// HUD visibility: auto = touch devices only. The quick panel or
+// /pcraftrevorn:hud can force it.
 function hudWanted(player) {
   try {
     const v = player.getDynamicProperty(HUD_FORCE_PROP);
@@ -301,17 +302,17 @@ function stopHud(playerOrId) {
   } catch { /* ignore */ }
 }
 
-// Close the HUD (if it is open) and open the wardrobe menu. Used by the command
-// and by the ?gender shortcut.
+// Close the HUD (if it is open) and open the wardrobe menu. Used by
+// /pcraftrevorn:gender and /pcraftrevorn:panel.
 function openMenu(player) {
   closeForms(player);
   beginSession(player);
   openGenderMenu(player);
 }
 
-// Quick panel: opened from the chat bar with ?pcm. It is a normal form (the HUD
-// JSON-UI buttons only work while the HUD form is open), and the HUD loop waits
-// on UserBusy while it is up.
+// Quick panel (/pcraftrevorn:panel): a normal form (the HUD JSON-UI buttons
+// only work while the HUD form is open), and the HUD loop waits on UserBusy
+// while it is up.
 const QUICK_TITLE = "PCraft 面板";
 
 function toggleHud(player) {
@@ -343,47 +344,28 @@ export function wireGender() {
   // Ensure the pc_state objective exists (server-side state only; nothing queries it client-side now).
   objective();
 
-  const open = (player) => {
-    system.runTimeout(() => { try { player.addTag(OPEN_TAG); } catch { /* ignore */ } }, 5);
-  };
-
-  // Stable entry: custom command /gender. Wrapped so a missing custom-command API
-  // can't abort the rest of the wiring (chat token + intervals).
+  // Custom commands only:
+  //   /pcraftrevorn:gender  -> wardrobe panel
+  //   /pcraftrevorn:panel   -> quick panel (PC/mobile HUD, gender, swallow)
+  //   /pcraftrevorn:hud     -> toggle the HUD buttons
+  // Wrapped so a missing custom-command API can't abort the rest of the wiring.
   try {
     system.beforeEvents.startup.subscribe((init) => {
       try {
-        init.customCommandRegistry.registerCommand(
-          { name: "pcraftrevorn:gender", description: "打开性别 / 体型设置", permissionLevel: CommandPermissionLevel.Any, cheatsRequired: false },
+        const reg = (name, desc, fn) => init.customCommandRegistry.registerCommand(
+          { name, description: desc, permissionLevel: CommandPermissionLevel.Any, cheatsRequired: false },
           (origin) => {
             const p = origin.sourceEntity;
-            if (p?.typeId === "minecraft:player") { system.run(() => openMenu(p)); return { status: CustomCommandStatus.Success }; }
+            if (p?.typeId === "minecraft:player") { system.run(() => fn(p)); return { status: CustomCommandStatus.Success }; }
             return { status: CustomCommandStatus.Failure, message: "只能由玩家执行。" };
           }
         );
+        reg("pcraftrevorn:gender", "打开性别 / 体型设置", openMenu);
+        reg("pcraftrevorn:panel", "打开快捷面板", (p) => { void openQuickPanel(p); });
+        reg("pcraftrevorn:hud", "开关 HUD 按钮", toggleHud);
       } catch { /* custom commands unsupported on this version */ }
     });
   } catch { /* startup event unavailable on this version */ }
-
-  // Chat shortcuts (world.beforeEvents.chatSend is a Beta API; guard it).
-  try {
-    world.beforeEvents.chatSend?.subscribe((ev) => {
-      const raw = (ev.message || "").trim();
-      const low = raw.toLowerCase();
-      if (low === "?pcm" || low === "?panel" || low === "?面板") {
-        ev.cancel = true;
-        system.run(() => { void openQuickPanel(ev.sender); });
-        return;
-      }
-      if (low === "?hud" || low === "?hud开关") {
-        ev.cancel = true;
-        system.run(() => toggleHud(ev.sender));
-        return;
-      }
-      if (low !== "?gender" && low !== "?性别" && low !== "?settingmenu") return;
-      ev.cancel = true;
-      open(ev.sender);
-    });
-  } catch { /* chatSend unavailable */ }
 
   system.runInterval(() => {
     for (const player of world.getAllPlayers()) {

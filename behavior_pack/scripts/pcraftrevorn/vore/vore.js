@@ -402,7 +402,7 @@ export function startSwallow(player, predator) {
   safeEffect(player, "invisibility", 40, 0, false);
   safeEffect(player, "resistance", 60, 4);
   try { player.onScreenDisplay.setTitle("§r", { subtitle: "§4被吞入", fadeInDuration: 5, stayDuration: 40, fadeOutDuration: 10 }); } catch { /* ignore */ }
-  player.sendMessage("§4[掠食者] §c你被吞入腹中！§7看屏幕上的提示，用快捷栏里的 §f方向道具 §7挣扎。§8(/scriptevent pcraftrevorn:release 脱身)");
+  player.sendMessage("§4[掠食者] §c你被吞入腹中！§7看屏幕上的提示，用快捷栏里的 §f方向道具 §7挣扎。§8(/pcraftrevorn:release 脱身)");
 
   spawnBar(player, session);
   prepareRide(player, predator, session);
