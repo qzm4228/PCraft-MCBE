@@ -266,44 +266,7 @@ world.scoreboard.setObjectiveAtDisplaySlot(DisplaySlotId.List, { objective: obj 
 
 ---
 
-## 7. 1.26.50 性别面板消失：适配记录（2026-10-24）
-
-现象：1.26.50 上打开性别菜单，衣柜面板不再出现（退回原版表单/或表单直接被吞掉）。
-
-### 7.1 排查依据
-
-| 资料 | 结论 |
-|---|---|
-| `Mojang/bedrock-samples` 标签 `v1.26.50.4` 的 `ui/server_form.json` | 脚本表单仍走 JSON-UI `server_form`；`long_form` / `custom_form` / `dynamic_button` 契约未变，只新增了 `multiselect` 控件 |
-| `83-vanilla-ui-1.26.50-diff.md`（社区整理） | 1.26.10 → 1.26.50：`server_form.json` 仅 `multiselect` + 缩进规范化；`#title_text` 仍是标题绑定 |
-| 1.26.50 更新日志 | DDUI 指的是新的 `CustomForm` / `MessageBox`（Ore UI）；`ActionFormData` / `ModalFormData` 仍是 JSON-UI 路线 |
-| `wiki.bedrock.dev/json-ui/modifying-server-forms` | 社区标准做法：标题放标记，用 `(#title_text - '标记') = #title_text` 判断“标题里有没有它” |
-
-因此面板不是被官方整条移除，而是**标记匹配失败**：
-
-1. **颜色码被规范化**：旧标记是 `§3§r`。1.26.50 的表单标题走新的文本管线，`§r` 这类“紧跟在颜色码后的冗余重置码”会被吃掉，`#title_text` 里只剩 `§3`，`§3§r` 子串不存在 → `gender_root` 隐藏、原版 `long_form` 显示 → 衣柜面板“消失”。
-2. **UserBusy**：从聊天栏（`/pcraftrevorn:gender` 或聊天按钮）打开表单时，若聊天界面还没完全关闭，`show()` 返回 `canceled` + `cancelationReason: "UserBusy"`。旧代码 `if (r.canceled) return;` 直接丢弃，表现同样是“没反应/面板没了”。
-
-### 7.2 改动
-
-`gender_pack/behavior_pack/scripts/gender.js`
-- 标题改为纯文本：`PCraft Gender Mod Female` / `PCraft Gender Mod Male`（无颜色码，可被标题管线任意规范化）。
-- 新增 `showForm(player, build, onResult)`：遇到 `UserBusy` 每 10 tick 重试一次、最多 12 次（约 6 秒），彻底失败时 actionbar 提示 + `console.warn`；四个菜单统一走它。
-
-`gender_pack/resource_pack/ui/gender_menu.json`
-- 判定改为 `PCraft Gender Mod`（前缀）与 `PCraft Gender Mod Female`；
-- 浮层 `layer` 5 → 20，避免被新版表单背景盖住；
-- 仍然只在标题命中时显示，其它插件的表单完全不受影响。
-
-### 7.3 若仍未恢复
-
-1. 打开内容日志过滤 `UI` / `server_form` / `gender`，看是否有 `Failed to create` / `Unknown renderer`；
-2. 确认世界设置里删掉旧的 `FemaleGenderMod_RP` 再重新启用（世界会保存包副本，同 uuid+版本不会覆盖）；
-3. 若只有“预览小人”缺失，检查 `live_player_renderer`（1.26.50 的原版 `inventory_screen.json` 仍在使用它）。
-
----
-
-## 8. 附：相关文件索引
+## 7. 附：相关文件索引
 
 | 作用 | 文件 |
 |------|------|

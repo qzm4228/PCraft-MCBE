@@ -13,11 +13,8 @@
 // render controllers) from pc_state.
 //
 // The menu is a native form; the RP re-skins it into a Wildfire's Female Gender
-// Mod look (ui/gender_menu.json). The form title carries a plain-text marker so
-// the UI knows it is a gender menu. Keep it plain: 1.26.50 forms go through the
-// new text pipeline, which normalises/removes § formatting codes before the
-// title reaches `#title_text`, so a colour-code marker ("§3§r") can vanish and
-// the overlay then stays hidden.
+// Mod look (ui/gender_menu.json). The form title carries an invisible marker so
+// the UI knows it is a gender menu.
 import { world, system, CommandPermissionLevel, CustomCommandStatus, DisplaySlotId } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 
@@ -33,44 +30,9 @@ const BUTTON_TOKEN = "pcgender_open";
 const SOUNDS_OFF_TAG = "pcgender:sounds_off";
 const HURT_SOUND = "pcraftrevorn_gender.female_hurt";
 
-// Title marker read by resource_pack/ui/gender_menu.json. Plain ASCII on
-// purpose (see the comment at the top); the suffix tells the UI which wardrobe
-// backdrop to draw. Both are safe to show if the overlay ever fails: the
-// native title simply reads "PCraft Gender Mod (Female)".
-const MARKER = "PCraft Gender Mod";
-const title = (female) => `${MARKER} ${female ? "Female" : "Male"}`;
-
-// Forms cannot open while another UI is up (the chat screen counts). The engine
-// answers UserBusy, and on 1.26.50 a command typed into chat is answered before
-// the chat screen finishes closing -- so retry for a few seconds instead of
-// silently dropping the menu.
-const FORM_RETRIES = 12;
-const FORM_RETRY_TICKS = 10;
-function showForm(player, build, onResult) {
-  const attempt = (left) => {
-    build().show(player).then((r) => {
-      if (r.canceled) {
-        const busy = String(r.cancelationReason ?? "").includes("Busy");
-        if (busy && left > 0) {
-          system.runTimeout(() => attempt(left - 1), FORM_RETRY_TICKS);
-          return;
-        }
-        if (busy) {
-          try { player.sendMessage("§7菜单没能打开：请先关掉聊天框或其它界面再试。"); } catch { /* ignore */ }
-        }
-        return;
-      }
-      onResult(r);
-    }).catch((e) => {
-      if (left > 0) {
-        system.runTimeout(() => attempt(left - 1), FORM_RETRY_TICKS);
-        return;
-      }
-      console.warn(`[pcraftrevorn] gender form failed: ${e?.message ?? e}`);
-    });
-  };
-  attempt(FORM_RETRIES);
-}
+// Title state bus read by resource_pack/ui/gender_menu.json.
+const MARKER = "§3§r";
+const title = (female) => `${MARKER}${female ? "1" : "0"}Female Gender Mod`;
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v | 0));
 const sexOf = (state) => state % 10;
@@ -163,38 +125,34 @@ function openSizeMenu(player) {
   const st = getState(player);
   const sex = sexOf(st);
   const size = sex > 0 ? sex - 1 : 0;
-  const build = () => {
-    const form = new ActionFormData().title(title(true));
-    for (let i = 0; i <= 4; i++) form.button(`体型 ${i}${i === size ? " §a✔" : ""}`);
-    form.button("§7返回");
-    return form;
-  };
-  showForm(player, build, (r) => {
+  const form = new ActionFormData().title(title(true));
+  for (let i = 0; i <= 4; i++) form.button(`体型 ${i}${i === size ? " §a✔" : ""}`);
+  form.button("§7返回");
+  form.show(player).then((r) => {
+    if (r.canceled) return;
     if (r.selection >= 0 && r.selection <= 4) {
       setState(player, encode(skinOf(st), r.selection + 1));
       system.run(() => openSizeMenu(player));
     } else {
       system.run(() => openGenderMenu(player));
     }
-  });
+  }).catch(() => { /* ignore */ });
 }
 
 function openRotationMenu(player) {
   const rot = getRot(player);
-  const build = () => {
-    const form = new ActionFormData().title(title(true));
-    for (let i = 0; i <= 4; i++) form.button(`胸旋转 ${i}${i === rot ? " §a✔" : ""}`);
-    form.button("§7返回");
-    return form;
-  };
-  showForm(player, build, (r) => {
+  const form = new ActionFormData().title(title(true));
+  for (let i = 0; i <= 4; i++) form.button(`胸旋转 ${i}${i === rot ? " §a✔" : ""}`);
+  form.button("§7返回");
+  form.show(player).then((r) => {
+    if (r.canceled) return;
     if (r.selection >= 0 && r.selection <= 4) {
       setRot(player, r.selection);
       system.run(() => openRotationMenu(player));
     } else {
       system.run(() => openGenderMenu(player));
     }
-  });
+  }).catch(() => { /* ignore */ });
 }
 
 function openSkinMenu(player) {
@@ -202,16 +160,14 @@ function openSkinMenu(player) {
   const cur = skinOf(st);
   // No marker in the title: the custom overlay stays hidden so the native
   // slider form is visible and draggable.
-  const build = () => {
-    const form = new ModalFormData().title("性别 / 皮肤预设");
-    form.slider("皮肤预设", 0, PRESET_COUNT, { valueStep: 1, defaultValue: cur, tooltip: "0 = 原版皮肤，1-12 = 预设" });
-    return form;
-  };
-  showForm(player, build, (r) => {
+  const form = new ModalFormData().title("性别 / 皮肤预设");
+  form.slider("皮肤预设", 0, PRESET_COUNT, { valueStep: 1, defaultValue: cur, tooltip: "0 = 原版皮肤，1-12 = 预设" });
+  form.show(player).then((r) => {
+    if (r.canceled) return;
     const sel = Math.max(0, Math.min(PRESET_COUNT, Number(r.formValues?.[0] ?? cur)));
     setState(player, encode(sel, sexOf(st)));
     system.run(() => openGenderMenu(player));
-  });
+  }).catch(() => { /* ignore */ });
 }
 
 function openGenderMenu(player) {
@@ -222,21 +178,18 @@ function openGenderMenu(player) {
   const skin = skinOf(st);
   const soundsOn = !player.hasTag(SOUNDS_OFF_TAG);
 
+  const form = new ActionFormData().title(title(female));
   const actions = [];
-  const build = () => {
-    const form = new ActionFormData().title(title(female));
-    actions.length = 0;
-    form.button(`性别 - ${female ? "§b女性" : "§7男性"}`); actions.push("gender");
-    if (female) {
-      form.button(`体型 - §b${size} / 4`); actions.push("size");
-      form.button(`胸旋转 - §b${getRot(player)} / 4`); actions.push("rot");
-      form.button(`女性受伤音效 - ${soundsOn ? "§a开" : "§c关"}`); actions.push("sounds");
-    }
-    form.button("§7关闭"); actions.push("close");
-    return form;
-  };
+  form.button(`性别 - ${female ? "§b女性" : "§7男性"}`); actions.push("gender");
+  if (female) {
+    form.button(`体型 - §b${size} / 4`); actions.push("size");
+    form.button(`胸旋转 - §b${getRot(player)} / 4`); actions.push("rot");
+    form.button(`女性受伤音效 - ${soundsOn ? "§a开" : "§c关"}`); actions.push("sounds");
+  }
+  form.button("§7关闭"); actions.push("close");
 
-  showForm(player, build, (r) => {
+  form.show(player).then((r) => {
+    if (r.canceled) return;
     switch (actions[r.selection]) {
       case "gender":
         setState(player, encode(skin, female ? 0 : (size > 0 ? size + 1 : 1)));
@@ -255,7 +208,7 @@ function openGenderMenu(player) {
       default:
         break; // close
     }
-  });
+  }).catch(() => { /* player left / busy */ });
 }
 
 export function wireGender() {

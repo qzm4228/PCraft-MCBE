@@ -125,8 +125,8 @@
 
 ### 2.10 菜单（表单）与 UI 皮肤化
 
-- 现状：`ActionFormData` 主菜单 + 体型子菜单 + `ModalFormData` 皮肤滑条；`gender_menu.json` 劫持 `server_form` 命名空间，用标题里的纯文本标记 `PCraft Gender Mod`（+ `Female`/`Male`）判断是否本菜单。
-- 评价：手法与社区一致（Fast Commands 也用命名空间覆盖/`server_form`）。早期用的是 `§3§r` 颜色码标记；1.26.50 的表单标题走新的文本管线，颜色码会被规范化掉，面板就再也匹配不到标题（已改为纯文本前缀标记，见 `docs/vcraft-gender-diagnosis.md`）。
+- 现状：`ActionFormData` 主菜单 + 体型子菜单 + `ModalFormData` 皮肤滑条；`gender_menu.json` 劫持 `server_form` 命名空间，用标题里的 `§3§r` 标记判断是否本菜单。
+- 评价：手法与社区一致（Fast Commands 也用命名空间覆盖/`server_form`），但**标题里塞分隔符 + 数字**较 hacky；一旦官方改标题绑定格式就会失效。
 - **校准**：
   - 标记可用更隐蔽的私有前缀（如 `\u00A7` 组合）或改用 `body`/`title` 的稳定字段；
   - 为 4 个按钮加图标（`button(text, icon)`）与本地化键。
