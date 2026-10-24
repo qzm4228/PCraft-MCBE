@@ -103,12 +103,28 @@ const chestAnim = (sex, rot) => (sex > 0 ? `animation.pcraftrevorn.chest.size${M
 // A huge blend-out time keeps the played animation from fading back to the
 // default pose (otherwise the chest flickers between the chosen size and size 3).
 const PERSIST_BLEND = 999999;
-function playAnim(entity, anim, controller) {
+// The chest / belly pose is re-asserted by a periodic loop. Re-issuing the same
+// animation every 3 ticks (the old behaviour) means ~13 playAnimation calls per
+// second per player: on PCs that is invisible, on phones it floods the animation
+// and command pipelines and is a known source of stutter / crashes. Remember the
+// last pose per (entity, controller) and only re-send it when it actually
+// changes, plus a low-frequency forced refresh that survives respawn / dimension
+// changes.
+const POSE_REFRESH = 200; // ticks (10 s)
+const lastPose = new Map(); // `<entityId>|<controller>` -> animation id
+function playAnim(entity, anim, controller, force = false) {
+  const key = `${entity.id}|${controller}`;
+  if (!force && lastPose.get(key) === anim) return;
+  lastPose.set(key, anim);
   try {
     entity.playAnimation(anim, { players: world.getAllPlayers(), blendOutTime: PERSIST_BLEND, controller });
     return;
   } catch { /* fall through */ }
-  try { entity.runCommand(`playanimation @s ${anim} none ${PERSIST_BLEND} "0" ${controller}`); } catch { /* ignore */ }
+  try { entity.runCommand(`playanimation @s ${anim} none ${PERSIST_BLEND} "0" ${controller}`); } catch { lastPose.delete(key); }
+}
+function clearPose(id) {
+  const prefix = id + "|";
+  for (const key of lastPose.keys()) if (key.startsWith(prefix)) lastPose.delete(key);
 }
 // Chest rotation angle (0..4), stored per player; applied on top of the size.
 const CHEST_ROT_PROP = "pcraftrevorn:chest_rot";
@@ -120,20 +136,20 @@ function setRot(player, n) {
   try { player.setDynamicProperty(CHEST_ROT_PROP, v); } catch { /* ignore */ }
   applyChest(player, getState(player));
 }
-function applyChest(player, state) {
+function applyChest(player, state, force = false) {
   const st = typeof state === "number" ? state : getState(player);
   const sex = FORCE_CHEST === null ? sexOf(st) : FORCE_CHEST;
-  playAnim(player, chestAnim(sex, getRot(player)), "pcraftrevorn:chest");
+  playAnim(player, chestAnim(sex, getRot(player)), "pcraftrevorn:chest", force);
 }
 // The belly mesh is owned by this pack, but VCraft shows/hides it via pc_belly.
 // Once VCraft is running (it lazily creates the pc_belly objective) it drives the
 // belly itself, including the grow/shrink transitions — so we only hide the belly
 // ourselves while no pc_belly objective exists yet. Otherwise our always-on "off"
 // would stomp VCraft's shrink and make the belly vanish as soon as the count hits 0.
-function ensureBelly(player) {
+function ensureBelly(player, force = false) {
   let owned = false;
   try { owned = !!world.scoreboard.getObjective("pc_belly"); } catch { owned = false; }
-  if (!owned) playAnim(player, "animation.vcraft.belly.off", "pcraftrevorn:belly");
+  if (!owned) playAnim(player, "animation.vcraft.belly.off", "pcraftrevorn:belly", force);
 }
 
 // ---- Belly (owned by this pack) -------------------------------------------
@@ -385,19 +401,25 @@ export function wireGender() {
   // /playanimation state is not persisted across respawn / relog / dimension travel,
   // so re-apply on spawn and periodically as a safety net.
   world.afterEvents.playerSpawn.subscribe((ev) => {
-    system.run(() => applyChest(ev.player, getState(ev.player)));
+    clearPose(ev.player.id);
+    system.run(() => applyChest(ev.player, getState(ev.player), true));
     startHud(ev.player);
   });
   try {
-    world.afterEvents.playerLeave.subscribe((ev) => stopHud(ev.playerId));
+    world.afterEvents.playerLeave.subscribe((ev) => { clearPose(ev.playerId); stopHud(ev.playerId); });
   } catch { /* older event shape */ }
   system.runTimeout(() => { for (const p of world.getAllPlayers()) startHud(p); }, 60);
+  // Safety net only: the pose cache means a normal tick sends nothing. The
+  // forced refresh every POSE_REFRESH ticks covers respawn / dimension travel.
+  let poseClock = 0;
   system.runInterval(() => {
+    poseClock += 1;
+    const force = poseClock % Math.max(1, Math.round(POSE_REFRESH / 20)) === 0;
     for (const player of world.getAllPlayers()) {
-      applyChest(player, getState(player));
-      ensureBelly(player);
+      applyChest(player, getState(player), force);
+      ensureBelly(player, force);
     }
-  }, 3);
+  }, 20);
 
   // Wildfire female hurt sound (played at the player's position so nearby
   // players hear it as well).
