@@ -30,7 +30,6 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import dist_resolver  # noqa: E402
-import texture_tiers  # noqa: E402
 from _common import read_version  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -120,8 +119,6 @@ def build_manifest(pack: dict, target: dict, baseline: bool = False,
         name = dep.get("module_name")
         if name and target.get("modules", {}).get(name):
             dep["version"] = target["modules"][name]
-    if pack.get("textures_tiers"):
-        manifest["subpacks"] = texture_tiers.subpacks_manifest()
     return manifest
 
 
@@ -191,8 +188,6 @@ def pack_entries(pack: dict, target: dict, prefix: str = "") -> list[tuple[str, 
         if rel == "manifest.json":
             continue  # replaced by the target-applied manifest above
         entries.append((f"{prefix}/{rel}" if prefix else rel, src))
-    if pack.get("textures_tiers"):
-        entries = texture_tiers.apply(entries, base, prefix)
     return entries
 
 

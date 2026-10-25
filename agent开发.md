@@ -123,35 +123,8 @@ HUD 可见性：默认**仅触屏**（`clientSystemInfo.platformType === "Mobile
   - HUD 的 Vore 按钮通过 `vcraft:want_swallow` 标签触发；
   - 手持 `vcraft:maw` 右键和 `/vcraft:swallow` 走同一函数。
 
-## 贴图内存预算与 subpacks（按设备内存分档）
-
-构建期由 `tools_py/texture_tiers.py` 处理。**不要直接改 `resource_pack/textures/entity`**：
-`generate_entities.py` 每次构建都会从上游素材重新拷贝，手改会被覆盖。
-
-流程：
-
-1. 按 UV 实际范围裁剪每套贴图，并把模型的 `texture_width/height` 改成裁剪后的尺寸
-   （UV 一个都不动，映射逐像素一致，只是去掉空白画布）。
-2. **基础包** = 裁剪后再缩到最长边 256 → 约 124 MB 显存。
-3. **`hd` 子包** = 同一批贴图缩到最长边 512 → 约 270 MB 显存，引擎按 `memory_tier` 自动选。
-
-清单里由构建器写入：
-
-```json
-"subpacks": [
-  { "folder_name": "hd", "name": "512px textures", "memory_tier": 12, "memory_performance_tier": 2 }
-]
-```
-
-`memory_tier` 的单位是 250 MB：`12` = 设备至少 3 GB 内存才会用 hd；不够就留在基础包。
-
-- 预算红线：基础包超过 `BASE_BUDGET_MB`（320 MB）直接构建失败；
-- 缓存：`.cache/tex_tiers/`，源图更新后自动重建；
-- ❌ 不要再往包里塞 2000×2000 这种画布：压缩后只有一两百 KB，解码后是 **15 MB/张**，
-  几百张就是几个 G，6 GB 手机必闪退。
-
 ## 版本与构建
 
 - 版本唯一来源：`config/version.json`，不要改别处的版本号；
 - 只用 `python tools_py/pipeline.py`（不要单独跑 `generate.py`）；
-- 回归检查：`node tools/check.js`、`node tools/audit.js`、`python .work/audit_hud_buttons.py`、`python .work/artifact_check.py 1.26.50`、`python .work/validate_artifact.py <target>`（清单/资源引用/贴图分档/UV 越界/UI 注册，8 个目标都要过）。
+- 回归检查：`node tools/check.js`、`node tools/audit.js`、`python .work/audit_hud_buttons.py`、`python .work/artifact_check.py 1.26.50`、`python .work/validate_artifact.py <target>`（清单/资源引用/UI 注册，8 个目标都要过）。
