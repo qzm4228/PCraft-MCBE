@@ -233,5 +233,5 @@ entity.pcraftrevorn:druid_projectile.name=德鲁伊弹射物
 entity.pcraftrevorn:autumn_druid_projectile.name=秋日德鲁伊弹射物
 entity.pcraftrevorn:spring_druid_projectile.name=春日德鲁伊弹射物
 entity.pcraftrevorn:winter_druid_projectile.name=冬日德鲁伊弹射物
-pack.name=PCraft+Internalised BP
-pack.description=PCraft+Internalised Behavior Pack - Custom entities and mechanics for your world.
+pack.name=PCraft+Internalised - Base BP
+pack.description=Base pack: original PCraft creatures, items, blocks and the swallow/digestion system.

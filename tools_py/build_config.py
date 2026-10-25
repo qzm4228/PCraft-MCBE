@@ -30,6 +30,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import dist_resolver  # noqa: E402
+import pack_split  # noqa: E402
 from _common import read_version  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -43,6 +44,16 @@ LANG_ORDER = ["en_US", "zh_CN", "zh_TW"]
 # --------------------------------------------------------------------------- #
 # helpers
 # --------------------------------------------------------------------------- #
+_PACK_CONFIG: dict | None = None
+
+
+def _pack_config() -> dict:
+    global _PACK_CONFIG
+    if _PACK_CONFIG is None:
+        _PACK_CONFIG = read_json(CONFIG) if CONFIG.exists() else {}
+    return _PACK_CONFIG
+
+
 def parse_version(value) -> list[int]:
     s = str(value).strip()
     m = re.match(r"^(\d{6})-beta-(\d+)$", s)
@@ -105,20 +116,33 @@ def build_manifest(pack: dict, target: dict, baseline: bool = False,
     header = manifest.setdefault("header", {})
     header["name"] = "pack.name"
     header["description"] = "pack.description"
+    if pack.get("literal_name"):
+        header["name"] = (pack.get("display_name") or {}).get("en_US", "pack.name")
+        header["description"] = (pack.get("description") or {}).get("en_US", "pack.description")
     header["version"] = version
     if pack.get("uuid"):
         header["uuid"] = pack["uuid"]
     mev = pack.get("min_engine_version") if baseline else (target.get("min_engine_version") or pack.get("min_engine_version"))
     if mev:
         header["min_engine_version"] = list(mev)
+    if pack.get("strip_script"):
+        manifest["modules"] = [m for m in manifest.get("modules", []) if m.get("type") != "script"]
     for module in manifest.get("modules", []):
         module["version"] = version
+    if pack.get("strip_script"):
+        manifest["dependencies"] = [d for d in manifest.get("dependencies", []) if not d.get("module_name")]
     for dep in manifest.get("dependencies", []):
         if isinstance(dep.get("version"), list):
             dep["version"] = version
         name = dep.get("module_name")
         if name and target.get("modules", {}).get(name):
             dep["version"] = target["modules"][name]
+    for key in pack.get("pack_dependencies", []):
+        other = _pack_config().get(key)
+        if other and other.get("uuid"):
+            manifest.setdefault("dependencies", []).append(
+                {"uuid": other["uuid"], "version": list(version)}
+            )
     return manifest
 
 
@@ -184,9 +208,12 @@ def pack_entries(pack: dict, target: dict, prefix: str = "") -> list[tuple[str, 
         entries.append((f"{prefix}/manifest.json", manifest))
     else:
         entries.append(("manifest.json", manifest))
+    group = pack.get("split")
     for rel, src in fmap.items():
         if rel == "manifest.json":
             continue  # replaced by the target-applied manifest above
+        if group and not pack_split.keep(group, rel):
+            continue
         entries.append((f"{prefix}/{rel}" if prefix else rel, src))
     return entries
 
@@ -264,7 +291,12 @@ def main(argv=None) -> int:
 
     DIST.mkdir(parents=True, exist_ok=True)
     print("[build_config] applying baseline config to source manifests ...")
+    seen_dirs: set[str] = set()
     for pack in config.values():
+        key = str(pack["base_dir"])
+        if key in seen_dirs:
+            continue  # several packs share one generated source tree
+        seen_dirs.add(key)
         write_source_manifest(pack)
 
     chosen = [t for t in targets if not only or t["id"] in only] if only else targets

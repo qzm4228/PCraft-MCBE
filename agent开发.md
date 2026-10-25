@@ -123,8 +123,28 @@ HUD 可见性：默认**仅触屏**（`clientSystemInfo.platformType === "Mobile
   - HUD 的 Vore 按钮通过 `vcraft:want_swallow` 标签触发；
   - 手持 `vcraft:maw` 右键和 `/vcraft:swallow` 走同一函数。
 
+## 拆包（基础 / 社区 / 宝可梦 / Internalised）
+
+源码仍是一棵树（`behavior_pack` + `resource_pack`），**打包时**由
+`tools_py/pack_split.py` 按规则分到 4 个内容包里，源头不搬家：
+
+| 包 | 内容 | 脚本 |
+|---|---|---|
+| `PCraftRevorn_BP/RP`（基础） | 原版生物、物品、方块、配方、结构；**吞食/消化系统、指南、外观 UI** | 有（唯一的脚本入口） |
+| `PCraftRevorn_Community_BP/RP` | cathyl_rabbit / plant_maiden / lamia / predatopia(_v2) / piglin_dragon + 多外观 | 无 |
+| `PCraftRevorn_Pokemon_BP/RP` | eevee 家族 5 只 | 无 |
+| `PCraftRevorn_Internalised_BP/RP` | bat_girl / bunny_girl / cat_girl / slime_girl / lamia_vcm / druid + 四季弹射物与法杖 | 无 |
+
+规则：
+
+- 三个内容包都 **依赖基础包**（manifest 里写 pack 依赖），只装内容包时生物能出现，但吞食/消化由基础包提供；
+- 内容包 **没有 script 模块**，行为逻辑全部留在基础包，避免多套 `runInterval` 打架；
+- 所有 id 仍是 `pcraftrevorn:`；物品图标图集、语言文件、UI 都留在基础包；
+- 拆分规则改 `tools_py/pack_split.py` 的 `GROUPS`（物种 / 物品 / 粒子三张表）；
+- 校验：`python .work/validate_split.py <target>`（包数量、依赖、跨包重复 id、资源引用、共享文件）。
+
 ## 版本与构建
 
 - 版本唯一来源：`config/version.json`，不要改别处的版本号；
 - 只用 `python tools_py/pipeline.py`（不要单独跑 `generate.py`）；
-- 回归检查：`node tools/check.js`、`node tools/audit.js`、`python .work/audit_hud_buttons.py`、`python .work/artifact_check.py 1.26.50`、`python .work/validate_artifact.py <target>`（清单/资源引用/UI 注册，8 个目标都要过）。
+- 回归检查：`node tools/check.js`、`node tools/audit.js`、`python .work/audit_hud_buttons.py`、`python .work/artifact_check.py 1.26.50`、`python .work/validate_artifact.py <target>`、`python .work/validate_split.py <target>`（清单/资源引用/UI 注册/拆包一致性，8 个目标都要过）。

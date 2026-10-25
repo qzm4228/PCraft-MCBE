@@ -3,10 +3,10 @@
     "output_name": "PCraftRevorn_BP",
     "folder_name": "PCraftRevorn_BP",
     "display_name": {
-      "en_US": "PCraft+Internalised BP"
+      "en_US": "PCraft+Internalised - Base BP"
     },
     "description": {
-      "en_US": "PCraft+Internalised Behavior Pack - Custom entities and mechanics for your world."
+      "en_US": "Base pack: original PCraft creatures, items, blocks and the swallow/digestion system."
     },
     "base_dir": "behavior_pack",
     "uuid": "b6f5c2a1-7d3e-4a91-9c2f-1a2b3c4d5e6f",
@@ -14,16 +14,17 @@
       1,
       21,
       100
-    ]
+    ],
+    "split": "base"
   },
   "pcraftrevorn_rp": {
     "output_name": "PCraftRevorn_RP",
     "folder_name": "PCraftRevorn_RP",
     "display_name": {
-      "en_US": "PCraft+Internalised RP"
+      "en_US": "PCraft+Internalised - Base RP"
     },
     "description": {
-      "en_US": "PCraft+Internalised Resource Pack - Custom textures and sounds for your world."
+      "en_US": "Base assets: HUD, UI, shared textures, sounds and the original creatures."
     },
     "base_dir": "resource_pack",
     "uuid": "e9a8f5d4-a061-4dc4-af50-4d5e6f708192",
@@ -31,6 +32,142 @@
       1,
       21,
       100
+    ],
+    "split": "base"
+  },
+  "pcraftrevorn_community_bp": {
+    "output_name": "PCraftRevorn_Community_BP",
+    "folder_name": "PCraftRevorn_Community_BP",
+    "display_name": {
+      "en_US": "PCraft+Internalised - Community BP"
+    },
+    "description": {
+      "en_US": "Community content: extra looks and community creatures. Requires the base pack."
+    },
+    "base_dir": "behavior_pack",
+    "uuid": "0d3d33cc-40be-411f-a36b-d892d6a0553e",
+    "min_engine_version": [
+      1,
+      21,
+      100
+    ],
+    "split": "community",
+    "strip_script": true,
+    "literal_name": true,
+    "pack_dependencies": [
+      "pcraftrevorn_bp"
+    ]
+  },
+  "pcraftrevorn_community_rp": {
+    "output_name": "PCraftRevorn_Community_RP",
+    "folder_name": "PCraftRevorn_Community_RP",
+    "display_name": {
+      "en_US": "PCraft+Internalised - Community RP"
+    },
+    "description": {
+      "en_US": "Community assets: extra looks and community creatures. Requires the base pack."
+    },
+    "base_dir": "resource_pack",
+    "uuid": "cd87c573-5ee0-4492-9b18-8cdb7af1d048",
+    "min_engine_version": [
+      1,
+      21,
+      100
+    ],
+    "split": "community",
+    "literal_name": true,
+    "pack_dependencies": [
+      "pcraftrevorn_rp"
+    ]
+  },
+  "pcraftrevorn_pokemon_bp": {
+    "output_name": "PCraftRevorn_Pokemon_BP",
+    "folder_name": "PCraftRevorn_Pokemon_BP",
+    "display_name": {
+      "en_US": "PCraft+Internalised - Pokemon BP"
+    },
+    "description": {
+      "en_US": "Pokemon content (Eevee family). Requires the base pack."
+    },
+    "base_dir": "behavior_pack",
+    "uuid": "c688e812-8328-4e2c-9416-5e69ebe1b5cd",
+    "min_engine_version": [
+      1,
+      21,
+      100
+    ],
+    "split": "pokemon",
+    "strip_script": true,
+    "literal_name": true,
+    "pack_dependencies": [
+      "pcraftrevorn_bp"
+    ]
+  },
+  "pcraftrevorn_pokemon_rp": {
+    "output_name": "PCraftRevorn_Pokemon_RP",
+    "folder_name": "PCraftRevorn_Pokemon_RP",
+    "display_name": {
+      "en_US": "PCraft+Internalised - Pokemon RP"
+    },
+    "description": {
+      "en_US": "Pokemon assets (Eevee family). Requires the base pack."
+    },
+    "base_dir": "resource_pack",
+    "uuid": "d1731a3c-b882-4bd6-a26b-d5fddb424da7",
+    "min_engine_version": [
+      1,
+      21,
+      100
+    ],
+    "split": "pokemon",
+    "literal_name": true,
+    "pack_dependencies": [
+      "pcraftrevorn_rp"
+    ]
+  },
+  "pcraftrevorn_internalised_bp": {
+    "output_name": "PCraftRevorn_Internalised_BP",
+    "folder_name": "PCraftRevorn_Internalised_BP",
+    "display_name": {
+      "en_US": "PCraft+Internalised - Internalised BP"
+    },
+    "description": {
+      "en_US": "Internalised (VCM) content: creature girls, druids and seasonal magic. Requires the base pack."
+    },
+    "base_dir": "behavior_pack",
+    "uuid": "4f1218a9-739d-4024-af1b-c05b3060285a",
+    "min_engine_version": [
+      1,
+      21,
+      100
+    ],
+    "split": "internalised",
+    "strip_script": true,
+    "literal_name": true,
+    "pack_dependencies": [
+      "pcraftrevorn_bp"
+    ]
+  },
+  "pcraftrevorn_internalised_rp": {
+    "output_name": "PCraftRevorn_Internalised_RP",
+    "folder_name": "PCraftRevorn_Internalised_RP",
+    "display_name": {
+      "en_US": "PCraft+Internalised - Internalised RP"
+    },
+    "description": {
+      "en_US": "Internalised (VCM) assets: creature girls, druids and seasonal effects. Requires the base pack."
+    },
+    "base_dir": "resource_pack",
+    "uuid": "215fbaa5-a5b9-4951-a441-91083e4b89b8",
+    "min_engine_version": [
+      1,
+      21,
+      100
+    ],
+    "split": "internalised",
+    "literal_name": true,
+    "pack_dependencies": [
+      "pcraftrevorn_rp"
     ]
   },
   "femalegendermod": {
