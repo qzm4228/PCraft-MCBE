@@ -31,7 +31,7 @@ export function refreshSpecies(species) {
 
 export function refreshAll() { for (const species of Object.keys(VARIANTS)) refreshSpecies(species); }
 
-function openSpecies(player, species) {
+async function openSpecies(player, species) {
   const vs = VARIANTS[species];
   const cur = getSel(species);
   const form = new ActionFormData().title(buildTitle(`${MENU_MARKERS.appearance}${LABEL[species] ?? species} · 外观`, 0));
@@ -40,16 +40,16 @@ function openSpecies(player, species) {
   vs.sets.forEach((s, i) => { form.button(`§f${s.name} §7(${s.count})${cur === i + 1 ? " §a✔" : ""}`); actions.push({ set: i + 1 }); });
   form.button("§7返回"); actions.push({ set: -1 });
   try { uiManager.closeAllForms(player); } catch { /* older ui module */ }
-  form.show(player).then((r) => {
-    if (r.canceled) return;
-    const a = actions[r.selection];
-    if (!a) return;
-    if (a.set === -1) { system.run(() => openVariants(player)); return; }
-    setSel(species, a.set);
-    refreshSpecies(species);
-    player.sendMessage(`§a[外观] ${LABEL[species] ?? species} 已切换为 ${a.set === 0 ? "原版" : vs.sets[a.set - 1].name}。`);
-    system.run(() => openSpecies(player, species));
-  }).catch(() => { /* ignore */ });
+  let r;
+  try { r = await form.show(player); } catch { return; }
+  if (r.canceled) return;
+  const a = actions[r.selection];
+  if (!a) return;
+  if (a.set === -1) { await openVariants(player); return; }
+  setSel(species, a.set);
+  refreshSpecies(species);
+  player.sendMessage(`§a[外观] ${LABEL[species] ?? species} 已切换为 ${a.set === 0 ? "原版" : vs.sets[a.set - 1].name}。`);
+  await openSpecies(player, species);
 }
 
 export async function openVariants(player) {
@@ -66,7 +66,7 @@ export async function openVariants(player) {
     footer: [{ id: "__close", label: "§7关闭" }],
   });
   if (res.canceled || res.id === "__close" || !res.id) return;
-  openSpecies(player, res.id);
+  await openSpecies(player, res.id);
 }
 
 export function wireVariants() {
