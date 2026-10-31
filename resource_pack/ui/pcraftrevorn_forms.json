@@ -57,7 +57,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "(not ((#title_text - '§0§r§1§r') = #title_text)) and ((#title_text - '§4§r') = #title_text) and ((#title_text - '§5§r') = #title_text) and ((#title_text - '§6§r') = #title_text)",
+        "source_property_name": "false",
         "target_property_name": "#visible"
       }
     ],

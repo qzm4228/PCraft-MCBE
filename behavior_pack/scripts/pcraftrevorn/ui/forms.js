@@ -1,4 +1,4 @@
-import { ActionFormData, ModalFormData, uiManager } from "@minecraft/server-ui";
+import { ActionFormData, uiManager } from "@minecraft/server-ui";
 import { buildTitle, MENU_MARKERS } from "../constants.js";
 
 // The PCraft HUD button bar is a persistent form (see the gender pack). Only
@@ -29,18 +29,4 @@ export async function showPcForm(player, { title = "", body = "", level = 0, but
   if (res.canceled) return { canceled: true };
   const button = buttons[res.selection];
   return { canceled: false, id: button?.id, selection: res.selection };
-}
-
-export async function showPcModal(player, { title = "", level = 0, controls = [] }) {
-  const form = new ModalFormData().title(buildTitle(title, level));
-  for (const c of controls) {
-    if (c.kind === "dropdown") form.dropdown(c.label, c.options, { defaultValueIndex: c.default ?? 0 });
-    else if (c.kind === "toggle") form.toggle(c.label, { defaultValue: !!c.default });
-    else if (c.kind === "slider") form.slider(c.label, c.min, c.max, { valueStep: c.step ?? 1, defaultValue: c.default ?? c.min });
-    else if (c.kind === "text") form.textField(c.label, c.placeholder ?? "", { default: c.default ?? "" });
-  }
-  closeHud(player);
-  const res = await form.show(player);
-  if (res.canceled) return { canceled: true };
-  return { canceled: false, values: res.formValues ?? [] };
 }

@@ -16,7 +16,7 @@
 // Mod look (ui/gender_menu.json). The form title carries an invisible marker so
 // the UI knows it is a gender menu.
 import { world, system, CommandPermissionLevel, CustomCommandStatus, DisplaySlotId } from "@minecraft/server";
-import { ActionFormData, ModalFormData, uiManager } from "@minecraft/server-ui";
+import { ActionFormData, uiManager } from "@minecraft/server-ui";
 
 const OBJECTIVE = "pc_state";
 const SEX_MAX = 5;
@@ -205,15 +205,23 @@ function openRotationMenu(player) {
 function openSkinMenu(player) {
   const st = getState(player);
   const cur = skinOf(st);
-  // No marker in the title: the custom overlay stays hidden so the native
-  // slider form is visible and draggable.
-  const form = new ModalFormData().title("性别 / 皮肤预设");
-  form.slider("皮肤预设", 0, PRESET_COUNT, { valueStep: 1, defaultValue: cur, tooltip: "0 = 原版皮肤，1-12 = 预设" });
+  const form = new ActionFormData().title(title(true));
+  form.button("§f◀ 上一个预设");
+  form.button(`§f当前：§e${cur === 0 ? "原版皮肤" : `预设 ${cur}`}`);
+  form.button("§f下一个预设 ▶");
+  form.button("§7返回");
   form.show(player).then((r) => {
     if (r.canceled) { endSession(player); return; }
-    const sel = Math.max(0, Math.min(PRESET_COUNT, Number(r.formValues?.[0] ?? cur)));
-    setState(player, encode(sel, sexOf(st)));
-    system.run(() => openGenderMenu(player));
+    const total = PRESET_COUNT + 1;
+    if (r.selection === 0) {
+      setState(player, encode((cur + total - 1) % total, sexOf(st)));
+      system.run(() => openSkinMenu(player));
+    } else if (r.selection === 2) {
+      setState(player, encode((cur + 1) % total, sexOf(st)));
+      system.run(() => openSkinMenu(player));
+    } else if (r.selection === 3) {
+      system.run(() => openGenderMenu(player));
+    }
   }).catch(() => { endSession(player); });
 }
 
@@ -335,7 +343,10 @@ function openMenu(player) {
 // Quick panel (/pcraftrevorn:panel): a normal form (the HUD JSON-UI buttons
 // only work while the HUD form is open), and the HUD loop waits on UserBusy
 // while it is up.
-const QUICK_TITLE = "PCraft 面板";
+// Invisible PCraft form marker (same as the BP's TITLE_MARKER): the JSON-UI
+// shell in gender_menu.json draws every title that contains it.
+const PCRAFT_MARKER = "§0§r§1§r";
+const QUICK_TITLE = `${PCRAFT_MARKER}PCraft 面板`;
 
 function toggleHud(player) {
   if (!HUD_ENABLED) {

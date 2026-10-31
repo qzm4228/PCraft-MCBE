@@ -47,7 +47,7 @@
             { "binding_name": "#title_text" },
             {
               "binding_type": "view",
-              "source_property_name": "(not ((#title_text - '§4§r') = #title_text)) or (not ((#title_text - '§5§r') = #title_text)) or (not ((#title_text - '§6§r') = #title_text))",
+              "source_property_name": "(not ((#title_text - '§0§r§1§r') = #title_text)) and ((#title_text - '§3§r') = #title_text) and ((#title_text - 'PCraft HUD') = #title_text)",
               "target_property_name": "#visible"
             }
           ]
@@ -69,7 +69,7 @@
             { "binding_name": "#title_text" },
             {
               "binding_type": "view",
-              "source_property_name": "(((#title_text - '§3§r') = #title_text) and ((#title_text - 'PCraft HUD') = #title_text) and ((#title_text - '§4§r') = #title_text) and ((#title_text - '§5§r') = #title_text) and ((#title_text - '§6§r') = #title_text))",
+              "source_property_name": "(((#title_text - '§0§r§1§r') = #title_text) and ((#title_text - '§3§r') = #title_text) and ((#title_text - 'PCraft HUD') = #title_text))",
               "target_property_name": "#visible"
             }
           ]
@@ -181,12 +181,13 @@
     ]
   },
 
-  // ---- JSON-UI menu shell (guide / options / appearance) --------------------
+  // ---- JSON-UI form shell (every PCraft / VCraft form) ----------------------
   //
-  // The scripts prefix the form title with an invisible marker (§4§r guide,
-  // §5§r options, §6§r appearance). The native form is hidden for those titles
-  // and this panel draws the buttons instead, reading the same `form_buttons`
-  // collection so `button.form_button_click` still resolves the show() promise.
+  // Every script form carries the invisible PCraft marker (§0§r§1§r) in its
+  // title. The native form is hidden for those titles and this panel draws the
+  // whole thing instead: title, body, and the form_buttons collection (so
+  // `button.form_button_click` still resolves the show() promise).
+  // The wardrobe (§3§r) and the HUD bar ("PCraft HUD") keep their own panels.
   "pcr_menu_root": {
     "type": "panel",
     "size": [ "100%", "100%" ],
@@ -195,7 +196,7 @@
       { "binding_name": "#title_text" },
       {
         "binding_type": "view",
-        "source_property_name": "(not ((#title_text - '§4§r') = #title_text)) or (not ((#title_text - '§5§r') = #title_text)) or (not ((#title_text - '§6§r') = #title_text))",
+        "source_property_name": "(not ((#title_text - '§0§r§1§r') = #title_text)) and ((#title_text - '§3§r') = #title_text) and ((#title_text - 'PCraft HUD') = #title_text)",
         "target_property_name": "#visible"
       }
     ],
@@ -224,23 +225,57 @@
               }
             },
             {
-              "title": {
-                "type": "label",
+              "content": {
+                "type": "stack_panel",
+                "orientation": "vertical",
                 "anchor_from": "top_middle",
                 "anchor_to": "top_middle",
-                "offset": [ 0, 12 ],
-                "text": "#title_text",
-                "color": [ 1, 1, 1, 1 ],
-                "shadow": true,
-                "localize": false,
-                "font_size": "extra_large"
-              }
-            },
-            {
-              "buttons@server_form.pcr_menu_buttons": {
-                "anchor_from": "top_middle",
-                "anchor_to": "top_middle",
-                "offset": [ 0, 46 ]
+                "offset": [ 0, 14 ],
+                "size": [ 336, "100%c" ],
+                "controls": [
+                  {
+                    "title": {
+                      "type": "label",
+                      "size": [ "100%", "default" ],
+                      "text": "#title_text",
+                      "color": [ 1, 1, 1, 1 ],
+                      "shadow": true,
+                      "localize": false,
+                      "font_size": "extra_large",
+                      "text_alignment": "center"
+                    }
+                  },
+                  {
+                    "gap_title": {
+                      "type": "panel",
+                      "size": [ 0, 8 ]
+                    }
+                  },
+                  {
+                    "body": {
+                      "type": "label",
+                      "size": [ "100%", "default" ],
+                      "text": "#body_text",
+                      "color": [ 0.78, 0.78, 0.84, 1 ],
+                      "shadow": true,
+                      "localize": false,
+                      "font_size": "normal",
+                      "text_alignment": "center"
+                    }
+                  },
+                  {
+                    "gap_body": {
+                      "type": "panel",
+                      "size": [ 0, 10 ]
+                    }
+                  },
+                  {
+                    "buttons@server_form.pcr_menu_buttons": {
+                      "anchor_from": "top_middle",
+                      "anchor_to": "top_middle"
+                    }
+                  }
+                ]
               }
             }
           ]
@@ -256,7 +291,9 @@
     "factory": {
       "name": "buttons",
       "control_ids": {
-        "button": "server_form.pcr_menu_button"
+        "button": "server_form.pcr_menu_button",
+        "label": "server_form.pcr_menu_label",
+        "header": "server_form.pcr_menu_header"
       }
     },
     "collection_name": "form_buttons",
@@ -297,6 +334,34 @@
           "size": [ 0, 3 ]
         }
       }
+    ]
+  },
+
+  "pcr_menu_label": {
+    "type": "label",
+    "size": [ 320, "default" ],
+    "text": "#form_button_text",
+    "color": [ 0.78, 0.78, 0.84, 1 ],
+    "shadow": true,
+    "localize": false,
+    "font_size": "normal",
+    "text_alignment": "center",
+    "bindings": [
+      { "binding_type": "collection_details", "binding_collection_name": "form_buttons" }
+    ]
+  },
+
+  "pcr_menu_header": {
+    "type": "label",
+    "size": [ 320, "default" ],
+    "text": "#form_button_text",
+    "color": [ 1, 1, 1, 1 ],
+    "shadow": true,
+    "localize": false,
+    "font_size": "large",
+    "text_alignment": "center",
+    "bindings": [
+      { "binding_type": "collection_details", "binding_collection_name": "form_buttons" }
     ]
   },
 
@@ -479,6 +544,34 @@
           "size": [ 0, 3 ]
         }
       }
+    ]
+  },
+
+  // Factory entries for ActionFormData.label() / .header() inside the wardrobe
+  // panel (the factory maps control id "label"/"header" to these).
+  "dynamic_label": {
+    "type": "label",
+    "size": [ 158, "default" ],
+    "text": "#form_button_text",
+    "color": [ 0.78, 0.78, 0.84, 1 ],
+    "shadow": true,
+    "localize": false,
+    "font_size": "normal",
+    "bindings": [
+      { "binding_type": "collection_details", "binding_collection_name": "form_buttons" }
+    ]
+  },
+
+  "dynamic_header": {
+    "type": "label",
+    "size": [ 158, "default" ],
+    "text": "#form_button_text",
+    "color": [ 1, 1, 1, 1 ],
+    "shadow": true,
+    "localize": false,
+    "font_size": "large",
+    "bindings": [
+      { "binding_type": "collection_details", "binding_collection_name": "form_buttons" }
     ]
   }
 }

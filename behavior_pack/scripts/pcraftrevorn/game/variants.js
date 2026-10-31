@@ -8,7 +8,7 @@
 import { world, system } from "@minecraft/server";
 import { ActionFormData, uiManager } from "@minecraft/server-ui";
 import { VARIANTS } from "../data/variants.js";
-import { MENU_MARKERS } from "../constants.js";
+import { MENU_MARKERS, buildTitle } from "../constants.js";
 import { assignSkin, applyWorldSet, getNum } from "../skin/assign.js";
 
 const DIMENSIONS = ["minecraft:overworld", "minecraft:nether", "minecraft:the_end"];
@@ -33,7 +33,7 @@ export function refreshAll() { for (const species of Object.keys(VARIANTS)) refr
 function openSpecies(player, species) {
   const vs = VARIANTS[species];
   const cur = getSel(species);
-  const form = new ActionFormData().title(`${MENU_MARKERS.appearance}${LABEL[species] ?? species} · 外观`);
+  const form = new ActionFormData().title(buildTitle(`${MENU_MARKERS.appearance}${LABEL[species] ?? species} · 外观`, 0));
   const actions = [{ set: 0 }];
   form.button(`§f原版${cur === 0 ? " §a✔" : ""}`);
   vs.sets.forEach((s, i) => { form.button(`§f${s.name} §7(${s.count})${cur === i + 1 ? " §a✔" : ""}`); actions.push({ set: i + 1 }); });
@@ -53,7 +53,7 @@ function openSpecies(player, species) {
 
 export function openVariants(player) {
   const species = Object.keys(VARIANTS);
-  const form = new ActionFormData().title(`${MENU_MARKERS.appearance}社区外观 · 每生物变体`);
+  const form = new ActionFormData().title(buildTitle(`${MENU_MARKERS.appearance}社区外观 · 每生物变体`, 0));
   form.body("§7为每种掠食者选择社区资源包提供的外观（服务端统一生效）。");
   for (const sp of species) {
     const cur = getSel(sp);

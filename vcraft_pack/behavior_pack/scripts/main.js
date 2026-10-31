@@ -5,7 +5,7 @@
 // The belly mesh (owned by the gender pack's minecraft:player) is driven by the
 // pc_belly scoreboard (0 = flat .. 8 = full), derived from the prey's health.
 import { world, system, DisplaySlotId, CommandPermissionLevel, CustomCommandStatus, ItemStack, EntityDamageCause } from "@minecraft/server";
-import { ActionFormData, ModalFormData, uiManager } from "@minecraft/server-ui";
+import { ActionFormData, uiManager } from "@minecraft/server-ui";
 
 // The PCraft HUD button bar is a persistent form (see the gender pack); only
 // one form can be open per player, so close it before opening a VCraft menu.
@@ -35,6 +35,8 @@ const SLOTS = { ring: "戒指", necklace: "吊坠" };
 
 // Per-player settings (dynamic properties).
 const CFG = { belly: "vcraft:cfg_belly", sounds: "vcraft:cfg_sounds", digest: "vcraft:cfg_digest", keep: "vcraft:cfg_keep", grow: "vcraft:cfg_grow" };
+// Same invisible marker the PCraft/JSON-UI shell keys on (server_form.long_form).
+const PCRAFT_MARKER = "§0§r§1§r";
 function cfgGet(player, key, def) { try { const v = player.getDynamicProperty(key); return typeof v === "boolean" ? v : def; } catch { return def; } }
 function cfgSet(player, key, val) { try { player.setDynamicProperty(key, !!val); } catch { /* ignore */ } }
 
@@ -282,7 +284,7 @@ function unequip(player, slot) {
   player.sendMessage("§a[VCraft] 已卸下饰品。");
 }
 function openTrinketMenu(player) {
-  const form = new ActionFormData().title("饰品 / Trinkets");
+  const form = new ActionFormData().title(PCRAFT_MARKER + "饰品 / Trinkets");
   form.body(`§f戒指：§7${getEquipped(player, "ring") ? ACCESSORIES[getEquipped(player, "ring")]?.name ?? getEquipped(player, "ring") : "空"}\n§f吊坠：§7${getEquipped(player, "necklace") ? ACCESSORIES[getEquipped(player, "necklace")]?.name ?? getEquipped(player, "necklace") : "空"}`);
   const actions = [];
   const eqRing = getEquipped(player, "ring");
@@ -556,7 +558,7 @@ function overwhelmTick() {
 }
 
 function openMainMenu(player) {
-  const form = new ActionFormData().title("VCraft");
+  const form = new ActionFormData().title(PCRAFT_MARKER + "VCraft");
   form.button("§f设置");
   form.button("§f胃袋");
   form.button("§f饰品");
@@ -570,22 +572,31 @@ function openMainMenu(player) {
   }).catch(() => { /* ignore */ });
 }
 
+const VCFG_ROWS = [
+  { key: CFG.belly, label: "显示腹部", def: true },
+  { key: CFG.sounds, label: "音效（吞咽/挣扎/打嗝）", def: true },
+  { key: CFG.digest, label: "自动消化", def: true },
+  { key: CFG.keep, label: "死亡时保留猎物", def: false },
+  { key: CFG.grow, label: "消化后增大胸部（体型）", def: false },
+];
+
 function openConfigMenu(player) {
-  const form = new ModalFormData().title("VCraft 设置");
-  form.toggle("显示腹部", { defaultValue: cfgGet(player, CFG.belly, true) });
-  form.toggle("音效（吞咽/挣扎/打嗝）", { defaultValue: cfgGet(player, CFG.sounds, true) });
-  form.toggle("自动消化", { defaultValue: cfgGet(player, CFG.digest, true) });
-  form.toggle("死亡时保留猎物", { defaultValue: cfgGet(player, CFG.keep, false) });
-  form.toggle("消化后增大胸部（体型）", { defaultValue: cfgGet(player, CFG.grow, false) });
+  const actions = [];
+  const form = new ActionFormData().title(PCRAFT_MARKER + "VCraft 设置");
+  form.body("§7点一下即可切换，立即保存。");
+  for (const r of VCFG_ROWS) {
+    const on = !!cfgGet(player, r.key, r.def);
+    form.button(`§f${r.label}  ${on ? "§a开" : "§c关"}`);
+    actions.push(r);
+  }
+  form.button("§7关闭"); actions.push(null);
   closeHud(player);
-  form.show(player).then((r) => {
-    if (r.canceled) return;
-    cfgSet(player, CFG.belly, r.formValues?.[0]);
-    cfgSet(player, CFG.sounds, r.formValues?.[1]);
-    cfgSet(player, CFG.digest, r.formValues?.[2]);
-    cfgSet(player, CFG.keep, r.formValues?.[3]);
-    cfgSet(player, CFG.grow, r.formValues?.[4]);
-    player.sendMessage("§a[VCraft] 设置已保存。");
+  form.show(player).then((res) => {
+    if (res.canceled) return;
+    const row = actions[res.selection];
+    if (!row) return;
+    cfgSet(player, row.key, !cfgGet(player, row.key, row.def));
+    system.run(() => openConfigMenu(player));
   }).catch(() => { /* ignore */ });
 }
 
@@ -609,7 +620,7 @@ function ambientTick() {
 function openPreyMenu(player) {
   const gut = getGut(player);
   const rs = gut ? riders(gut) : [];
-  const form = new ActionFormData().title("胃袋");
+  const form = new ActionFormData().title(PCRAFT_MARKER + "胃袋");
   if (rs.length === 0) {
     form.body("§7胃袋是空的。");
     form.button("§7关闭");
