@@ -35,6 +35,26 @@
     "size": [ "100%", "100%" ],
     "controls": [
       {
+        // Click shield for our JSON-UI menu forms: `absorbs_input` is false on
+        // the screen (so the world keeps running), which means a click on empty
+        // space would otherwise reach the game and swing/mine. Only shown for
+        // PCraft forms (title carries the §0§r§1§r marker), never for the HUD bar.
+        "menu_shield": {
+          "type": "input_panel",
+          "size": [ "100%", "100%" ],
+          "prevent_touch_input": true,
+          "layer": 1,
+          "bindings": [
+            { "binding_name": "#title_text" },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§0§r§1§r') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
         "form@common_dialogs.main_panel_no_buttons": {
           "$title_panel": "common_dialogs.standard_title_label",
           "$title_size": [ "100% - 15px", 10 ],

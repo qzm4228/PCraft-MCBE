@@ -19,6 +19,10 @@
     "render_only_when_topmost": false,
     "render_game_behind": true,
     "always_accepts_input": true,
+    // Do not capture/hide the OS cursor: menus opened on this screen need a
+    // clickable pointer on desktop. Touch devices have no cursor, and the HUD
+    // bar is mobile-only by default, so this does not affect gameplay there.
+    "should_steal_mouse": false,
     // Deliberately NOT `screen_not_flushable` / `screen_draws_last`: those are
     // overlay-only flags (debug_screen uses them because it must never be
     // closed). On a form screen they stop the previous form from being flushed
