@@ -85,8 +85,6 @@
                 "animate": [
                     "root",
           "belly_jiggle",
-          "chest_rest",
-          "belly_rest",
           "bow_chargingc",
           "fishing_rod_usec",
           "fishing_rodc",
@@ -109,8 +107,6 @@
             },
             "animations": {
         "belly_jiggle": "animation.vcraft.belly.idle",
-        "chest_rest": "animation.pcraftrevorn.chest.off",
-        "belly_rest": "animation.vcraft.belly.off",
         "no": "animation.player.no",
         "fishing_rod_usec": "controller.animation.player.fishing_rod_use",
         "fishing_rod_use": "animation.player.fishing_rod_use",

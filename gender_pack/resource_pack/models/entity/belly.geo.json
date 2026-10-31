@@ -8,53 +8,213 @@
         "texture_height": 128,
         "visible_bounds_width": 3,
         "visible_bounds_height": 3,
-        "visible_bounds_offset": [0, 1.5, 0]
+        "visible_bounds_offset": [
+          0,
+          1.5,
+          0
+        ]
       },
       "bones": [
-        { "name": "root", "pivot": [0, 0, 0] },
-        { "name": "waist", "parent": "root", "pivot": [0, 12, 0] },
-        { "name": "body", "parent": "waist", "pivot": [0, 24, 0] },
-        { "name": "gut", "parent": "body", "pivot": [0, 18, 0] },
-        { "name": "vore1", "parent": "gut", "pivot": [0, 18, 0] },
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "waist",
+          "parent": "root",
+          "pivot": [
+            0,
+            12,
+            0
+          ]
+        },
+        {
+          "name": "body",
+          "parent": "waist",
+          "pivot": [
+            0,
+            24,
+            0
+          ]
+        },
+        {
+          "name": "gut",
+          "parent": "pcr_hide",
+          "pivot": [
+            0,
+            18,
+            0
+          ]
+        },
+        {
+          "name": "vore1",
+          "parent": "gut",
+          "pivot": [
+            0,
+            18,
+            0
+          ]
+        },
         {
           "name": "bottom",
           "parent": "vore1",
-          "pivot": [0, 18, 0],
+          "pivot": [
+            0,
+            18,
+            0
+          ],
           "cubes": [
-            { "origin": [-6, 7, -14], "size": [12, 12, 12], "inflate": 0.05, "uv": [64, 32] }
+            {
+              "origin": [
+                -6,
+                207.0,
+                -14
+              ],
+              "size": [
+                12,
+                12,
+                12
+              ],
+              "inflate": 0.05,
+              "uv": [
+                64,
+                32
+              ]
+            }
           ]
         },
         {
           "name": "top",
           "parent": "vore1",
-          "pivot": [0, 18, 0],
+          "pivot": [
+            0,
+            18,
+            0
+          ],
           "cubes": [
-            { "origin": [-5, 7, -12], "size": [10, 6, 11], "inflate": 0.25, "uv": [64, 15] }
+            {
+              "origin": [
+                -5,
+                207.0,
+                -12
+              ],
+              "size": [
+                10,
+                6,
+                11
+              ],
+              "inflate": 0.25,
+              "uv": [
+                64,
+                15
+              ]
+            }
           ]
         },
         {
           "name": "top2",
           "parent": "top",
-          "pivot": [0, 18, 0],
+          "pivot": [
+            0,
+            18,
+            0
+          ],
           "cubes": [
-            { "origin": [-4, 7, -2], "size": [8, 2, 7], "inflate": 0.25, "uv": [64, 6] }
+            {
+              "origin": [
+                -4,
+                207.0,
+                -2
+              ],
+              "size": [
+                8,
+                2,
+                7
+              ],
+              "inflate": 0.25,
+              "uv": [
+                64,
+                6
+              ]
+            }
           ]
         },
-        { "name": "vore2", "parent": "gut", "pivot": [0, 18, 0] },
+        {
+          "name": "vore2",
+          "parent": "gut",
+          "pivot": [
+            0,
+            18,
+            0
+          ]
+        },
         {
           "name": "bottomS2",
           "parent": "vore2",
-          "pivot": [0, 18, 0],
+          "pivot": [
+            0,
+            18,
+            0
+          ],
           "cubes": [
-            { "origin": [-12, 8, -26], "size": [24, 16, 24], "inflate": 0.05, "uv": [32, 88] }
+            {
+              "origin": [
+                -12,
+                208.0,
+                -26
+              ],
+              "size": [
+                24,
+                16,
+                24
+              ],
+              "inflate": 0.05,
+              "uv": [
+                32,
+                88
+              ]
+            }
           ]
         },
         {
           "name": "topS2",
           "parent": "vore2",
-          "pivot": [0, 18, 0],
+          "pivot": [
+            0,
+            18,
+            0
+          ],
           "cubes": [
-            { "origin": [-10, 4, -23], "size": [20, 10, 22], "inflate": 0.25, "uv": [42, 56] }
+            {
+              "origin": [
+                -10,
+                204.0,
+                -23
+              ],
+              "size": [
+                20,
+                10,
+                22
+              ],
+              "inflate": 0.25,
+              "uv": [
+                42,
+                56
+              ]
+            }
+          ]
+        },
+        {
+          "name": "pcr_hide",
+          "parent": "body",
+          "pivot": [
+            0,
+            0,
+            0
           ]
         }
       ]
