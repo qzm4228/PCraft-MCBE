@@ -440,6 +440,15 @@ function digestTick() {
       ensureStruggleItems(player); // keys are locked, but never leave the prey stuck
       // the arrow row + percentage refresh on their own timer so they stay on
       // screen between prompts
+      // correct/incorrect flash: only for hudUntil ticks, then back to idle
+      // (or off when no prompt is active). Without this the last arrow colour
+      // stays on screen until the next prompt.
+      if (session.hudUntil && now > session.hudUntil) {
+        session.hud = allOff();
+        if (session.awaiting && session.promptDir) session.hud[session.promptDir] = "idle";
+        session.hudUntil = 0;
+        showPrompt(player, session);
+      }
       session.msgTimer = (session.msgTimer + 1) % 10;
       if (session.msgTimer === 0) showPrompt(player, session);
       if (session.awaiting) {

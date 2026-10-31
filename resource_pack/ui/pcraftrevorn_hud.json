@@ -44,6 +44,7 @@
           "color": [ 1, 1, 1, 1 ],
           "shadow": false,
           "localize": false,
+          "visible": "((('%.3s' * (#vore_bus - ('%.6s' * #vore_bus))) - '  0') = ('%.3s' * (#vore_bus - ('%.6s' * #vore_bus))))",
           "text": "('剩余 ' + ('%.3s' * (#vore_bus - ('%.6s' * #vore_bus))) + 's')"
         }
       },
