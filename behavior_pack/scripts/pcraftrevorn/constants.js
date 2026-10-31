@@ -43,3 +43,11 @@ export const hudMarker = (dir, state) =>
 /** @param {{[dir: string]: "off"|"idle"|"correct"|"incorrect"}} stateByDir */
 export const buildHudBus = (stateByDir) =>
   TITLE_MARKER + HUD_DIRS.map((d) => hudMarker(d, stateByDir?.[d] ?? "off")).join("");
+
+// Menu markers: an invisible colour code inside the form title tells the
+// server_form UI which custom panel to draw (and hides the native form).
+export const MENU_MARKERS = {
+  guide: "§4§r",
+  options: "§5§r",
+  appearance: "§6§r",
+};

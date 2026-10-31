@@ -36,6 +36,7 @@ export async function openOptions(player) {
   while (true) {
     const res = await showPcForm(player, {
       title: "PCraft 选项",
+      menu: "options",
       body: "§7游戏设置与外观设置。",
       level: 0,
       buttons: [

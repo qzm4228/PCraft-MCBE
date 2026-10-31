@@ -3,40 +3,25 @@
   "third_party_server_screen@common.base_screen": {
     "$screen_content": "server_form.main_screen_content",
     "$additional_screen_content": "server_form.pcraftrevorn_additional_content",
-    // Non-blocking overlay screen: the non-modal subset of vanilla 1.21.100.6
-    // `debug_screen` (the one vanilla screen that pops up over gameplay with a
-    // working button while the game below keeps receiving input).
+    // The HUD bar is disabled for now, so this screen can be a normal modal
+    // menu: the game pauses and the engine gives us the mouse pointer, which is
+    // what the JSON-UI menus need. The non-modal variant is kept in git history
+    // for when the HUD comes back on a different host.
     //
     // IMPORTANT: these flags MUST be literal booleans. Writing a Molang
     // expression here is not supported by the engine: a non-empty string is
     // truthy, so `absorbs_input` becomes true and the screen swallows every
-    // touch -- the joystick and camera die. That was the bug that made the
-    // HUD bar "knock out" the touch controls no matter how the buttons were
-    // laid out.
+    // touch.
     "send_telemetry": false,
-    "is_showing_menu": false,
-    "absorbs_input": false,
-    "render_only_when_topmost": false,
+    "is_showing_menu": true,
+    "absorbs_input": true,
+    "render_only_when_topmost": true,
     "render_game_behind": true,
-    "always_accepts_input": true,
-    // Same combination vanilla debug_screen uses: "modal" for input/cursor
-    // purposes but not a menu, so the game keeps running and the touch controls
-    // stay alive. Added to make the pointer show up on desktop.
-    "is_modal": true,
-    // Do not capture/hide the OS cursor: menus opened on this screen need a
-    // clickable pointer on desktop. Touch devices have no cursor, and the HUD
-    // bar is mobile-only by default, so this does not affect gameplay there.
+    // Do not capture/hide the OS cursor.
     "should_steal_mouse": false,
-    // Deliberately NOT `screen_not_flushable` / `screen_draws_last`: those are
-    // overlay-only flags (debug_screen uses them because it must never be
-    // closed). On a form screen they stop the previous form from being flushed
-    // and put it back on top, so opening the options form from the guide left
-    // both screens stacked and unclickable.
     "low_frequency_rendering": true,
-    // Vanilla screens draw a centered loading bar while the screen opens
-    // (`common.base_screen` -> loading_bars_background, gated on
-    // `$use_loading_bars`). Our form is persistent, so that bar just flickers
-    // in the middle of the screen. debug_screen turns it off the same way.
+    // Vanilla screens draw a centered loading bar while the screen opens; a
+    // form is transient, so turn it off like debug_screen does.
     "$use_loading_bars": false,
     "$screen_animations": [],
     "$background_animations": [],
@@ -72,7 +57,7 @@
       },
       {
         "binding_type": "view",
-        "source_property_name": "(not ((#title_text - '§0§r§1§r') = #title_text))",
+        "source_property_name": "(not ((#title_text - '§0§r§1§r') = #title_text)) and ((#title_text - '§4§r') = #title_text) and ((#title_text - '§5§r') = #title_text) and ((#title_text - '§6§r') = #title_text)",
         "target_property_name": "#visible"
       }
     ],

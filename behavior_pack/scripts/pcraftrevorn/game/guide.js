@@ -48,6 +48,7 @@ export async function openGuide(player) {
   while (true) {
     const res = await showPcForm(player, {
       title: "掠食者指南",
+      menu: "guide",
       body: "§7点一个名字，瞧瞧它是谁、爱吃什么、怎么哄。",
       level: 0,
       buttons: PRED_ORDER.map((id) => ({ id, label: `§f${NAMES[id]}` })).concat([{ id: "__options", label: "§b选项" }, { id: "__close", label: "§a关闭" }])

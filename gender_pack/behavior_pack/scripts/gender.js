@@ -39,6 +39,10 @@ const title = (female) => `${MARKER}${female ? "1" : "0"}Female Gender Mod`;
 // it comes back as soon as that menu closes.
 // ---------------------------------------------------------------------------
 const HUD_TITLE = "PCraft HUD";
+// HUD bar temporarily disabled: the persistent form forces the whole form screen
+// to stay non-modal, which is what prevents the pointer from appearing in the
+// JSON-UI menus. Menus now get the whole screen (modal, with a cursor).
+const HUD_ENABLED = false;
 // The art is drawn directly by JSON-UI from $tex / $tex_pressed (see
 // ui/gender_menu.json); no icon is sent through the form button.
 const HUD_BUTTONS = ["", ""];
@@ -307,6 +311,7 @@ function hudWanted(player) {
 function startHud(player) {
   try {
     if (hudActive.has(player.id)) return;
+    if (!HUD_ENABLED) return;
     if (!hudWanted(player)) return;
     hudActive.add(player.id);
     const id = player.id;
@@ -340,7 +345,11 @@ function toggleHud(player) {
   try { player.setDynamicProperty(HUD_FORCE_PROP, on ? 1 : 0); } catch { /* ignore */ }
   if (on) startHud(player);
   else stopHud(player);
-  try { player.sendMessage(on ? "§7[PCraft] HUD 已开启。" : "§7[PCraft] HUD 已关闭。"); } catch { /* ignore */ }
+  try {
+    player.sendMessage(on
+      ? (HUD_ENABLED ? "§7[PCraft] HUD 已开启。" : "§7[PCraft] HUD 目前停用（菜单改造中），入口请用 /pcraftrevorn:panel。")
+      : "§7[PCraft] HUD 已关闭。");
+  } catch { /* ignore */ }
 }
 
 async function openQuickPanel(player) {
