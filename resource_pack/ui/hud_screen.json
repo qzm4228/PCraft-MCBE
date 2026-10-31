@@ -1,0 +1,50 @@
+// hud_screen override: keep it flag-only for $screen_content / button_mappings
+// (the engine merges these into whatever the running version ships), and add
+// the vore overlay as an extra layer.
+//
+// The vore HUD rides the title channel: the script writes "__pcr:..." with
+// onScreenDisplay.setTitle, #hud_title_text_string exposes it to JSON-UI, and
+// the vanilla title label is hidden while that bus is present. Same mechanism
+// as Waila GT's tooltip overlay.
+{
+  "namespace": "hud",
+  "hud_screen@common.base_screen": {
+    "is_showing_menu": false,
+    "should_steal_mouse": true,
+    "low_frequency_rendering": true,
+    "absorbs_input": false,
+    "render_only_when_topmost": false,
+    "send_telemetry": false,
+    "$screen_animations": [],
+    "$background_animations": [],
+    "load_screen_immediately": true,
+    "always_accepts_input": true,
+    "$additional_screen_content": "hud.pcraftrevorn_vore_overlay"
+  },
+  "hud_title_text": {
+    "modifications": [
+      {
+        "array_name": "bindings",
+        "operation": "insert_front",
+        "value": [
+          {
+            "binding_type": "global",
+            "binding_name": "#hud_title_text_string",
+            "binding_name_override": "#text"
+          }
+        ]
+      },
+      {
+        "array_name": "bindings",
+        "operation": "insert_back",
+        "value": [
+          {
+            "binding_type": "view",
+            "source_property_name": "(not (('%.6s' * #text) = '__pcr:'))",
+            "target_property_name": "#visible"
+          }
+        ]
+      }
+    ]
+  }
+}

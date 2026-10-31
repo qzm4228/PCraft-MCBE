@@ -1,27 +1,39 @@
 {
   "namespace": "hud",
 
-  // PCraftRevorn vore HUD -- VCM's VoreMinigameOverlay look on the action-bar
-  // channel (the mechanism is copied from poggy's 高亮信息显示: this file fully
-  // replaces hud_actionbar_text, whose $actionbar_text is fed by the engine).
+  // PCraftRevorn vore HUD -- VCM's VoreMinigameOverlay layout on the *title*
+  // channel (the pattern is Waila GT's: hud_screen gets an extra
+  // $additional_screen_content layer, and the script writes a compact bus with
+  // onScreenDisplay.setTitle; that string is exposed as #hud_title_text_string).
   //
-  // Layout, like VoreMinigameOverlay:
-  //        "剩余 3s"          (VCM: "Time Remaining: 3" at h/2-114)
-  //        [48x48 arrow]      (VCM: 48x48 sprite at w/2-27, h/2-31)
-  //        "挣脱 4/15"        (VCM: "Score: 4/15" at h/2+86)
+  // Why the title channel: the action bar is shared with VCraft's belly readout
+  // and the boss bar name is global to all players, so neither can carry this
+  // per-player state. The title channel is per-player and the vanilla title
+  // label is hidden by hud_screen.json while the bus is present.
   //
   // Bus: "__pcr:" + timer(3) + score(3) + needed(3) + 4 direction markers
-  "hud_actionbar_text": {
+  //      marker = "§2§r§<dir*4+state>§r"   (off / idle / correct / incorrect)
+  //
+  // Layout (same offsets as the VCM overlay):
+  //        "剩余 3s"
+  //        [48x48 arrow]
+  //        "挣脱 4/15"
+  "pcraftrevorn_vore_overlay": {
     "type": "panel",
-    "size": [ 0, 0 ],
-    "anchor_from": "center",
-    "anchor_to": "center",
-    "$atext": "$actionbar_text",
-      "$t6": "('%.6s' * $atext)",
-      "$t9": "('%.9s' * $atext)",
-      "$t12": "('%.12s' * $atext)",
-      "$t15": "('%.15s' * $atext)",
-    "visible": "(not (($atext - '__pcr:') = $atext))",
+    "size": [ "100%", "100%" ],
+    "clips_children": false,
+    "bindings": [
+      {
+        "binding_type": "global",
+        "binding_name": "#hud_title_text_string",
+        "binding_name_override": "#vore_bus"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "(('%.6s' * #vore_bus) = '__pcr:')",
+        "target_property_name": "#visible"
+      }
+    ],
     "controls": [
       {
         "pcr_timer": {
@@ -32,12 +44,7 @@
           "color": [ 1, 1, 1, 1 ],
           "shadow": false,
           "localize": false,
-          "$atext": "$actionbar_text",
-      "$t6": "('%.6s' * $atext)",
-      "$t9": "('%.9s' * $atext)",
-      "$t12": "('%.12s' * $atext)",
-      "$t15": "('%.15s' * $atext)",
-          "text": "('剩余 ' + ($t9 - $t6) + 's')"
+          "text": "('剩余 ' + ('%.3s' * (#vore_bus - ('%.6s' * #vore_bus))) + 's')"
         }
       },
       {
@@ -49,39 +56,99 @@
           "offset": [ -3, -7 ],
           "controls": [
             {
-              "arrow_up": {
+              "up_idle": {
                 "type": "image",
                 "size": [ "100%", "100%" ],
-                "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_up",
-                "$atext": "$actionbar_text",
-                "visible": "(not (($atext - '§2§r§1§r') = $atext))"
+                "texture": "textures/ui/pcraftrevorn/hud/struggle_up_idle",
+                "visible": "(not ((#vore_bus - '§2§r§1§r') = #vore_bus))"
               }
             },
             {
-              "arrow_down": {
+              "up_correct": {
                 "type": "image",
                 "size": [ "100%", "100%" ],
-                "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_down",
-                "$atext": "$actionbar_text",
-                "visible": "(not (($atext - '§2§r§5§r') = $atext))"
+                "texture": "textures/ui/pcraftrevorn/hud/struggle_up_correct",
+                "visible": "(not ((#vore_bus - '§2§r§2§r') = #vore_bus))"
               }
             },
             {
-              "arrow_left": {
+              "up_incorrect": {
                 "type": "image",
                 "size": [ "100%", "100%" ],
-                "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_left",
-                "$atext": "$actionbar_text",
-                "visible": "(not (($atext - '§2§r§9§r') = $atext))"
+                "texture": "textures/ui/pcraftrevorn/hud/struggle_up_incorrect",
+                "visible": "(not ((#vore_bus - '§2§r§3§r') = #vore_bus))"
               }
             },
             {
-              "arrow_right": {
+              "down_idle": {
                 "type": "image",
                 "size": [ "100%", "100%" ],
-                "texture": "textures/ui/pcraftrevorn/hud/vcm_arrow_right",
-                "$atext": "$actionbar_text",
-                "visible": "(not (($atext - '§2§r§d§r') = $atext))"
+                "texture": "textures/ui/pcraftrevorn/hud/struggle_down_idle",
+                "visible": "(not ((#vore_bus - '§2§r§5§r') = #vore_bus))"
+              }
+            },
+            {
+              "down_correct": {
+                "type": "image",
+                "size": [ "100%", "100%" ],
+                "texture": "textures/ui/pcraftrevorn/hud/struggle_down_correct",
+                "visible": "(not ((#vore_bus - '§2§r§6§r') = #vore_bus))"
+              }
+            },
+            {
+              "down_incorrect": {
+                "type": "image",
+                "size": [ "100%", "100%" ],
+                "texture": "textures/ui/pcraftrevorn/hud/struggle_down_incorrect",
+                "visible": "(not ((#vore_bus - '§2§r§7§r') = #vore_bus))"
+              }
+            },
+            {
+              "left_idle": {
+                "type": "image",
+                "size": [ "100%", "100%" ],
+                "texture": "textures/ui/pcraftrevorn/hud/struggle_left_idle",
+                "visible": "(not ((#vore_bus - '§2§r§9§r') = #vore_bus))"
+              }
+            },
+            {
+              "left_correct": {
+                "type": "image",
+                "size": [ "100%", "100%" ],
+                "texture": "textures/ui/pcraftrevorn/hud/struggle_left_correct",
+                "visible": "(not ((#vore_bus - '§2§r§a§r') = #vore_bus))"
+              }
+            },
+            {
+              "left_incorrect": {
+                "type": "image",
+                "size": [ "100%", "100%" ],
+                "texture": "textures/ui/pcraftrevorn/hud/struggle_left_incorrect",
+                "visible": "(not ((#vore_bus - '§2§r§b§r') = #vore_bus))"
+              }
+            },
+            {
+              "right_idle": {
+                "type": "image",
+                "size": [ "100%", "100%" ],
+                "texture": "textures/ui/pcraftrevorn/hud/struggle_right_idle",
+                "visible": "(not ((#vore_bus - '§2§r§d§r') = #vore_bus))"
+              }
+            },
+            {
+              "right_correct": {
+                "type": "image",
+                "size": [ "100%", "100%" ],
+                "texture": "textures/ui/pcraftrevorn/hud/struggle_right_correct",
+                "visible": "(not ((#vore_bus - '§2§r§e§r') = #vore_bus))"
+              }
+            },
+            {
+              "right_incorrect": {
+                "type": "image",
+                "size": [ "100%", "100%" ],
+                "texture": "textures/ui/pcraftrevorn/hud/struggle_right_incorrect",
+                "visible": "(not ((#vore_bus - '§2§r§f§r') = #vore_bus))"
               }
             }
           ]
@@ -96,12 +163,7 @@
           "color": [ 1, 1, 1, 1 ],
           "shadow": false,
           "localize": false,
-          "$atext": "$actionbar_text",
-      "$t6": "('%.6s' * $atext)",
-      "$t9": "('%.9s' * $atext)",
-      "$t12": "('%.12s' * $atext)",
-      "$t15": "('%.15s' * $atext)",
-          "text": "('挣脱 ' + ($t12 - $t9) + '/' + ($t15 - $t12))"
+          "text": "('挣脱 ' + ('%.3s' * (#vore_bus - ('%.9s' * #vore_bus))) + '/' + ('%.3s' * (#vore_bus - ('%.12s' * #vore_bus))))"
         }
       }
     ]

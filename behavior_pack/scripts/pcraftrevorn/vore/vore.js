@@ -20,7 +20,7 @@ import {
   clearStruggleItems, stashInventory, unstashInventory, isStruggleItem,
   STASH_ENTITY, STASH_KEY
 } from "./prey_items.js";
-import { buildHudBus, hudMarker } from "../constants.js";
+import { hudMarker } from "../constants.js";
 import { COMMUNITY } from "../data/community.js";
 import { VCM } from "../data/vcm.js";
 
@@ -132,25 +132,18 @@ function lockTo(player, session) {
   return true;
 }
 
-// The digestion bar doubles as the HUD channel: the boss bar's fill comes from
-// the entity's health and its nameTag carries the struggle state bus that
-// hud/pcraftrevorn_hud.json reads back (see constants.js). The bus itself is
-// formatting codes only, so it never prints; the readable suffix after it is
-// what the plain vanilla bar shows while the custom HUD is disabled.
+// The digestion bar is a boss entity: its health drives the boss-bar fill. Its
+// nameTag must stay a plain label -- a boss bar's name is shared by every player
+// and does not parse formatting-code buses, so putting the struggle bus there
+// leaked `0r1r2r...` garbage to everyone. The struggle HUD rides the per-player
+// title channel instead (see hud/pcraftrevorn_hud.json).
 const BAR_ID = "pcraftrevorn:digestion_bar";
-const BAR_SUFFIX = "§7消化中";
-const barName = (bus) => bus + BAR_SUFFIX;
-
-/** Per-direction HUD state; the resolved frame lingers briefly before clearing. */
-function hudStates(session, now) {
-  if (session.awaiting) return session.hud ?? allOff();
-  return now < (session.hudUntil ?? 0) ? (session.hud ?? allOff()) : allOff();
-}
+const BAR_NAME = "§7消化中";
 
 function spawnBar(player, session) {
   try {
     const bar = player.dimension.spawnEntity(BAR_ID, player.location);
-    bar.nameTag = barName(buildHudBus(allOff()));
+    bar.nameTag = BAR_NAME;
     const hp = bar.getComponent("minecraft:health");
     if (hp) hp.setCurrentValue(1);
     session.barId = bar.id;
@@ -162,14 +155,11 @@ function updateBar(player, session) {
   let bar;
   try { bar = world.getEntity(session.barId); } catch { bar = undefined; }
   if (!bar) { session.barId = undefined; return; }
-  const now = system.currentTick;
   try {
     bar.teleport(player.location, { dimension: player.dimension });
     const pct = Math.max(1, Math.min(100, Math.round((session.digest / session.maxTimer) * 100)));
     const hp = bar.getComponent("minecraft:health");
     if (hp) hp.setCurrentValue(pct);
-    const bus = barName(buildHudBus(hudStates(session, now)));
-    if (bar.nameTag !== bus) bar.nameTag = bus;
   } catch { /* ignore */ }
 }
 
@@ -284,17 +274,22 @@ function hudBus(session) {
 }
 
 function showPrompt(player, session) {
-  // The whole HUD rides the action bar (poggy's pattern): the RP replaces
-  // hud_actionbar_text, which receives $actionbar_text from the engine, so the
-  // arrow and the percentage are drawn there and no /title is involved at all.
+  // Title-channel HUD (Waila's pattern): the bus rides onScreenDisplay.setTitle
+  // and hud/pcraftrevorn_hud.json reads it back through #hud_title_text_string.
+  // The action bar is left free for the belly readout. stayDuration is longer
+  // than the 10 tick refresh cadence so the overlay never blinks out.
   try {
-    player.onScreenDisplay.setActionBar(hudBus(session));
+    player.onScreenDisplay.setTitle(hudBus(session), {
+      fadeInDuration: 0,
+      stayDuration: 40,
+      fadeOutDuration: 0,
+    });
   } catch { /* ignore */ }
 }
 
 /** Clears the HUD bus (release / escape / death). */
 function clearPrompt(player) {
-  try { player.onScreenDisplay.setActionBar(" "); } catch { /* ignore */ }
+  try { player.onScreenDisplay.setTitle(""); } catch { /* ignore */ }
 }
 
 /**
