@@ -212,7 +212,7 @@
       {
         "panel": {
           "type": "panel",
-          "size": [ 360, 600 ],
+          "size": [ 300, 340 ],
           "anchor_from": "center",
           "anchor_to": "center",
           "controls": [
@@ -230,8 +230,8 @@
                 "orientation": "vertical",
                 "anchor_from": "top_middle",
                 "anchor_to": "top_middle",
-                "offset": [ 0, 14 ],
-                "size": [ 336, "100%c" ],
+                "offset": [ 0, 10 ],
+                "size": [ 276, "100%c" ],
                 "controls": [
                   {
                     "title": {
@@ -241,14 +241,14 @@
                       "color": [ 1, 1, 1, 1 ],
                       "shadow": true,
                       "localize": false,
-                      "font_size": "extra_large",
+                      "font_size": "large",
                       "text_alignment": "center"
                     }
                   },
                   {
                     "gap_title": {
                       "type": "panel",
-                      "size": [ 0, 8 ]
+                      "size": [ 0, 6 ]
                     }
                   },
                   {
@@ -259,14 +259,14 @@
                       "color": [ 0.78, 0.78, 0.84, 1 ],
                       "shadow": true,
                       "localize": false,
-                      "font_size": "normal",
+                      "font_size": "small",
                       "text_alignment": "center"
                     }
                   },
                   {
                     "gap_body": {
                       "type": "panel",
-                      "size": [ 0, 10 ]
+                      "size": [ 0, 8 ]
                     }
                   },
                   {
@@ -287,7 +287,7 @@
   "pcr_menu_buttons": {
     "type": "stack_panel",
     "orientation": "vertical",
-    "size": [ 320, "100%c" ],
+    "size": [ 276, "100%c" ],
     "factory": {
       "name": "buttons",
       "control_ids": {
@@ -308,18 +308,18 @@
   "pcr_menu_button": {
     "type": "stack_panel",
     "orientation": "vertical",
-    "size": [ 320, "100%c" ],
+    "size": [ 276, "100%c" ],
     "controls": [
       {
         "btn@common_buttons.light_text_button": {
           "anchor_from": "top_left",
           "anchor_to": "top_left",
-          "size": [ 320, 24 ],
+          "size": [ 276, 22 ],
           "$pressed_button_name": "button.form_button_click",
           "$button_text": "#form_button_text",
           "$button_text_binding_type": "collection",
           "$button_text_grid_collection_name": "form_buttons",
-          "$button_text_max_size": [ "100%", 22 ],
+          "$button_text_max_size": [ "100%", 20 ],
           "bindings": [
             {
               "binding_type": "collection_details",
@@ -331,7 +331,7 @@
       {
         "spacer": {
           "type": "panel",
-          "size": [ 0, 3 ]
+          "size": [ 0, 2 ]
         }
       }
     ]
@@ -339,7 +339,7 @@
 
   "pcr_menu_label": {
     "type": "label",
-    "size": [ 320, "default" ],
+    "size": [ 276, "default" ],
     "text": "#form_button_text",
     "color": [ 0.78, 0.78, 0.84, 1 ],
     "shadow": true,
@@ -353,7 +353,7 @@
 
   "pcr_menu_header": {
     "type": "label",
-    "size": [ 320, "default" ],
+    "size": [ 276, "default" ],
     "text": "#form_button_text",
     "color": [ 1, 1, 1, 1 ],
     "shadow": true,

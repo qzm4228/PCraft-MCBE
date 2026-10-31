@@ -31,7 +31,7 @@ export async function showPcForm(player, { title = "", body = "", level = 0, but
   return { canceled: false, id: button?.id, selection: res.selection };
 }
 
-export const PAGE_SIZE = 10;
+export const PAGE_SIZE = 5;
 
 /**
  * Paginated PCraft form. Shows `items` in pages (prev/next rows) plus an
