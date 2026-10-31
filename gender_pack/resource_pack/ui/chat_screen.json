@@ -242,12 +242,6 @@
           "size": [ "100%c", "100%c" ],
           "controls": [
             {
-              "hud@chat.pcraftrevorn_chat_button": {
-                "$command": "/pcraftrevorn:hud",
-                "$text": "§eHUD"
-              }
-            },
-            {
               "gender@chat.pcraftrevorn_chat_button": {
                 "$command": "/pcraftrevorn:gender",
                 "$text": "§b性别"

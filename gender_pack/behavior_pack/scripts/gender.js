@@ -39,9 +39,10 @@ const title = (female) => `${MARKER}${female ? "1" : "0"}Female Gender Mod`;
 // it comes back as soon as that menu closes.
 // ---------------------------------------------------------------------------
 const HUD_TITLE = "PCraft HUD";
-// HUD bar temporarily disabled: the persistent form forces the whole form screen
-// to stay non-modal, which is what prevents the pointer from appearing in the
-// JSON-UI menus. Menus now get the whole screen (modal, with a cursor).
+// Build-time switch (not a runtime platform check):
+//   PC package     -> false: modal menus, no HUD bar
+//   Mobile package -> true : non-modal screen + HUD bar
+// tools_py/build_config.py rewrites this exact line for the Mobile build.
 const HUD_ENABLED = false;
 // The art is drawn directly by JSON-UI from $tex / $tex_pressed (see
 // ui/gender_menu.json); no icon is sent through the form button.
@@ -293,19 +294,15 @@ async function hudLoop(player) {
   }
 }
 
-// HUD visibility: auto = touch devices only. The quick panel or
-// /pcraftrevorn:hud can force it.
+// HUD visibility is decided by the package, not by runtime platform sniffing:
+// the Mobile build flips HUD_ENABLED on, the PC build leaves it off.
+// /pcraftrevorn:hud can still force it off/on for the current player.
 function hudWanted(player) {
+  if (!HUD_ENABLED) return false;
   try {
-    const v = player.getDynamicProperty(HUD_FORCE_PROP);
-    if (v === 1) return true;
-    if (v === 0) return false;
+    if (player.getDynamicProperty(HUD_FORCE_PROP) === 0) return false;
   } catch { /* ignore */ }
-  try {
-    const info = player.clientSystemInfo;
-    if (!info) return true; // API missing on this version -> keep the old behaviour
-    return info.platformType === "Mobile";
-  } catch { return true; }
+  return true;
 }
 
 function startHud(player) {
@@ -341,15 +338,15 @@ function openMenu(player) {
 const QUICK_TITLE = "PCraft 面板";
 
 function toggleHud(player) {
+  if (!HUD_ENABLED) {
+    try { player.sendMessage("§7[PCraft] 此版本不提供 HUD 按钮。"); } catch { /* ignore */ }
+    return;
+  }
   const on = !hudActive.has(player.id);
   try { player.setDynamicProperty(HUD_FORCE_PROP, on ? 1 : 0); } catch { /* ignore */ }
   if (on) startHud(player);
   else stopHud(player);
-  try {
-    player.sendMessage(on
-      ? (HUD_ENABLED ? "§7[PCraft] HUD 已开启。" : "§7[PCraft] HUD 目前停用（菜单改造中），入口请用 /pcraftrevorn:panel。")
-      : "§7[PCraft] HUD 已关闭。");
-  } catch { /* ignore */ }
+  try { player.sendMessage(on ? "§7[PCraft] HUD 已开启。" : "§7[PCraft] HUD 已关闭。"); } catch { /* ignore */ }
 }
 
 async function openQuickPanel(player) {
@@ -357,16 +354,14 @@ async function openQuickPanel(player) {
   let r;
   try {
     const form = new ActionFormData().title(QUICK_TITLE);
-    form.button("切换 电脑 / 手机 HUD");
     form.button("打开性别面板");
     form.button("吞食（最近目标）");
     form.button("§7关闭");
     r = await form.show(player);
   } catch { r = undefined; }
   if (!r || r.canceled) return;
-  if (r.selection === 0) toggleHud(player);
-  else if (r.selection === 1) openMenu(player);
-  else if (r.selection === 2) { try { player.addTag(HUD_SWALLOW_TAG); } catch { /* ignore */ } }
+  if (r.selection === 0) openMenu(player);
+  else if (r.selection === 1) { try { player.addTag(HUD_SWALLOW_TAG); } catch { /* ignore */ } }
 }
 
 export function wireGender() {

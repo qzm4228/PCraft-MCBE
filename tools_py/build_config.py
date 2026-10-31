@@ -221,6 +221,17 @@ def pack_entries(pack: dict, target: dict, prefix: str = "", platform: str | Non
             and rel == "ui/pcraftrevorn_forms.json"
         ):
             src = MOBILE_FORMS
+        if (
+            platform == "Mobile"
+            and pack.get("base_dir") == "gender_pack/behavior_pack"
+            and rel == "scripts/gender.js"
+        ):
+            # HUD bar: Mobile only. Build-time switch, no runtime platform check.
+            data = src.read_bytes()
+            patched = data.replace(b"const HUD_ENABLED = false;", b"const HUD_ENABLED = true;")
+            if patched == data:
+                raise SystemExit("[build_config] HUD_ENABLED sentinel not found in gender.js")
+            src = patched
         entries.append((f"{prefix}/{rel}" if prefix else rel, src))
     return entries
 
