@@ -17,11 +17,8 @@
     "absorbs_input": false,
     "render_only_when_topmost": false,
     "render_game_behind": true,
-    // Do not capture/hide the OS cursor.
-    "should_steal_mouse": false,
-    // Touch devices do not need the pointer: keep the overlay non-modal so
-    // the touch controls keep working, but accept taps on the panels.
-    "is_modal": true,
+    // Touch: the exact 10.25.2 field set. Non-modal overlay, taps still reach
+    // the panels. Do NOT add is_modal / should_steal_mouse here.
     "always_accepts_input": true,
     "low_frequency_rendering": true,
     // Vanilla screens draw a centered loading bar while the screen opens; a

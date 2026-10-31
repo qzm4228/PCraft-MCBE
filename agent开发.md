@@ -68,10 +68,25 @@
 
 （`holographic_postrender_screen` 是另一个同类例子。）
 
-这套字面量照抄进 `third_party_server_screen`（`resource_pack/ui/pcraftrevorn_forms.json`）：
-`is_showing_menu: false`、`absorbs_input: false`、`render_only_when_topmost: false`、
-`render_game_behind: true`、`always_accepts_input: true`、`screen_draws_last: true`、
-`screen_not_flushable: true`。
+`third_party_server_screen` 现在**分两套**，构建时按 `--platform` 选择
+（源文件 `resource_pack/ui/pcraftrevorn_forms.json` 是 PC 版，
+`config/ui_variants/pcraftrevorn_forms.mobile.json` 是手机版，由
+`.work/make_mobile_ui.py` 生成）：
+
+| 字段 | PC（模态菜单） | 手机（10.25.2 实测） |
+|---|---|---|
+| `is_showing_menu` | `true` | `false` |
+| `absorbs_input` | `true` | `false` |
+| `render_only_when_topmost` | `true` | `false` |
+| `render_game_behind` | `true` | `true` |
+| `is_modal` | — | — |
+| `always_accepts_input` | — | `true` |
+| `should_steal_mouse` | `false` | — |
+
+手机那列就是 **10.25.2 的原样字段**，已在真机验证：透传触摸、面板按钮可点、
+摇杆和视角正常。**不要再给手机版加 `is_modal` / `should_steal_mouse`**——
+加了就会重新吞触摸或抢指针。
+PC 那列是原版菜单的模态组合，引擎才会交出鼠标指针。
 
 - ❌ **绝对不要在这些标志上写表达式**（以前写过 `(not ($touch and (not $is_pregame)))`）。
   引擎不按表达式求值，非空字符串就是「真」，于是 `absorbs_input` 变成 `true`，
