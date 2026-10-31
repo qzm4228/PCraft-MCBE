@@ -1,26 +1,11 @@
 {
   "namespace": "hud",
-
-  // PCraftRevorn vore HUD -- VCM's VoreMinigameOverlay layout on the *title*
-  // channel (the pattern is Waila GT's: hud_screen gets an extra
-  // $additional_screen_content layer, and the script writes a compact bus with
-  // onScreenDisplay.setTitle; that string is exposed as #hud_title_text_string).
-  //
-  // Why the title channel: the action bar is shared with VCraft's belly readout
-  // and the boss bar name is global to all players, so neither can carry this
-  // per-player state. The title channel is per-player and the vanilla title
-  // label is hidden by hud_screen.json while the bus is present.
-  //
-  // Bus: "__pcr:" + timer(3) + score(3) + needed(3) + 4 direction markers
-  //      marker = "§2§r§<dir*4+state>§r"   (off / idle / correct / incorrect)
-  //
-  // Layout (same offsets as the VCM overlay):
-  //        "剩余 3s"
-  //        [48x48 arrow]
-  //        "挣脱 4/15"
   "pcraftrevorn_vore_overlay": {
     "type": "panel",
-    "size": [ "100%", "100%" ],
+    "size": [
+      "100%",
+      "100%"
+    ],
     "clips_children": false,
     "bindings": [
       {
@@ -40,116 +25,309 @@
           "type": "label",
           "anchor_from": "center",
           "anchor_to": "center",
-          "offset": [ 0, -100 ],
-          "color": [ 1, 1, 1, 1 ],
+          "offset": [
+            0,
+            -84
+          ],
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
           "shadow": false,
           "localize": false,
-          "visible": "((('%.3s' * (#vore_bus - ('%.6s' * #vore_bus))) - '  0') = ('%.3s' * (#vore_bus - ('%.6s' * #vore_bus))))",
-          "text": "('剩余 ' + ('%.3s' * (#vore_bus - ('%.6s' * #vore_bus))) + 's')"
+          "text": "('剩余 ' + ('%.3s' * (#bus - ('%.6s' * #bus))) + 's')",
+          "bindings": [
+            {
+              "binding_type": "global",
+              "binding_name": "#hud_title_text_string",
+              "binding_name_override": "#bus"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((('%.3s' * (#bus - ('%.6s' * #bus))) - '  0') = ('%.3s' * (#bus - ('%.6s' * #bus))))",
+              "target_property_name": "#visible"
+            }
+          ]
         }
       },
       {
         "pcr_arrow": {
           "type": "panel",
-          "size": [ 48, 48 ],
+          "size": [
+            48,
+            48
+          ],
           "anchor_from": "center",
           "anchor_to": "center",
-          "offset": [ -3, -7 ],
+          "offset": [
+            0,
+            0
+          ],
           "controls": [
             {
               "up_idle": {
                 "type": "image",
-                "size": [ "100%", "100%" ],
+                "size": [
+                  "100%",
+                  "100%"
+                ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_up_idle",
-                "visible": "(not ((#vore_bus - '§2§r§1§r') = #vore_bus))"
+                "bindings": [
+                  {
+                    "binding_type": "global",
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#bus"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#bus - '§2§r§1§r') = #bus))",
+                    "target_property_name": "#visible"
+                  }
+                ]
               }
             },
             {
               "up_correct": {
                 "type": "image",
-                "size": [ "100%", "100%" ],
+                "size": [
+                  "100%",
+                  "100%"
+                ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_up_correct",
-                "visible": "(not ((#vore_bus - '§2§r§2§r') = #vore_bus))"
+                "bindings": [
+                  {
+                    "binding_type": "global",
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#bus"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#bus - '§2§r§2§r') = #bus))",
+                    "target_property_name": "#visible"
+                  }
+                ]
               }
             },
             {
               "up_incorrect": {
                 "type": "image",
-                "size": [ "100%", "100%" ],
+                "size": [
+                  "100%",
+                  "100%"
+                ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_up_incorrect",
-                "visible": "(not ((#vore_bus - '§2§r§3§r') = #vore_bus))"
+                "bindings": [
+                  {
+                    "binding_type": "global",
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#bus"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#bus - '§2§r§3§r') = #bus))",
+                    "target_property_name": "#visible"
+                  }
+                ]
               }
             },
             {
               "down_idle": {
                 "type": "image",
-                "size": [ "100%", "100%" ],
+                "size": [
+                  "100%",
+                  "100%"
+                ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_down_idle",
-                "visible": "(not ((#vore_bus - '§2§r§5§r') = #vore_bus))"
+                "bindings": [
+                  {
+                    "binding_type": "global",
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#bus"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#bus - '§2§r§5§r') = #bus))",
+                    "target_property_name": "#visible"
+                  }
+                ]
               }
             },
             {
               "down_correct": {
                 "type": "image",
-                "size": [ "100%", "100%" ],
+                "size": [
+                  "100%",
+                  "100%"
+                ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_down_correct",
-                "visible": "(not ((#vore_bus - '§2§r§6§r') = #vore_bus))"
+                "bindings": [
+                  {
+                    "binding_type": "global",
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#bus"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#bus - '§2§r§6§r') = #bus))",
+                    "target_property_name": "#visible"
+                  }
+                ]
               }
             },
             {
               "down_incorrect": {
                 "type": "image",
-                "size": [ "100%", "100%" ],
+                "size": [
+                  "100%",
+                  "100%"
+                ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_down_incorrect",
-                "visible": "(not ((#vore_bus - '§2§r§7§r') = #vore_bus))"
+                "bindings": [
+                  {
+                    "binding_type": "global",
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#bus"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#bus - '§2§r§7§r') = #bus))",
+                    "target_property_name": "#visible"
+                  }
+                ]
               }
             },
             {
               "left_idle": {
                 "type": "image",
-                "size": [ "100%", "100%" ],
+                "size": [
+                  "100%",
+                  "100%"
+                ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_left_idle",
-                "visible": "(not ((#vore_bus - '§2§r§9§r') = #vore_bus))"
+                "bindings": [
+                  {
+                    "binding_type": "global",
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#bus"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#bus - '§2§r§9§r') = #bus))",
+                    "target_property_name": "#visible"
+                  }
+                ]
               }
             },
             {
               "left_correct": {
                 "type": "image",
-                "size": [ "100%", "100%" ],
+                "size": [
+                  "100%",
+                  "100%"
+                ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_left_correct",
-                "visible": "(not ((#vore_bus - '§2§r§a§r') = #vore_bus))"
+                "bindings": [
+                  {
+                    "binding_type": "global",
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#bus"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#bus - '§2§r§a§r') = #bus))",
+                    "target_property_name": "#visible"
+                  }
+                ]
               }
             },
             {
               "left_incorrect": {
                 "type": "image",
-                "size": [ "100%", "100%" ],
+                "size": [
+                  "100%",
+                  "100%"
+                ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_left_incorrect",
-                "visible": "(not ((#vore_bus - '§2§r§b§r') = #vore_bus))"
+                "bindings": [
+                  {
+                    "binding_type": "global",
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#bus"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#bus - '§2§r§b§r') = #bus))",
+                    "target_property_name": "#visible"
+                  }
+                ]
               }
             },
             {
               "right_idle": {
                 "type": "image",
-                "size": [ "100%", "100%" ],
+                "size": [
+                  "100%",
+                  "100%"
+                ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_right_idle",
-                "visible": "(not ((#vore_bus - '§2§r§d§r') = #vore_bus))"
+                "bindings": [
+                  {
+                    "binding_type": "global",
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#bus"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#bus - '§2§r§d§r') = #bus))",
+                    "target_property_name": "#visible"
+                  }
+                ]
               }
             },
             {
               "right_correct": {
                 "type": "image",
-                "size": [ "100%", "100%" ],
+                "size": [
+                  "100%",
+                  "100%"
+                ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_right_correct",
-                "visible": "(not ((#vore_bus - '§2§r§e§r') = #vore_bus))"
+                "bindings": [
+                  {
+                    "binding_type": "global",
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#bus"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#bus - '§2§r§e§r') = #bus))",
+                    "target_property_name": "#visible"
+                  }
+                ]
               }
             },
             {
               "right_incorrect": {
                 "type": "image",
-                "size": [ "100%", "100%" ],
+                "size": [
+                  "100%",
+                  "100%"
+                ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_right_incorrect",
-                "visible": "(not ((#vore_bus - '§2§r§f§r') = #vore_bus))"
+                "bindings": [
+                  {
+                    "binding_type": "global",
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#bus"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#bus - '§2§r§f§r') = #bus))",
+                    "target_property_name": "#visible"
+                  }
+                ]
               }
             }
           ]
@@ -160,11 +338,26 @@
           "type": "label",
           "anchor_from": "center",
           "anchor_to": "center",
-          "offset": [ 0, 86 ],
-          "color": [ 1, 1, 1, 1 ],
+          "offset": [
+            0,
+            66
+          ],
+          "color": [
+            1,
+            1,
+            1,
+            1
+          ],
           "shadow": false,
           "localize": false,
-          "text": "('挣脱 ' + ('%.3s' * (#vore_bus - ('%.9s' * #vore_bus))) + '/' + ('%.3s' * (#vore_bus - ('%.12s' * #vore_bus))))"
+          "text": "('挣脱 ' + ('%.3s' * (#bus - ('%.9s' * #bus))) + '/' + ('%.3s' * (#bus - ('%.12s' * #bus))))",
+          "bindings": [
+            {
+              "binding_type": "global",
+              "binding_name": "#hud_title_text_string",
+              "binding_name_override": "#bus"
+            }
+          ]
         }
       }
     ]
