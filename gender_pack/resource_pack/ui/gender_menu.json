@@ -35,6 +35,25 @@
     "size": [ "100%", "100%" ],
     "controls": [
       {
+        // Touch variant only: the screen is non-modal there, so empty-space taps
+        // must be swallowed by our menu instead of reaching the world. Hidden for
+        // the wardrobe (its own shield) and for native forms.
+        "menu_shield": {
+          "type": "input_panel",
+          "size": [ "100%", "100%" ],
+          "prevent_touch_input": true,
+          "layer": 1,
+          "bindings": [
+            { "binding_name": "#title_text" },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§4§r') = #title_text)) or (not ((#title_text - '§5§r') = #title_text)) or (not ((#title_text - '§6§r') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
         "form@common_dialogs.main_panel_no_buttons": {
           "$title_panel": "common_dialogs.standard_title_label",
           "$title_size": [ "100% - 15px", 10 ],

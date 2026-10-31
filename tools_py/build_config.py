@@ -37,6 +37,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "config" / "packs.json"
 TARGETS = ROOT / "config" / "targets.json"
 DIST = ROOT / "dist"
+MOBILE_FORMS = ROOT / "config" / "ui_variants" / "pcraftrevorn_forms.mobile.json"
 
 LANG_ORDER = ["en_US", "zh_CN", "zh_TW"]
 
@@ -198,7 +199,7 @@ def new_zip(out_file: Path, entries: list[tuple[str, object]]) -> None:
                 zf.write(src, arcname)
 
 
-def pack_entries(pack: dict, target: dict, prefix: str = "") -> list[tuple[str, object]]:
+def pack_entries(pack: dict, target: dict, prefix: str = "", platform: str | None = None) -> list[tuple[str, object]]:
     """Resolve the pack for this target -> [(arcname, src)]. Overrides manifest.json."""
     base = ROOT / pack["base_dir"]
     fmap = dist_resolver.resolve(base, target["id"])
@@ -214,14 +215,22 @@ def pack_entries(pack: dict, target: dict, prefix: str = "") -> list[tuple[str, 
             continue  # replaced by the target-applied manifest above
         if group and not pack_split.keep(group, rel):
             continue
+        if (
+            platform == "Mobile"
+            and pack.get("base_dir") == "resource_pack"
+            and rel == "ui/pcraftrevorn_forms.json"
+        ):
+            src = MOBILE_FORMS
         entries.append((f"{prefix}/{rel}" if prefix else rel, src))
     return entries
 
 
-def build_target(config: dict, target: dict) -> Path:
+def build_target(config: dict, target: dict, platform: str | None = None) -> Path:
     tid = target["id"]
     label = str(next(iter(config.values()))["version"])
-    print(f"[build_config] === target {tid} (min_engine {target.get('min_engine_version')}) ===")
+    suffix = f"_{platform}" if platform else ""
+    print(f"[build_config] === target {tid} (min_engine {target.get('min_engine_version')})"
+          f"{' [' + platform + ']' if platform else ''} ===")
 
     for key, pack in config.items():
         sel = dist_resolver.selections(ROOT / pack["base_dir"], tid)
@@ -234,15 +243,15 @@ def build_target(config: dict, target: dict) -> Path:
 
     mcpacks = []
     for key, pack in config.items():
-        out = DIST / f"{pack['output_name']}_{tid}.mcpack"
-        new_zip(out, pack_entries(pack, target))
+        out = DIST / f"{pack['output_name']}_{tid}{suffix}.mcpack"
+        new_zip(out, pack_entries(pack, target, platform=platform))
         mcpacks.append(out)
         print(f"   {out.name}")
 
     entries: list[tuple[str, object]] = []
     for pack in config.values():
-        entries.extend(pack_entries(pack, target, prefix=pack["folder_name"]))
-    bundle = DIST / f"PCraftRevorn_{label}_{tid}.mcaddon"
+        entries.extend(pack_entries(pack, target, prefix=pack["folder_name"], platform=platform))
+    bundle = DIST / f"PCraftRevorn_{label}_{tid}{suffix}.mcaddon"
     new_zip(bundle, entries)
     print(f"   {bundle.name}")
     return bundle
@@ -253,11 +262,17 @@ def main(argv=None) -> int:
     version_override = None
     only: list[str] = []
     do_list = False
+    platform: str | None = None
     i = 0
     while i < len(argv):
         a = argv[i]
         if a == "--list":
             do_list = True
+        elif a == "--platform":
+            i += 1
+            platform = argv[i]
+        elif a.startswith("--platform="):
+            platform = a.split("=", 1)[1]
         elif a == "--target":
             i += 1
             only.append(argv[i])
@@ -303,7 +318,12 @@ def main(argv=None) -> int:
     if only and not chosen:
         raise SystemExit(f"[build_config] unknown target(s): {only} (known: {[t['id'] for t in targets]})")
 
-    built = [build_target(config, t) for t in chosen]
+    if platform not in (None, "PC", "Mobile"):
+        raise SystemExit(f"[build_config] bad --platform {platform!r} (PC or Mobile)")
+    if platform == "Mobile" and not MOBILE_FORMS.exists():
+        raise SystemExit(f"[build_config] missing mobile variant: {MOBILE_FORMS}")
+
+    built = [build_target(config, t, platform) for t in chosen]
 
     print(f"\n[build_config] {len(config)} packs x {len(chosen)} target(s) built.")
     for f in sorted(built):

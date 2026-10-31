@@ -1,0 +1,923 @@
+{
+  "namespace": "server_form",
+  "third_party_server_screen@common.base_screen": {
+    "$screen_content": "server_form.main_screen_content",
+    "$additional_screen_content": "server_form.pcraftrevorn_additional_content",
+    // The HUD bar is disabled for now, so this screen can be a normal modal
+    // menu: the game pauses and the engine gives us the mouse pointer, which is
+    // what the JSON-UI menus need. The non-modal variant is kept in git history
+    // for when the HUD comes back on a different host.
+    //
+    // IMPORTANT: these flags MUST be literal booleans. Writing a Molang
+    // expression here is not supported by the engine: a non-empty string is
+    // truthy, so `absorbs_input` becomes true and the screen swallows every
+    // touch.
+    "send_telemetry": false,
+    "is_showing_menu": false,
+    "absorbs_input": false,
+    "render_only_when_topmost": false,
+    "render_game_behind": true,
+    // Do not capture/hide the OS cursor.
+    "should_steal_mouse": false,
+    // Touch devices do not need the pointer: keep the overlay non-modal so
+    // the touch controls keep working, but accept taps on the panels.
+    "is_modal": true,
+    "always_accepts_input": true,
+    "low_frequency_rendering": true,
+    // Vanilla screens draw a centered loading bar while the screen opens; a
+    // form is transient, so turn it off like debug_screen does.
+    "$use_loading_bars": false,
+    "$screen_animations": [],
+    "$background_animations": [],
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_cancel",
+        "to_button_id": "button.menu_exit",
+        "mapping_type": "global"
+      }
+    ]
+  },
+  "pcraftrevorn_additional_content": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "controls": [
+      {
+        "layer@server_form.pcraftrevorn_layer": {}
+      }
+    ]
+  },
+  "pcraftrevorn_layer": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "bindings": [
+      {
+        "binding_name": "#title_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "(not ((#title_text - '§0§r§1§r') = #title_text)) and ((#title_text - '§4§r') = #title_text) and ((#title_text - '§5§r') = #title_text) and ((#title_text - '§6§r') = #title_text)",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "bar@server_form.pcraftrevorn_progress_bar": {
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [
+            0,
+            -14
+          ]
+        }
+      }
+    ]
+  },
+  "pcraftrevorn_progress_bar": {
+    "type": "panel",
+    "size": [
+      204,
+      8
+    ],
+    "controls": [
+      {
+        "track": {
+          "type": "image",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "texture": "textures/ui/White",
+          "color": [
+            0.08,
+            0.08,
+            0.08
+          ],
+          "alpha": 0.65
+        }
+      },
+      {
+        "fill_0": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            6,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  6,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§0§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_1": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            19,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  19,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§1§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_2": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            32,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  32,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§2§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_3": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            45,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  45,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§3§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_4": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            58,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  58,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§4§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_5": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            71,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  71,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§5§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_6": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            84,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  84,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§6§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_7": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            97,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  97,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§7§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_8": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            109,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  109,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§8§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_9": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            122,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  122,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§9§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_10": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            135,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  135,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§a§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_11": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            148,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  148,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§b§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_12": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            161,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  161,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§c§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_13": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            174,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  174,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§d§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_14": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            187,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  187,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§e§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "fill_15": {
+          "type": "panel",
+          "layer": 2,
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "offset": [
+            2,
+            2
+          ],
+          "size": [
+            200,
+            4
+          ],
+          "clips_children": true,
+          "property_bag": {
+            "#current_title_text": ""
+          },
+          "controls": [
+            {
+              "fill_image": {
+                "type": "image",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  200,
+                  4
+                ],
+                "texture": "textures/ui/White",
+                "color": [
+                  0.4,
+                  0.85,
+                  0.45
+                ]
+              }
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text",
+              "binding_name_override": "#current_title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#current_title_text - '§2§r§f§r') = #current_title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "frame": {
+          "type": "image",
+          "layer": 3,
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "texture": "textures/ui/White",
+          "color": [
+            0.6,
+            0.6,
+            0.6
+          ],
+          "alpha": 0.25
+        }
+      }
+    ]
+  }
+}
