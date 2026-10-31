@@ -7,13 +7,7 @@
       "100%"
     ],
     "clips_children": false,
-    "bindings": [
-      {
-        "binding_type": "view",
-        "source_property_name": "(('%.6s' * #hud_title_text_string) = '__pcr:')",
-        "target_property_name": "#visible"
-      }
-    ],
+    "visible": "('%.6s' * $title_text = '__pcr:')",
     "controls": [
       {
         "pcr_timer": {
@@ -32,14 +26,8 @@
           ],
           "shadow": false,
           "localize": false,
-          "text": "('剩余 ' + ('%.3s' * (#hud_title_text_string - ('%.6s' * #hud_title_text_string))) + 's')",
-          "bindings": [
-            {
-              "binding_type": "view",
-              "source_property_name": "((('%.3s' * (#hud_title_text_string - ('%.6s' * #hud_title_text_string))) - '  0') = ('%.3s' * (#hud_title_text_string - ('%.6s' * #hud_title_text_string))))",
-              "target_property_name": "#visible"
-            }
-          ]
+          "text": "('剩余 ' + ('%.3s' * ($title_text - ('%.6s' * $title_text))) + 's')",
+          "visible": "((('%.3s' * ($title_text - ('%.6s' * $title_text))) - '  0') = ('%.3s' * ($title_text - ('%.6s' * $title_text))))"
         }
       },
       {
@@ -64,13 +52,7 @@
                   "100%"
                 ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_up_idle",
-                "bindings": [
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "(not ((#hud_title_text_string - '§2§r§1§r') = #hud_title_text_string))",
-                    "target_property_name": "#visible"
-                  }
-                ]
+                "visible": "(not (($title_text - '§2§r§1§r') = $title_text))"
               }
             },
             {
@@ -81,13 +63,7 @@
                   "100%"
                 ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_up_correct",
-                "bindings": [
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "(not ((#hud_title_text_string - '§2§r§2§r') = #hud_title_text_string))",
-                    "target_property_name": "#visible"
-                  }
-                ]
+                "visible": "(not (($title_text - '§2§r§2§r') = $title_text))"
               }
             },
             {
@@ -98,13 +74,7 @@
                   "100%"
                 ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_up_incorrect",
-                "bindings": [
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "(not ((#hud_title_text_string - '§2§r§3§r') = #hud_title_text_string))",
-                    "target_property_name": "#visible"
-                  }
-                ]
+                "visible": "(not (($title_text - '§2§r§3§r') = $title_text))"
               }
             },
             {
@@ -115,13 +85,7 @@
                   "100%"
                 ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_down_idle",
-                "bindings": [
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "(not ((#hud_title_text_string - '§2§r§5§r') = #hud_title_text_string))",
-                    "target_property_name": "#visible"
-                  }
-                ]
+                "visible": "(not (($title_text - '§2§r§5§r') = $title_text))"
               }
             },
             {
@@ -132,13 +96,7 @@
                   "100%"
                 ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_down_correct",
-                "bindings": [
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "(not ((#hud_title_text_string - '§2§r§6§r') = #hud_title_text_string))",
-                    "target_property_name": "#visible"
-                  }
-                ]
+                "visible": "(not (($title_text - '§2§r§6§r') = $title_text))"
               }
             },
             {
@@ -149,13 +107,7 @@
                   "100%"
                 ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_down_incorrect",
-                "bindings": [
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "(not ((#hud_title_text_string - '§2§r§7§r') = #hud_title_text_string))",
-                    "target_property_name": "#visible"
-                  }
-                ]
+                "visible": "(not (($title_text - '§2§r§7§r') = $title_text))"
               }
             },
             {
@@ -166,13 +118,7 @@
                   "100%"
                 ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_left_idle",
-                "bindings": [
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "(not ((#hud_title_text_string - '§2§r§9§r') = #hud_title_text_string))",
-                    "target_property_name": "#visible"
-                  }
-                ]
+                "visible": "(not (($title_text - '§2§r§9§r') = $title_text))"
               }
             },
             {
@@ -183,13 +129,7 @@
                   "100%"
                 ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_left_correct",
-                "bindings": [
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "(not ((#hud_title_text_string - '§2§r§a§r') = #hud_title_text_string))",
-                    "target_property_name": "#visible"
-                  }
-                ]
+                "visible": "(not (($title_text - '§2§r§a§r') = $title_text))"
               }
             },
             {
@@ -200,13 +140,7 @@
                   "100%"
                 ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_left_incorrect",
-                "bindings": [
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "(not ((#hud_title_text_string - '§2§r§b§r') = #hud_title_text_string))",
-                    "target_property_name": "#visible"
-                  }
-                ]
+                "visible": "(not (($title_text - '§2§r§b§r') = $title_text))"
               }
             },
             {
@@ -217,13 +151,7 @@
                   "100%"
                 ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_right_idle",
-                "bindings": [
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "(not ((#hud_title_text_string - '§2§r§d§r') = #hud_title_text_string))",
-                    "target_property_name": "#visible"
-                  }
-                ]
+                "visible": "(not (($title_text - '§2§r§d§r') = $title_text))"
               }
             },
             {
@@ -234,13 +162,7 @@
                   "100%"
                 ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_right_correct",
-                "bindings": [
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "(not ((#hud_title_text_string - '§2§r§e§r') = #hud_title_text_string))",
-                    "target_property_name": "#visible"
-                  }
-                ]
+                "visible": "(not (($title_text - '§2§r§e§r') = $title_text))"
               }
             },
             {
@@ -251,13 +173,7 @@
                   "100%"
                 ],
                 "texture": "textures/ui/pcraftrevorn/hud/struggle_right_incorrect",
-                "bindings": [
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "(not ((#hud_title_text_string - '§2§r§f§r') = #hud_title_text_string))",
-                    "target_property_name": "#visible"
-                  }
-                ]
+                "visible": "(not (($title_text - '§2§r§f§r') = $title_text))"
               }
             }
           ]
@@ -280,7 +196,7 @@
           ],
           "shadow": false,
           "localize": false,
-          "text": "('挣脱 ' + ('%.3s' * (#hud_title_text_string - ('%.9s' * #hud_title_text_string))) + '/' + ('%.3s' * (#hud_title_text_string - ('%.12s' * #hud_title_text_string))))"
+          "text": "('挣脱 ' + ('%.3s' * ($title_text - ('%.9s' * $title_text))) + '/' + ('%.3s' * ($title_text - ('%.12s' * $title_text))))"
         }
       }
     ]

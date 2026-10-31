@@ -1,11 +1,11 @@
-// hud_screen override: keep it flag-only for $screen_content / button_mappings
-// (the engine merges these into whatever the running version ships), and add
-// the vore overlay as an extra layer.
-//
-// The vore HUD rides the title channel: the script writes "__pcr:..." with
-// onScreenDisplay.setTitle, #hud_title_text_string exposes it to JSON-UI, and
-// the vanilla title label is hidden while that bus is present. Same mechanism
-// as Waila GT's tooltip overlay.
+// hud_screen overrides, following the proven WAILA (r4isen1920) pattern:
+//   1. hide the vanilla title with ONE insert_front that binds
+//      #hud_title_text_string -> #text and then tests #text (same array, order
+//      matters);
+//   2. attach our overlay through the vanilla `hud_title_text_factory`, so the
+//      engine instantiates it for every title and hands it $title_text.
+// A static $additional_screen_content panel does NOT refresh with the title,
+// which is why the raw bus leaked through and the arrows stayed stale.
 {
   "namespace": "hud",
   "hud_screen@common.base_screen": {
@@ -19,19 +19,51 @@
     "$screen_animations": [],
     "$background_animations": [],
     "load_screen_immediately": true,
-    "always_accepts_input": true,
-    "$additional_screen_content": "hud.pcraftrevorn_vore_overlay"
+    "always_accepts_input": true
   },
+
+  // Vanilla title label: hide it while the string is our bus.
   "hud_title_text": {
     "modifications": [
       {
         "array_name": "bindings",
-        "operation": "insert_back",
+        "operation": "insert_front",
         "value": [
           {
+            "binding_type": "global",
+            "binding_name": "#hud_title_text_string",
+            "binding_name_override": "#text"
+          },
+          {
             "binding_type": "view",
-            "source_property_name": "(not (('%.6s' * #hud_title_text_string) = '__pcr:'))",
+            "source_property_name": "(not ('%.6s' * #text = '__pcr:'))",
             "target_property_name": "#visible"
+          }
+        ]
+      }
+    ]
+  },
+
+  // Our overlay rides the title factory: one instance per title, updated by the
+  // engine, with the current title available as $title_text.
+  "root_panel": {
+    "size": [ "100%", "100%" ],
+    "modifications": [
+      {
+        "array_name": "controls",
+        "operation": "insert_front",
+        "value": [
+          {
+            "pcraftrevorn_vore_factory": {
+              "type": "panel",
+              "size": [ "100%", "100%" ],
+              "factory": {
+                "name": "hud_title_text_factory",
+                "control_ids": {
+                  "hud_title_text": "hud.pcraftrevorn_vore_overlay"
+                }
+              }
+            }
           }
         ]
       }
