@@ -15,6 +15,7 @@
     "absorbs_input": false,
     "render_only_when_topmost": false,
     "send_telemetry": false,
+    "$use_loading_bars": false,
     "$screen_animations": [],
     "$background_animations": [],
     "load_screen_immediately": true,

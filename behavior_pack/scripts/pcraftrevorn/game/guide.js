@@ -1,5 +1,5 @@
 // Predator guidebook UI (port of PredGuidebookScreen / guidebook UI).
-import { showPcForm } from "../ui/forms.js";
+import { showPcForm, showPcPaged } from "../ui/forms.js";
 import { SKINS } from "../data/skins.js";
 import { COMMUNITY } from "../data/community.js";
 import { VCM } from "../data/vcm.js";
@@ -46,12 +46,12 @@ const itemLabel = (id) => ITEM_NAMES[id] ?? id.split(":").pop();
 
 export async function openGuide(player) {
   while (true) {
-    const res = await showPcForm(player, {
+    const res = await showPcPaged(player, {
       title: "掠食者指南",
-      menu: "guide",
       body: "§7点一个名字，瞧瞧它是谁、爱吃什么、怎么哄。",
       level: 0,
-      buttons: PRED_ORDER.map((id) => ({ id, label: `§f${NAMES[id]}` })).concat([{ id: "__options", label: "§b选项" }, { id: "__close", label: "§a关闭" }])
+      items: PRED_ORDER.map((id) => ({ id, label: `§f${NAMES[id]}` })),
+      footer: [{ id: "__options", label: "§b选项" }, { id: "__close", label: "§a关闭" }]
     });
     if (res.canceled || res.id === "__close") break;
     if (res.id === "__options") { await openOptions(player); continue; }

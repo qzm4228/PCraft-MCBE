@@ -9,6 +9,7 @@ import { world, system } from "@minecraft/server";
 import { ActionFormData, uiManager } from "@minecraft/server-ui";
 import { VARIANTS } from "../data/variants.js";
 import { MENU_MARKERS, buildTitle } from "../constants.js";
+import { showPcPaged } from "../ui/forms.js";
 import { assignSkin, applyWorldSet, getNum } from "../skin/assign.js";
 
 const DIMENSIONS = ["minecraft:overworld", "minecraft:nether", "minecraft:the_end"];
@@ -51,21 +52,21 @@ function openSpecies(player, species) {
   }).catch(() => { /* ignore */ });
 }
 
-export function openVariants(player) {
-  const species = Object.keys(VARIANTS);
-  const form = new ActionFormData().title(buildTitle(`${MENU_MARKERS.appearance}社区外观 · 每生物变体`, 0));
-  form.body("§7为每种掠食者选择社区资源包提供的外观（服务端统一生效）。");
-  for (const sp of species) {
+export async function openVariants(player) {
+  const items = Object.keys(VARIANTS).map((sp) => {
     const cur = getSel(sp);
     const label = cur === 0 ? "原版" : VARIANTS[sp].sets[cur - 1]?.name ?? "?";
-    form.button(`§f${LABEL[sp] ?? sp} §7- ${label}`);
-  }
-  form.button("§7关闭");
-  try { uiManager.closeAllForms(player); } catch { /* older ui module */ }
-  form.show(player).then((r) => {
-    if (r.canceled || r.selection >= species.length) return;
-    system.run(() => openSpecies(player, species[r.selection]));
-  }).catch(() => { /* ignore */ });
+    return { id: sp, label: `§f${LABEL[sp] ?? sp} §7- ${label}` };
+  });
+  const res = await showPcPaged(player, {
+    title: `${MENU_MARKERS.appearance}社区外观 · 每生物变体`,
+    body: "§7为每种掠食者选择社区资源包提供的外观（服务端统一生效）。",
+    level: 0,
+    items,
+    footer: [{ id: "__close", label: "§7关闭" }],
+  });
+  if (res.canceled || res.id === "__close" || !res.id) return;
+  openSpecies(player, res.id);
 }
 
 export function wireVariants() {
