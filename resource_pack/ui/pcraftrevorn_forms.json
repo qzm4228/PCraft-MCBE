@@ -19,6 +19,10 @@
     "render_only_when_topmost": false,
     "render_game_behind": true,
     "always_accepts_input": true,
+    // Same combination vanilla debug_screen uses: "modal" for input/cursor
+    // purposes but not a menu, so the game keeps running and the touch controls
+    // stay alive. Added to make the pointer show up on desktop.
+    "is_modal": true,
     // Do not capture/hide the OS cursor: menus opened on this screen need a
     // clickable pointer on desktop. Touch devices have no cursor, and the HUD
     // bar is mobile-only by default, so this does not affect gameplay there.
