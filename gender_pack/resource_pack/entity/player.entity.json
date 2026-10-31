@@ -85,6 +85,8 @@
                 "animate": [
                     "root",
           "belly_jiggle",
+          "chest_rest",
+          "belly_rest",
           "bow_chargingc",
           "fishing_rod_usec",
           "fishing_rodc",
@@ -107,6 +109,8 @@
             },
             "animations": {
         "belly_jiggle": "animation.vcraft.belly.idle",
+        "chest_rest": "animation.pcraftrevorn.chest.off",
+        "belly_rest": "animation.vcraft.belly.off",
         "no": "animation.player.no",
         "fishing_rod_usec": "controller.animation.player.fishing_rod_use",
         "fishing_rod_use": "animation.player.fishing_rod_use",
@@ -224,8 +228,8 @@
                 { "controller.render.player.first_person": "variable.is_first_person && !query.is_spectator" },
                 { "controller.render.player.third_person": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator" },
                 { "controller.render.player.map": "variable.map_face_icon" },
-                { "controller.render.pcraftrevorn.chest": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && !query.is_in_ui" },
-                { "controller.render.vcraft_belly": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && !query.is_in_ui" }
+                { "controller.render.pcraftrevorn.chest": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator" },
+                { "controller.render.vcraft_belly": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator" }
             ],
             "enable_attachables": true
         }
