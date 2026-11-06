@@ -340,7 +340,6 @@ ITEMS = [
     ["basaltmite_scale", "basaltmite_scale", 64, "items", ["pcraftrevorn:basaltmite_scale"]],
     ["bejeweled_upgrade_kit", "jeweled_upgrade_template", 64, "items"],
     ["carbonated_water_bottle", "carbonated_water_bottle", 1, "items"],
-    ["cupids_arrow", "cupid_arrow", 16, "items"],
     ["debugging_item", "stick", 64, "items", None, True],
     ["fermented_glowberry_juice_bottle", "fermented_glowberry_bottle", 1, "nature"],
     ["gilded_basaltmite_scale", "basaltmite_plate_gilded", 64, "items", ["pcraftrevorn:basaltmite_scale"]],
@@ -1008,6 +1007,11 @@ def gen_assets() -> None:
         src = SRC_ASSETS / "textures" / "item" / (tex + ".png")
         if exists(src):
             copy(src, RP / "textures" / "items" / "pcraftrevorn" / (tex + ".png"))
+    # The cupid's arrow item was removed, but the rabbit staff projectiles still
+    # reuse its icon as their entity texture.
+    src = SRC_ASSETS / "textures" / "item" / "cupid_arrow.png"
+    if exists(src):
+        copy(src, RP / "textures" / "items" / "pcraftrevorn" / "cupid_arrow.png")
     # block textures
     for file, relval in BLOCK_TEX.items():
         if not relval.startswith("blocks/pcraftrevorn/"):

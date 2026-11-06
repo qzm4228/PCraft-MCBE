@@ -38,9 +38,7 @@ const PRED_ORDER = Object.keys(NAMES);
 // Who is neutral and who can be tamed with what (data/tame.js, generated from
 // each entity's minecraft:tameable so the guide can never drift from the engine).
 const NEUTRAL = new Set(VCM.neutral ?? []);
-const VCM_IDS = new Set(VCM.predatorIds ?? []);
 const ITEM_NAMES = {
-  "pcraftrevorn:cupids_arrow": "丘比特之箭",
   "minecraft:slime_ball": "史莱姆球",
   "minecraft:golden_apple": "金苹果",
   "minecraft:golden_carrot": "金胡萝卜",
@@ -70,16 +68,12 @@ async function openDetail(player, id) {
     lines.push("§7脾气：§f中立 §8（不主动袭击玩家，被打了会还手）");
   }
   const tame = TAME[id];
-  if (tame) {
-    if (tame.items && tame.items.length) {
-      const items = tame.items.map(itemLabel).join("§7 / §f");
-      const chance = Math.round((tame.chance ?? 1) * 100);
-      const rate = chance >= 100 ? "§a必定成功" : `§f${chance}%`;
-      lines.push(`§7驯服：§f手持${items}§f右键它 §8· ${rate} §8，或§e丘比特之箭§8射中它`);
-    } else {
-      lines.push("§7驯服：§f用§e丘比特之箭§f射中它，箭到即驯服");
-    }
-  } else if (VCM_IDS.has(id)) {
+  if (tame && tame.items && tame.items.length) {
+    const items = tame.items.map(itemLabel).join("§7 / §f");
+    const chance = Math.round((tame.chance ?? 1) * 100);
+    const rate = chance >= 100 ? "§a必定成功" : `§f${chance}%`;
+    lines.push(`§7驯服：§f手持${items}§f右键它 §8· ${rate}`);
+  } else {
     lines.push("§7驯服：§8不可驯服");
   }
   lines.push("", `§8${LORE[id] ?? ""}`);

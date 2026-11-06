@@ -10,17 +10,12 @@
           "type": "int",
           "range": [
             0,
-            11
+            5
           ],
           "default": 0,
           "client_sync": true
         },
         "pcraftrevorn:belly": {
-          "type": "bool",
-          "default": false,
-          "client_sync": true
-        },
-        "pcraftrevorn:tamed": {
           "type": "bool",
           "default": false,
           "client_sync": true
@@ -76,15 +71,6 @@
               ]
             }
           ]
-        }
-      },
-      "pcraftrevorn:tamed": {
-        "minecraft:is_tamed": {},
-        "minecraft:behavior.follow_owner": {
-          "priority": 6,
-          "speed_multiplier": 1,
-          "start_distance": 10,
-          "stop_distance": 2
         }
       }
     },
@@ -182,16 +168,6 @@
           "component_groups": [
             "pcraftrevorn:prey_holder"
           ]
-        }
-      },
-      "pcraftrevorn:on_tame": {
-        "add": {
-          "component_groups": [
-            "pcraftrevorn:tamed"
-          ]
-        },
-        "set_property": {
-          "pcraftrevorn:tamed": true
         }
       }
     }

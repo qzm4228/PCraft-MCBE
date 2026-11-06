@@ -13,7 +13,6 @@ import { wireWorldgen } from "./pcraftrevorn/game/worldgen.js";
 import { wireVinemaiden } from "./pcraftrevorn/game/vinemaiden.js";
 import { openVariants, wireVariants } from "./pcraftrevorn/game/variants.js";
 import { wireVcmCombat } from "./pcraftrevorn/game/vcm_combat.js";
-import { wireCupid } from "./pcraftrevorn/game/cupid.js";
 
 wireVoreEvents();
 wireInteractEvents();
@@ -24,7 +23,6 @@ wireWorldgen();
 wireVinemaiden();
 wireVariants();
 wireVcmCombat();
-wireCupid();
 
 // Assign skins to predators when they spawn / are summoned.
 world.afterEvents.entitySpawn.subscribe((ev) => {

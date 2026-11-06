@@ -580,18 +580,15 @@ def behavior(c, skin_max: int):
         "pcraftrevorn:on_swallow": {"remove": {"component_groups": ["pcraftrevorn:aggressive"]}, "add": {"component_groups": ["pcraftrevorn:prey_holder"]}},
         "pcraftrevorn:on_release": {"add": {"component_groups": ["pcraftrevorn:aggressive"]}, "remove": {"component_groups": ["pcraftrevorn:prey_holder"]}},
     }
-    if b["tameable"]:
+    items = b.get("tameItems") or []
+    if b["tameable"] and items:
         groups["pcraftrevorn:tamed"] = {"minecraft:is_tamed": {}, "minecraft:behavior.follow_owner": {"priority": 6, "speed_multiplier": 1, "start_distance": 10, "stop_distance": 2}}
         events["pcraftrevorn:on_tame"] = {"add": {"component_groups": ["pcraftrevorn:tamed"]}}
-        # Right-click bribe. Empty -> the cupid's arrow projectile is the only
-        # way to tame (game/cupid.js); no implicit arrow item any more.
-        items = b.get("tameItems") or []
-        if items:
-            components["minecraft:tameable"] = {
-                "probability": b.get("tameProb", 1),
-                "tame_items": items,
-                "tame_event": {"event": "pcraftrevorn:on_tame", "target": "self"},
-            }
+        components["minecraft:tameable"] = {
+            "probability": b.get("tameProb", 1),
+            "tame_items": items,
+            "tame_event": {"event": "pcraftrevorn:on_tame", "target": "self"},
+        }
     return {
         "format_version": "1.21.0",
         "minecraft:entity": {

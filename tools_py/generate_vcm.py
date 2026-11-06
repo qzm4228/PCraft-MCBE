@@ -83,23 +83,16 @@ CREATURES = [
         "src": "bat_girl", "name": "蝙蝠娘", "nameEn": "Bat Girl",
         "lore": "洞穴里的夜行小姐姐：翅膀软、心眼小，饿起来可不讲道理。",
         "egg": (-9610733, -10471161), "variants": [0, 1, 2],
-        "tamedSkins": True,
         "skins": [
             ("batgirltexturenobelly", "bat_girl0"), ("batgirltexture", "bat_girl0_belly"),
-            ("batgirltexturetamednobelly", "bat_girl0_tamed"), ("batgirltexturetamed", "bat_girl0_tamed_belly"),
             ("whitebatgirltexturenobelly", "bat_girl1"), ("whitebatgirltexture", "bat_girl1_belly"),
-            ("whitebatgirltexturetamednobelly", "bat_girl1_tamed"), ("whitebatgirltexturetamed", "bat_girl1_tamed_belly"),
             ("blackbatgirltexturenobelly", "bat_girl2"), ("blackbatgirltexture", "bat_girl2_belly"),
-            ("blackbatgirltexturetamednobelly", "bat_girl2_tamed"), ("blackbatgirltexturetamed", "bat_girl2_tamed_belly"),
         ],
         "animate": ANIM_BELLY,
         "behavior": {"hp": 20, "speed": 0.3, "dmg": 4, "follow": 32, "size": [0.35, 1.15],
-                     "scale": 1.3, "loot": None, "tameable": True, "undead": False,
+                     "scale": 1.3, "loot": None, "tameable": False, "undead": False,
                      # neutral: hunts villagers/animals, only fights back when hit
-                     "neutral": True, "targets": HUNT_PEACE,
-                     # no right-click bribe: the cupid's arrow projectile tames her
-                     "tameItems": [],
-                     "tame": {"items": [], "chance": 1}},
+                     "neutral": True, "targets": HUNT_PEACE},
         "stats": _stats(difficulty=0.30),
     },
     {

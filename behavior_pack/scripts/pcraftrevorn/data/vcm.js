@@ -147,16 +147,10 @@ export const VCM = {
     "bat_girl": {
       "bat_girl0": 0,
       "bat_girl0_belly": 1,
-      "bat_girl0_tamed": 2,
-      "bat_girl0_tamed_belly": 3,
-      "bat_girl1": 4,
-      "bat_girl1_belly": 5,
-      "bat_girl1_tamed": 6,
-      "bat_girl1_tamed_belly": 7,
-      "bat_girl2": 8,
-      "bat_girl2_belly": 9,
-      "bat_girl2_tamed": 10,
-      "bat_girl2_tamed_belly": 11
+      "bat_girl1": 2,
+      "bat_girl1_belly": 3,
+      "bat_girl2": 4,
+      "bat_girl2_belly": 5
     },
     "bunny_girl": {
       "bunny_girl0": 0,
@@ -190,7 +184,7 @@ export const VCM = {
     }
   },
   "texMax": {
-    "bat_girl": 11,
+    "bat_girl": 5,
     "bunny_girl": 1,
     "cat_girl": 1,
     "druid": 7,
@@ -205,14 +199,8 @@ export const VCM = {
       "pcraftrevorn:winter_druid_projectile"
     ]
   },
-  "tamedSkins": [
-    "bat_girl"
-  ],
+  "tamedSkins": [],
   "tame": {
-    "bat_girl": {
-      "items": [],
-      "chance": 1
-    },
     "slime_girl": {
       "items": [
         "minecraft:slime_ball"

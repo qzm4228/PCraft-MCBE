@@ -10,16 +10,10 @@
       "textures": {
         "skin0": "textures/entity/pcraftrevorn/bat_girl0",
         "skin1": "textures/entity/pcraftrevorn/bat_girl0_belly",
-        "skin2": "textures/entity/pcraftrevorn/bat_girl0_tamed",
-        "skin3": "textures/entity/pcraftrevorn/bat_girl0_tamed_belly",
-        "skin4": "textures/entity/pcraftrevorn/bat_girl1",
-        "skin5": "textures/entity/pcraftrevorn/bat_girl1_belly",
-        "skin6": "textures/entity/pcraftrevorn/bat_girl1_tamed",
-        "skin7": "textures/entity/pcraftrevorn/bat_girl1_tamed_belly",
-        "skin8": "textures/entity/pcraftrevorn/bat_girl2",
-        "skin9": "textures/entity/pcraftrevorn/bat_girl2_belly",
-        "skin10": "textures/entity/pcraftrevorn/bat_girl2_tamed",
-        "skin11": "textures/entity/pcraftrevorn/bat_girl2_tamed_belly"
+        "skin2": "textures/entity/pcraftrevorn/bat_girl1",
+        "skin3": "textures/entity/pcraftrevorn/bat_girl1_belly",
+        "skin4": "textures/entity/pcraftrevorn/bat_girl2",
+        "skin5": "textures/entity/pcraftrevorn/bat_girl2_belly"
       },
       "geometry": {
         "default": "geometry.bat_girl"

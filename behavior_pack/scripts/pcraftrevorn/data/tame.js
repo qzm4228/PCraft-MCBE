@@ -3,16 +3,8 @@
 //   chance: success chance for that item
 // Every entry can also be tamed by the cupid's arrow (game/cupid.js).
 export const TAME = {
-  "bat_girl": { items: [], chance: 1 },
-  "cathyl_rabbit": { items: [], chance: 1 },
-  "eevee_rabbit": { items: [], chance: 1 },
-  "eevee_scarecrow": { items: [], chance: 1 },
-  "eevee_vinemaiden": { items: [], chance: 1 },
   "gilded_basaltmite": { items: ["minecraft:golden_apple"], chance: 1 },
   "piglin_royal_knight": { items: ["pcraftrevorn:piglin_royal_talisman"], chance: 1 },
-  "plant_maiden": { items: [], chance: 1 },
   "rabbit_wizard": { items: ["minecraft:golden_carrot"], chance: 1 },
-  "scarecrow": { items: [], chance: 1 },
   "slime_girl": { items: ["minecraft:slime_ball"], chance: 0.2 },
-  "vinemaiden": { items: [], chance: 1 },
 };

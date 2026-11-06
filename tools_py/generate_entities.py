@@ -149,16 +149,13 @@ SPECIAL = [
 INVISIBLE_GEO = "geometry.pcraftrevorn.invisible"
 INVISIBLE_TEX = "textures/entity/pcraftrevorn/invisible"
 # preds that can be tamed (pcraftrevorn:tameable_preds tag)
-TAMEABLE = {"gilded_basaltmite", "piglin_royal_knight", "rabbit_wizard", "scarecrow", "vinemaiden"}
-# Right-click "bribe" per species. An empty list means the creature is only
-# tamed by the cupid's arrow projectile (game/cupid.js). The guide reads the
-# same values through data/tame.js.
+TAMEABLE = {"gilded_basaltmite", "piglin_royal_knight", "rabbit_wizard"}
+# Right-click "bribe" per species. Those are the only taming routes: the cupid's
+# arrow was removed (Bedrock bows cannot fire custom ammo).
 TAME_ITEMS = {
     "gilded_basaltmite": ["minecraft:golden_apple"],
     "piglin_royal_knight": [NS + ":piglin_royal_talisman"],
     "rabbit_wizard": ["minecraft:golden_carrot"],
-    "scarecrow": [],
-    "vinemaiden": [],
 }
 # entities that ship a spawn egg item
 SPAWN_EGG = {"zombie", "piglin_royal", "vinemaiden", "piglin_royal_knight", "silverfish", "basaltmite", "rabbit_wizard", "gilded_basaltmite", "scarecrow"}
