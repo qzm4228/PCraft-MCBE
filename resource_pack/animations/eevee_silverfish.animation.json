@@ -67645,54 +67645,15 @@
     },
     "animation.eevee_silverfish.attack": {
       "loop": true,
-      "bones": {
-        "splatbras": {
-          "scale": 0
-        },
-        "splatbuste": {
-          "scale": 0
-        },
-        "splatjambe1": {
-          "scale": 0
-        },
-        "splatjambe2": {
-          "scale": 0
-        }
-      }
+      "bones": {}
     },
     "animation.eevee_silverfish.eat": {
       "loop": true,
-      "bones": {
-        "splatbras": {
-          "scale": 0
-        },
-        "splatbuste": {
-          "scale": 0
-        },
-        "splatjambe1": {
-          "scale": 0
-        },
-        "splatjambe2": {
-          "scale": 0
-        }
-      }
+      "bones": {}
     },
     "animation.eevee_silverfish.no": {
       "loop": true,
-      "bones": {
-        "splatbras": {
-          "scale": 0
-        },
-        "splatbuste": {
-          "scale": 0
-        },
-        "splatjambe1": {
-          "scale": 0
-        },
-        "splatjambe2": {
-          "scale": 0
-        }
-      }
+      "bones": {}
     }
   }
 }

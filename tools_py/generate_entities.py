@@ -134,7 +134,7 @@ ENTITIES = [
     {"id": "rabbit_wizard", "geo": "rabbit", "anim": "rabbit", "skins": re.compile(r"^rabbit\d", re.ASCII), "kind": "creature", "hp": 24, "speed": 0.25, "dmg": 3, "follow": 16, "kbr": 0, "size": [0.6, 1.8], "hostile": True, "families": ["rabbit_wizard", "predator", "village_protector"], "pop": "animal"},
     {"id": "piglin_royal", "geo": "piglin_royalty", "anim": "piglin_royalty", "skins": re.compile(r"^piglin_royal_(?!knight)", re.ASCII), "kind": "monster", "hp": 150, "speed": 0.3, "dmg": 3, "follow": 16, "kbr": 1, "size": [1.5, 3.4], "hostile": False, "families": ["piglin", "piglin_royal", "monster"], "pop": "monster", "loot": "piglin_royal"},
     {"id": "piglin_royal_knight", "geo": "piglin_royal_knight", "anim": "piglin_royal_knight", "skins": re.compile(r"^piglin_royal_knight_", re.ASCII), "kind": "monster", "hp": 32, "speed": 0.32, "dmg": 5, "follow": 16, "kbr": 0, "size": [0.6, 1.8], "hostile": True, "families": ["piglin", "piglin_royal_knight", "predator", "monster"], "pop": "monster"},
-    {"id": "binding_ring", "geo": "binding_ring", "anim": "shielding_ring", "skins": re.compile(r"^binding_ring$", re.ASCII), "kind": "monster", "hp": 10, "speed": 0.6, "dmg": 3, "follow": 16, "kbr": 0.35, "size": [0.6, 1.8], "hostile": False, "families": ["binding_ring", "accessory"], "pop": "monster"},
+    {"id": "binding_ring", "geo": "binding_ring", "anim": "binding_ring", "skins": re.compile(r"^binding_ring$", re.ASCII), "kind": "monster", "hp": 10, "speed": 0.6, "dmg": 3, "follow": 16, "kbr": 0.35, "size": [0.6, 1.8], "hostile": False, "families": ["binding_ring", "accessory"], "pop": "monster"},
     {"id": "shielding_ring", "geo": "shielding_ring", "anim": "shielding_ring", "skins": re.compile(r"^shielding_ring$", re.ASCII), "kind": "monster", "hp": 20, "speed": 0.45, "dmg": 3, "follow": 16, "kbr": 2, "size": [0.6, 1.8], "hostile": False, "families": ["shielding_ring", "accessory"], "pop": "monster"},
 ]
 SPECIAL = [
@@ -306,6 +306,17 @@ def genTextureAndGeometry():
         if not f.endswith(".animation.json"):
             continue
         write_json(RP / "animations" / f, convertAnimObject(read_json(SRC_ANIM / f)))
+    # binding_ring has a single ring: the shared shielding-ring animation also
+    # drives ring2, which this model does not have.
+    sh = RP / "animations" / "shielding_ring.animation.json"
+    if exists(sh):
+        d = read_json(sh)
+        anims = {}
+        for k, v in (d.get("animations") or {}).items():
+            (v.get("bones") or {}).pop("ring2", None)
+            anims[k.replace("animation.shielding_ring.", "animation.binding_ring.")] = v
+        d["animations"] = anims
+        write_json(RP / "animations" / "binding_ring.animation.json", d)
     # textures
     for f in sorted(os.listdir(SRC_TEX)):
         if not f.endswith(".png"):

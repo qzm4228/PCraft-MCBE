@@ -16,7 +16,7 @@
         "default": "geometry.binding_ring"
       },
       "animations": {
-        "idle": "animation.shielding_ring.idle"
+        "idle": "animation.binding_ring.idle"
       },
       "scripts": {
         "animate": [

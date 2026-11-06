@@ -51713,20 +51713,7 @@
     },
     "animation.eevee_rabbit.attack": {
       "loop": true,
-      "bones": {
-        "splatbras": {
-          "scale": 0
-        },
-        "splatbuste": {
-          "scale": 0
-        },
-        "splatjambe1": {
-          "scale": 0
-        },
-        "splatjambe2": {
-          "scale": 0
-        }
-      }
+      "bones": {}
     },
     "animation.eevee_rabbit.Downed": {
       "animation_length": 0.5,

@@ -25603,20 +25603,7 @@
     },
     "animation.eevee_zombie.attack": {
       "loop": true,
-      "bones": {
-        "splatbras": {
-          "scale": 0
-        },
-        "splatbuste": {
-          "scale": 0
-        },
-        "splatjambe1": {
-          "scale": 0
-        },
-        "splatjambe2": {
-          "scale": 0
-        }
-      }
+      "bones": {}
     }
   }
 }

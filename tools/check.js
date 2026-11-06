@@ -55,9 +55,18 @@ const clientAnimNames = new Set();
 for (const f of list(path.join(RP, 'entity'), '.json')) {
   const d = readJSON(path.join(RP, 'entity', f))['minecraft:client_entity'].description;
   if (d.identifier === 'minecraft:player') continue;
-  const geoId = d.geometry?.default;
-  let bones = geoBones.get(geoId);
-  if (!bones && typeof geoId === 'string' && (/\[|\]/.test(geoId) || geoId.startsWith('Array.'))) {
+  // Union every geometry the entity can wear (default + named rework variants),
+  // not just the default: an animation may be written for a variant rig.
+  const geoIds = [];
+  for (const v of Object.values(d.geometry || {})) {
+    if (typeof v === 'string') geoIds.push(v);
+    else if (Array.isArray(v)) geoIds.push(...v.filter((x) => typeof x === 'string'));
+  }
+  let bones = new Set();
+  for (const geoId of geoIds) {
+    const b = geoBones.get(geoId);
+    if (b) { for (const x of b) bones.add(x); continue; }
+    if (!/\[|\]/.test(geoId) && !geoId.startsWith('Array.')) continue;
     // geometry selected by an array (e.g. rework sets): union all listed geometries
     const arrName = geoId.match(/^Array\.([A-Za-z0-9_]+)/)?.[1];
     let geoList = [];
@@ -68,9 +77,9 @@ for (const f of list(path.join(RP, 'entity'), '.json')) {
       const arr = rcDef.arrays?.geometries?.[`Array.${arrName}`];
       if (arr) { geoList = arr; break; }
     }
-    if (geoList.length) { bones = new Set(); for (const gid of geoList) { const b = geoBones.get(gid); if (b) for (const x of b) bones.add(x); } }
+    for (const gid of geoList) { const b2 = geoBones.get(gid); if (b2) for (const x of b2) bones.add(x); }
   }
-  if (!bones) { problems.push(`client ${d.identifier}: geometry ${geoId} not found`); continue; }
+  if (!bones.size) { problems.push(`client ${d.identifier}: geometry ${geoIds[0] ?? '?'} not found`); continue; }
   for (const [key, animName] of Object.entries(d.animations || {})) {
     if (animName.startsWith('controller.')) continue;
     clientAnimNames.add(animName);
