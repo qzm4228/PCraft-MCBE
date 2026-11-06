@@ -88,6 +88,35 @@ export function wireCupid() {
   world.afterEvents.itemUse.subscribe(onUse);
   try { world.afterEvents.itemUseOn.subscribe(onUse); } catch { /* older versions */ }
 
+  // Bow support: holding the cupid's arrow in the OFFHAND while shooting a bow
+  // turns the arrow into a cupid arrow (the bow still consumes a normal arrow;
+  // one cupid's arrow is taken from the offhand). The vanilla tipped-arrow route
+  // cannot work: variants are data values that the script API neither exposes
+  // on the arrow entity nor lets us create reliably.
+  world.afterEvents.entitySpawn.subscribe((ev) => {
+    const arrow = ev.entity;
+    if (arrow?.typeId !== ARROW_ENTITY) return;
+    let near;
+    try { near = arrow.dimension.getPlayers({ location: arrow.location, maxDistance: 4 }); } catch { return; }
+    for (const p of near) {
+      try {
+        const eq = p.getComponent("minecraft:equippable");
+        const main = eq.getEquipment(EquipmentSlot.Mainhand)?.typeId;
+        if (main !== "minecraft:bow" && main !== "minecraft:crossbow") continue;
+        const off = eq.getEquipment(EquipmentSlot.Offhand);
+        if (!off || off.typeId !== ARROW_ITEM) continue;
+        arrow.addTag(ARROW_TAG);
+        if (off.amount > 1) {
+          off.amount -= 1;
+          eq.setEquipment(EquipmentSlot.Offhand, off);
+        } else {
+          eq.setEquipment(EquipmentSlot.Offhand, undefined);
+        }
+        break;
+      } catch { continue; }
+    }
+  });
+
   const onHit = (ev) => {
     if (ev.projectile?.typeId !== ARROW_ENTITY) return;
     try { if (!ev.projectile.hasTag(ARROW_TAG)) return; } catch { return; }
