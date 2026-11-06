@@ -541,7 +541,7 @@ function playerPreyTick() {
     s.msgTimer = (s.msgTimer + 1) % 10;
     if (s.msgTimer === 0) {
       const left = Math.max(0, Math.round(((s.maxTimer - s.digest) / s.maxTimer) * 100));
-      try { prey.onScreenDisplay.setActionBar(`§c消化中 §f${left}% §7· 挣扎 §f${s.struggles}/${s.needed} §8[跳/潜]`); } catch { /* ignore */ }
+      try { prey.onScreenDisplay.setActionBar(`§c消化中 §f${left}% §7· 挣扎 §f${s.struggles}/${s.needed} §8[按方向道具]`); } catch { /* ignore */ }
     }
   }
 }
@@ -617,7 +617,9 @@ function ambientTick() {
   }
 }
 
-function openPreyMenu(player) {
+const PREY_PAGE = 6;
+
+function openPreyMenu(player, page = 0) {
   const gut = getGut(player);
   const rs = gut ? riders(gut) : [];
   const form = new ActionFormData().title(PCRAFT_MARKER + "胃袋");
@@ -628,17 +630,39 @@ function openPreyMenu(player) {
     form.show(player).catch(() => { /* ignore */ });
     return;
   }
-  form.body(`§f猎物 ${rs.length}/${capacity(player)} · 吸收 ${getAbsorb(player)}`);
-  for (const r of rs) form.button(`§f放出：§7${r.typeId.replace("minecraft:", "")}`);
-  form.button("§7关闭");
+
+  // capacity() goes up to 20, so the list needs pages: 6 rows + prev/next + 关闭
+  // still fits the 300x340 JSON-UI panel.
+  const pages = Math.max(1, Math.ceil(rs.length / PREY_PAGE));
+  page = Math.max(0, Math.min(pages - 1, page | 0));
+  const start = page * PREY_PAGE;
+  const slice = rs.slice(start, start + PREY_PAGE);
+  const actions = [];
+
+  form.body(`§f猎物 ${rs.length}/${capacity(player)} · 吸收 ${getAbsorb(player)}` +
+    (pages > 1 ? `\n§8第 ${page + 1} / ${pages} 页` : ""));
+  for (const r of slice) {
+    form.button(`§f放出：§7${r.typeId.replace("minecraft:", "")}`);
+    actions.push({ op: "free", prey: r });
+  }
+  if (pages > 1) {
+    form.button("§7◀ 上一页"); actions.push({ op: "page", page: (page + pages - 1) % pages });
+    form.button("§7下一页 ▶"); actions.push({ op: "page", page: (page + 1) % pages });
+  }
+  form.button("§7关闭"); actions.push({ op: "close" });
+
   closeHud(player);
   form.show(player).then((res) => {
-    if (res.canceled || res.selection >= rs.length) return;
-    const prey = rs[res.selection];
+    if (res.canceled) return;
+    const a = actions[res.selection];
+    if (!a || a.op === "close") return;
+    if (a.op === "page") { system.run(() => openPreyMenu(player, a.page)); return; }
+    const prey = a.prey;
     try { prey.runCommand("ride @s stop_riding"); } catch { /* ignore */ }
     try { prey.removeTag(PREY_TAG); } catch { /* ignore */ }
     try { prey.removeEffect("invisibility"); } catch { /* ignore */ }
     player.sendMessage(`§a[VCraft] 放出了 §f${prey.typeId.replace("minecraft:", "")}§a。`);
+    system.run(() => openPreyMenu(player, page));
   }).catch(() => { /* ignore */ });
 }
 
