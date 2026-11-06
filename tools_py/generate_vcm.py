@@ -97,9 +97,9 @@ CREATURES = [
                      "scale": 1.3, "loot": None, "tameable": True, "undead": False,
                      # neutral: hunts villagers/animals, only fights back when hit
                      "neutral": True, "targets": HUNT_PEACE,
-                     # VCM: 20 % per interaction (feed it until it trusts you)
-                     "tameProb": 0.2, "tameItems": ["pcraftrevorn:cupids_arrow"],
-                     "tame": {"items": ["pcraftrevorn:cupids_arrow"], "chance": 0.2}},
+                     # no right-click bribe: the cupid's arrow projectile tames her
+                     "tameItems": [],
+                     "tame": {"items": [], "chance": 1}},
         "stats": _stats(difficulty=0.30),
     },
     {
@@ -189,10 +189,10 @@ CREATURES = [
         "behavior": {"hp": 20, "speed": 0.3, "dmg": 6, "follow": 24, "size": [1.0, 2.0],
                      "scale": 2.0, "loot": "slime_girl", "tameable": True, "undead": False,
                      "neutral": True, "targets": HUNT_PEACE,
-                     # VCM: 20 % per slime ball (the cupid arrow also works)
+                     # VCM: 20 % per slime ball (or shoot her with the cupid's arrow)
                      "tameProb": 0.2,
-                     "tameItems": ["pcraftrevorn:cupids_arrow", "minecraft:slime_ball"],
-                     "tame": {"items": ["pcraftrevorn:cupids_arrow", "minecraft:slime_ball"], "chance": 0.2}},
+                     "tameItems": ["minecraft:slime_ball"],
+                     "tame": {"items": ["minecraft:slime_ball"], "chance": 0.2}},
         "stats": _stats(difficulty=0.30),
     },
 ]

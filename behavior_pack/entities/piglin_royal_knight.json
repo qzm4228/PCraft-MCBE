@@ -142,7 +142,7 @@
       "minecraft:tameable": {
         "probability": 1,
         "tame_items": [
-          "pcraftrevorn:cupids_arrow"
+          "pcraftrevorn:piglin_royal_talisman"
         ],
         "tame_event": {
           "event": "pcraftrevorn:on_tame",

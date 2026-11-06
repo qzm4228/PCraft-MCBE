@@ -193,16 +193,6 @@
       },
       "minecraft:behavior.random_look_around": {
         "priority": 5
-      },
-      "minecraft:tameable": {
-        "probability": 1,
-        "tame_items": [
-          "pcraftrevorn:cupids_arrow"
-        ],
-        "tame_event": {
-          "event": "pcraftrevorn:on_tame",
-          "target": "self"
-        }
       }
     },
     "events": {

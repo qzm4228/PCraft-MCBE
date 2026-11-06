@@ -138,7 +138,7 @@
       "minecraft:tameable": {
         "probability": 1,
         "tame_items": [
-          "pcraftrevorn:cupids_arrow"
+          "minecraft:golden_apple"
         ],
         "tame_event": {
           "event": "pcraftrevorn:on_tame",

@@ -340,7 +340,7 @@ ITEMS = [
     ["basaltmite_scale", "basaltmite_scale", 64, "items", ["pcraftrevorn:basaltmite_scale"]],
     ["bejeweled_upgrade_kit", "jeweled_upgrade_template", 64, "items"],
     ["carbonated_water_bottle", "carbonated_water_bottle", 1, "items"],
-    ["cupids_arrow", "cupid_arrow", 1, "items"],
+    ["cupids_arrow", "cupid_arrow", 16, "items"],
     ["debugging_item", "stick", 64, "items", None, True],
     ["fermented_glowberry_juice_bottle", "fermented_glowberry_bottle", 1, "nature"],
     ["gilded_basaltmite_scale", "basaltmite_plate_gilded", 64, "items", ["pcraftrevorn:basaltmite_scale"]],

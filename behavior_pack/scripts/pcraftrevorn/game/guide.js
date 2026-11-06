@@ -41,7 +41,10 @@ const NEUTRAL = new Set(VCM.neutral ?? []);
 const VCM_IDS = new Set(VCM.predatorIds ?? []);
 const ITEM_NAMES = {
   "pcraftrevorn:cupids_arrow": "丘比特之箭",
-  "minecraft:slime_ball": "史莱姆球"
+  "minecraft:slime_ball": "史莱姆球",
+  "minecraft:golden_apple": "金苹果",
+  "minecraft:golden_carrot": "金胡萝卜",
+  "pcraftrevorn:piglin_royal_talisman": "猪灵王护符"
 };
 const itemLabel = (id) => ITEM_NAMES[id] ?? id.split(":").pop();
 
@@ -68,10 +71,14 @@ async function openDetail(player, id) {
   }
   const tame = TAME[id];
   if (tame) {
-    const items = (tame.items ?? []).map(itemLabel).join("§7 / §f");
-    const chance = Math.round((tame.chance ?? 1) * 100);
-    const rate = chance >= 100 ? "§a必定成功" : `§f${chance}% §7成功，没成功就多试几次`;
-    lines.push(`§7驯服：§f手持${items}§f右键它 §8· ${rate}`);
+    if (tame.items && tame.items.length) {
+      const items = tame.items.map(itemLabel).join("§7 / §f");
+      const chance = Math.round((tame.chance ?? 1) * 100);
+      const rate = chance >= 100 ? "§a必定成功" : `§f${chance}%`;
+      lines.push(`§7驯服：§f手持${items}§f右键它 §8· ${rate} §8，或§e丘比特之箭§8射中它`);
+    } else {
+      lines.push("§7驯服：§f用§e丘比特之箭§f射中它，箭到即驯服");
+    }
   } else if (VCM_IDS.has(id)) {
     lines.push("§7驯服：§8不可驯服");
   }

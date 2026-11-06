@@ -210,14 +210,11 @@ export const VCM = {
   ],
   "tame": {
     "bat_girl": {
-      "items": [
-        "pcraftrevorn:cupids_arrow"
-      ],
-      "chance": 0.2
+      "items": [],
+      "chance": 1
     },
     "slime_girl": {
       "items": [
-        "pcraftrevorn:cupids_arrow",
         "minecraft:slime_ball"
       ],
       "chance": 0.2

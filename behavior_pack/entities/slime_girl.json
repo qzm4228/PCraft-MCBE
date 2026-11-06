@@ -158,7 +158,6 @@
       "minecraft:tameable": {
         "probability": 0.2,
         "tame_items": [
-          "pcraftrevorn:cupids_arrow",
           "minecraft:slime_ball"
         ],
         "tame_event": {

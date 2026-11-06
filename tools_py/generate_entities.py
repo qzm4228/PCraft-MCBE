@@ -150,6 +150,16 @@ INVISIBLE_GEO = "geometry.pcraftrevorn.invisible"
 INVISIBLE_TEX = "textures/entity/pcraftrevorn/invisible"
 # preds that can be tamed (pcraftrevorn:tameable_preds tag)
 TAMEABLE = {"gilded_basaltmite", "piglin_royal_knight", "rabbit_wizard", "scarecrow", "vinemaiden"}
+# Right-click "bribe" per species. An empty list means the creature is only
+# tamed by the cupid's arrow projectile (game/cupid.js). The guide reads the
+# same values through data/tame.js.
+TAME_ITEMS = {
+    "gilded_basaltmite": ["minecraft:golden_apple"],
+    "piglin_royal_knight": [NS + ":piglin_royal_talisman"],
+    "rabbit_wizard": ["minecraft:golden_carrot"],
+    "scarecrow": [],
+    "vinemaiden": [],
+}
 # entities that ship a spawn egg item
 SPAWN_EGG = {"zombie", "piglin_royal", "vinemaiden", "piglin_royal_knight", "silverfish", "basaltmite", "rabbit_wizard", "gilded_basaltmite", "scarecrow"}
 # entities with a separate emissive glow texture (drawn as a 2nd render controller)
@@ -474,16 +484,18 @@ def genBehavior(e, skinMax):
         events[NS + ":on_swallow"] = {"remove": {"component_groups": [NS + ":aggressive"]}, "add": {"component_groups": [NS + ":prey_holder"]}}
         events[NS + ":on_release"] = {"add": {"component_groups": [NS + ":aggressive"]}, "remove": {"component_groups": [NS + ":prey_holder"]}}
     if e["id"] in TAMEABLE:
-        components["minecraft:tameable"] = {
-            "probability": 1,
-            "tame_items": [NS + ":cupids_arrow"],
-            "tame_event": {"event": NS + ":on_tame", "target": "self"},
-        }
         componentGroups[NS + ":tamed"] = {
             "minecraft:is_tamed": {},
             "minecraft:behavior.follow_owner": {"priority": 6, "speed_multiplier": 1, "start_distance": 10, "stop_distance": 2},
         }
         events[NS + ":on_tame"] = {"add": {"component_groups": [NS + ":tamed"]}}
+        items = TAME_ITEMS.get(e["id"], [])
+        if items:
+            components["minecraft:tameable"] = {
+                "probability": 1,
+                "tame_items": items,
+                "tame_event": {"event": NS + ":on_tame", "target": "self"},
+            }
 
     write_json(BP / "entities" / (e["id"] + ".json"), {
         "format_version": "1.21.0",
@@ -700,6 +712,134 @@ def genAttachables():
 # (handled by generate_variants.js), not a standalone entity. ----
 
 
+CUPID_ARROW_GEO = {
+    "format_version": "1.12.0",
+    "minecraft:geometry": [
+        {
+            "description": {
+                "identifier": "geometry.pcraftrevorn_cupid_arrow",
+                "texture_width": 32.0,
+                "texture_height": 32.0,
+            },
+            "bones": [
+                {
+                    "name": "body",
+                    "pivot": [0.0, 1.0, 0.0],
+                    "cubes": [
+                        {
+                            "origin": [0.0, -1.5, -3.0],
+                            "rotation": [0.0, 0.0, 45.0],
+                            "size": [0.0, 5.0, 16.0],
+                            "uv": {"east": {"uv": [0.0, 0.0]}},
+                        },
+                        {
+                            "origin": [0.0, -1.5, -3.0],
+                            "rotation": [0.0, 0.0, -45.0],
+                            "size": [0.0, 5.0, 16.0],
+                            "uv": {"east": {"uv": [0.0, 0.0]}},
+                        },
+                        {
+                            "origin": [-2.5, -1.5, 12.0],
+                            "rotation": [0.0, 0.0, 45.0],
+                            "size": [5.0, 5.0, 0.0],
+                            "uv": {"south": {"uv": [0.0, 5.0]}},
+                        },
+                    ],
+                }
+            ],
+        }
+    ],
+}
+
+
+def genCupidArrow() -> None:
+    """The cupid's arrow projectile: fired by the item, tamed on hit by cupid.js."""
+    write_json(BP / "entities" / "cupids_arrow.json", {
+        "format_version": "1.21.0",
+        "minecraft:entity": {
+            "description": {
+                "identifier": NS + ":cupids_arrow",
+                "is_spawnable": False,
+                "is_summonable": True,
+            },
+            "components": {
+                "minecraft:collision_box": {"width": 0.25, "height": 0.25},
+                "minecraft:type_family": {"family": ["pcraftrevorn_cupid_arrow"]},
+                "minecraft:projectile": {
+                    "on_hit": {
+                        "impact_damage": {"damage": 0, "knockback": False, "destroy_on_hit": True},
+                        "stick_in_ground": {"shake_time": 0.2},
+                    },
+                    "power": 2.0,
+                    "gravity": 0.05,
+                    "inertia": 0.99,
+                    "liquid_inertia": 0.6,
+                    "anchor": 1,
+                    "offset": [0, -0.1, 0],
+                    "uncertainty_base": 0,
+                    "uncertainty_multiplier": 0,
+                    "shoot_target": False,
+                },
+                "minecraft:physics": {},
+                "minecraft:pushable": {"is_pushable": False, "is_pushable_by_piston": False},
+            },
+        },
+    })
+    write_json(RP / "entity" / "cupids_arrow.entity.json", {
+        "format_version": "1.10.0",
+        "minecraft:client_entity": {
+            "description": {
+                "identifier": NS + ":cupids_arrow",
+                "materials": {"default": "entity_alphatest"},
+                "textures": {"default": "textures/entity/pcraftrevorn/cupids_arrow"},
+                "geometry": {"default": "geometry.pcraftrevorn_cupid_arrow"},
+                "animations": {"move": "animation.pcraftrevorn.cupids_arrow.move"},
+                "scripts": {
+                    "pre_animation": [
+                        "variable.shake = query.shake_time - query.frame_alpha;",
+                        "variable.shake_power = variable.shake > 0.0 ? -Math.sin(variable.shake * 200.0) * variable.shake : 0.0;",
+                    ],
+                    "animate": [{"move": "1.0"}],
+                },
+                "render_controllers": ["controller.render.pcraftrevorn_cupid_arrow"],
+            }
+        },
+    })
+    write_json(RP / "models" / "entity" / "cupids_arrow.geo.json", CUPID_ARROW_GEO)
+    write_json(RP / "animations" / "cupids_arrow.animation.json", {
+        "format_version": "1.8.0",
+        "animations": {
+            "animation.pcraftrevorn.cupids_arrow.move": {
+                "loop": True,
+                "bones": {
+                    "body": {
+                        "rotation": [
+                            "variable.shake_power - query.target_x_rotation",
+                            "-query.target_y_rotation",
+                            0.0,
+                        ],
+                        "scale": [0.7, 0.7, 0.9],
+                    }
+                },
+            }
+        },
+    })
+    write_json(RP / "render_controllers" / "cupids_arrow.render_controllers.json", {
+        "format_version": "1.10.0",
+        "render_controllers": {
+            "controller.render.pcraftrevorn_cupid_arrow": {
+                "geometry": "Geometry.default",
+                "materials": [{"*": "Material.default"}],
+                "textures": ["Texture.default"],
+                "filter_lighting": True,
+            }
+        },
+    })
+    tex = Path(__file__).resolve().parent / "assets" / "cupids_arrow.png"
+    if exists(tex):
+        copy(tex, RP / "textures" / "entity" / "pcraftrevorn" / "cupids_arrow.png")
+
+
 def main():
     if not exists(MOD):
         print("Missing .work/mod. Run tools/extract.ps1 first.", file=sys.stderr)
@@ -719,6 +859,7 @@ def main():
     genTextureAndGeometry()
     genMobs()
     genSpecial()
+    genCupidArrow()
     genSpawnRules()
     genSkinData()
     genAttachables()
