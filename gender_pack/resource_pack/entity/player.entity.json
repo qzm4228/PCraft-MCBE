@@ -84,7 +84,6 @@
                 ],
                 "animate": [
                     "root",
-          "belly_jiggle",
           "bow_chargingc",
           "fishing_rod_usec",
           "fishing_rodc",
@@ -106,7 +105,6 @@
                 "should_update_effects_offscreen": "1.0"
             },
             "animations": {
-        "belly_jiggle": "animation.vcraft.belly.idle",
         "no": "animation.player.no",
         "fishing_rod_usec": "controller.animation.player.fishing_rod_use",
         "fishing_rod_use": "animation.player.fishing_rod_use",

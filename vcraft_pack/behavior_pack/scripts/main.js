@@ -688,9 +688,20 @@ export function wireVcraft() {
   world.afterEvents.playerSpawn.subscribe((ev) => {
     lastBelly.delete(ev.player.id);
     bellySettle.delete(ev.player.id);
-    system.runTimeout(() => {
-      try { applyBelly(ev.player, bellyTarget.get(ev.player.id) ?? 0, true); } catch { /* ignore */ }
-    }, 20);
+    const p = ev.player;
+    // The client sometimes drops the first /playanimation after a spawn/relog:
+    // the belly then sits at the default (full-size) bind pose until the next
+    // bellyRefresh. Re-assert the settled pose a few times instead of waiting.
+    for (const delay of [20, 40, 80, 140]) {
+      system.runTimeout(() => {
+        try {
+          if (!p.isValid) return;
+          const target = bellyTarget.get(p.id) ?? 0;
+          if ((lastBelly.get(p.id) ?? 0) !== target) return; // mid-ease, don't snap
+          applyBelly(p, target, true);
+        } catch { /* ignore */ }
+      }, delay);
+    }
   });
   world.afterEvents.playerLeave.subscribe((ev) => { lastBelly.delete(ev.playerId); bellySettle.delete(ev.playerId); });
   // Custom commands: /vcraft:swallow, /vcraft:release, /vcraft:prey
