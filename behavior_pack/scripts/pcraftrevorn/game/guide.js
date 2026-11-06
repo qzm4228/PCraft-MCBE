@@ -3,6 +3,7 @@ import { showPcForm, showPcPaged } from "../ui/forms.js";
 import { SKINS } from "../data/skins.js";
 import { COMMUNITY } from "../data/community.js";
 import { VCM } from "../data/vcm.js";
+import { TAME } from "../data/tame.js";
 import { openOptions } from "./config.js";
 
 const NAMES = {
@@ -34,9 +35,9 @@ Object.assign(NAMES, VCM.names ?? {});
 Object.assign(LORE, VCM.lore ?? {});
 const PRED_ORDER = Object.keys(NAMES);
 
-// VCM import: who is neutral and who can be tamed with what (data/vcm.js).
+// Who is neutral and who can be tamed with what (data/tame.js, generated from
+// each entity's minecraft:tameable so the guide can never drift from the engine).
 const NEUTRAL = new Set(VCM.neutral ?? []);
-const TAME = VCM.tame ?? {};
 const VCM_IDS = new Set(VCM.predatorIds ?? []);
 const ITEM_NAMES = {
   "pcraftrevorn:cupids_arrow": "丘比特之箭",
@@ -68,8 +69,9 @@ async function openDetail(player, id) {
   const tame = TAME[id];
   if (tame) {
     const items = (tame.items ?? []).map(itemLabel).join("§7 / §f");
-    const pct = Math.round((tame.chance ?? 1) * 100);
-    lines.push(`§7驯服：§f手持${items}§f右键它 §8· §f${pct}% §7成功，没成功就多试几次`);
+    const chance = Math.round((tame.chance ?? 1) * 100);
+    const rate = chance >= 100 ? "§a必定成功" : `§f${chance}% §7成功，没成功就多试几次`;
+    lines.push(`§7驯服：§f手持${items}§f右键它 §8· ${rate}`);
   } else if (VCM_IDS.has(id)) {
     lines.push("§7驯服：§8不可驯服");
   }
