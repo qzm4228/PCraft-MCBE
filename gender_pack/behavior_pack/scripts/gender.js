@@ -65,7 +65,20 @@ const FP_ANIM = "animation.pcraftrevorn_gender.fp_hide";
 const FP_STOP = "animation.pcraftrevorn_gender.fp_stop";
 const FP_CTRL = "pcraftrevorn_gender:first_person";
 const FP_BLEND = 999999;
+// Camera-pivot offsets (blocks, entity-local) for the states our player
+// animations lean the body into. The values are the head displacement of the
+// matching animation frames (1 model unit = 0.0586 blocks):
+//   sprint: waist 15 deg  -> head ~+0.20 z, ~-0.03 y
+//   sneak : waist 35 deg  -> head ~+0.45 z, ~+0.03 y
+// They keep the pivot on the animated head instead of the vanilla eye.
+const FP_OFFSETS = {
+  default: { x: 0, y: 0, z: 0 },
+  sprinting: { x: 0, y: -0.03, z: 0.2 },
+  sneaking: { x: 0, y: 0.03, z: 0.45 },
+};
+const FP_EASE = 0.55; // per 2-tick step -> settles in ~0.35 s
 const fpMode = new Map(); // playerId -> "off" | "normal" | "model"
+const fpOffset = new Map(); // playerId -> {x,y,z}
 
 function firstPersonOn(player) {
   try { return player.getDynamicProperty(FP_PROP) === true; } catch { return false; }
@@ -78,6 +91,11 @@ function firstPersonBlocked(player) {
     if (item?.typeId === "minecraft:spyglass") return true;
   } catch { /* ignore */ }
   return false;
+}
+function fpOffsetTarget(player) {
+  try { if (player.isSneaking) return FP_OFFSETS.sneaking; } catch { /* ignore */ }
+  try { if (player.isSprinting) return FP_OFFSETS.sprinting; } catch { /* ignore */ }
+  return FP_OFFSETS.default;
 }
 function fpPlayHide(player) {
   try {
@@ -94,6 +112,12 @@ function fpStopHide(player) {
     });
   } catch { /* ignore */ }
 }
+function fpSetCamera(player, model) {
+  try {
+    if (model) player.camera.setCamera(FP_CAMERA, { entityOffset: fpOffset.get(player.id) ?? FP_OFFSETS.default });
+    else player.camera.setCamera("minecraft:first_person");
+  } catch { /* ignore */ }
+}
 function fpSync(player, force = false) {
   if (!player?.isValid) return;
   const want = !firstPersonOn(player) ? "off" : firstPersonBlocked(player) ? "normal" : "model";
@@ -101,14 +125,40 @@ function fpSync(player, force = false) {
   if (!force && prev === want) return;
   fpMode.set(player.id, want);
   if (want === "model") {
-    if (prev !== "model") fpPlayHide(player);
-    try { player.camera.setCamera(FP_CAMERA, { entityOffset: { x: 0, y: 0, z: 0 } }); } catch { /* ignore */ }
+    if (prev !== "model") {
+      fpOffset.set(player.id, { x: 0, y: 0, z: 0 });
+      fpPlayHide(player);
+    }
+    fpSetCamera(player, true);
   } else if (want === "normal") {
+    fpOffset.delete(player.id);
     if (prev === "model") fpStopHide(player);
-    try { player.camera.setCamera("minecraft:first_person"); } catch { /* ignore */ }
+    fpSetCamera(player, false);
   } else if (prev === "model" || prev === "normal") {
+    fpOffset.delete(player.id);
     fpStopHide(player);
     try { player.camera.clear(); } catch { /* ignore */ }
+  }
+}
+// Ease the pivot toward the state offset every 2 ticks so sprint/sneak changes
+// glide instead of snapping.
+function fpEaseTick() {
+  for (const player of world.getAllPlayers()) {
+    if (fpMode.get(player.id) !== "model") continue;
+    const target = fpOffsetTarget(player);
+    const cur = fpOffset.get(player.id) ?? { x: 0, y: 0, z: 0 };
+    const nx = cur.x + (target.x - cur.x) * FP_EASE;
+    const ny = cur.y + (target.y - cur.y) * FP_EASE;
+    const nz = cur.z + (target.z - cur.z) * FP_EASE;
+    if (Math.abs(nx - cur.x) < 0.001 && Math.abs(ny - cur.y) < 0.001 && Math.abs(nz - cur.z) < 0.001) {
+      if (cur.x !== target.x || cur.y !== target.y || cur.z !== target.z) {
+        fpOffset.set(player.id, { ...target });
+        fpSetCamera(player, true);
+      }
+      continue;
+    }
+    fpOffset.set(player.id, { x: nx, y: ny, z: nz });
+    fpSetCamera(player, true);
   }
 }
 
@@ -498,6 +548,8 @@ export function wireGender() {
     });
   } catch { /* event unavailable on this engine */ }
   system.runTimeout(() => { for (const p of world.getAllPlayers()) startHud(p); }, 60);
+  // Smooth first-person pivot (every 2 ticks; only hits the camera while moving).
+  system.runInterval(fpEaseTick, 2);
   // Safety net only: the pose cache means a normal tick sends nothing. The
   // forced refresh every POSE_REFRESH ticks covers respawn / dimension travel.
   let poseClock = 0;
