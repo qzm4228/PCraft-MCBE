@@ -7,6 +7,7 @@
       "100%"
     ],
     "clips_children": false,
+    "$title_text|default": "",
     "visible": "('%.6s' * $title_text = '__pcr:')",
     "controls": [
       {
@@ -26,8 +27,16 @@
           ],
           "shadow": false,
           "localize": false,
-          "text": "('剩余 ' + ('%.3s' * ($title_text - ('%.6s' * $title_text))) + 's')",
-          "visible": "((('%.3s' * ($title_text - ('%.6s' * $title_text))) - '  0') = ('%.3s' * ($title_text - ('%.6s' * $title_text))))"
+          "$pcr_timer_text|default": "",
+          "$pcr_timer_visible|default": false,
+          "text": "$pcr_timer_text",
+          "visible": "$pcr_timer_visible",
+          "variables": [
+            {
+              "$pcr_timer_text": "('剩余 ' + ('%.3s' * ($title_text - ('%.6s' * $title_text))) + 's')",
+              "$pcr_timer_visible": "((('%.3s' * ($title_text - ('%.6s' * $title_text))) - '  0') = ('%.3s' * ($title_text - ('%.6s' * $title_text))))"
+            }
+          ]
         }
       },
       {
@@ -196,7 +205,13 @@
           ],
           "shadow": false,
           "localize": false,
-          "text": "('挣脱 ' + ('%.3s' * ($title_text - ('%.9s' * $title_text))) + '/' + ('%.3s' * ($title_text - ('%.12s' * $title_text))))"
+          "$pcr_score_text|default": "",
+          "text": "$pcr_score_text",
+          "variables": [
+            {
+              "$pcr_score_text": "('挣脱 ' + ('%.3s' * ($title_text - ('%.9s' * $title_text))) + '/' + ('%.3s' * ($title_text - ('%.12s' * $title_text))))"
+            }
+          ]
         }
       }
     ]
