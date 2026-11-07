@@ -63,7 +63,6 @@ const FP_PROP = "pcraftrevorn:first_person";
 const FP_CAMERA = "pcraftrevorn_gender:first_person";
 const FP_ANIM = "animation.pcraftrevorn_gender.fp_hide";
 const FP_STOP = "animation.pcraftrevorn_gender.fp_stop";
-const FP_CTRL = "pcraftrevorn_gender:first_person";
 const FP_BLEND = 999999;
 // Camera-pivot offsets (blocks, entity-local) for the states our player
 // animations lean the body into. The values are the head displacement of the
@@ -99,24 +98,26 @@ function fpOffsetTarget(player) {
 }
 function fpPlayHide(player) {
   try {
-    player.playAnimation(FP_ANIM, { controller: FP_CTRL, blendOutTime: FP_BLEND, players: [player] });
+    player.playAnimation(FP_ANIM, { blendOutTime: FP_BLEND, players: [player] });
   } catch { /* ignore */ }
 }
 function fpStopHide(player) {
-  // Reset a stacked /playanimation state: play a no-op animation on the same
-  // controller and transition it to "none", which restores every bone.
+  // Playing another animation on the same (default) controller replaces the
+  // head-hide pose; this stop pose only restores head scale 1, so the body
+  // positions fall back to the normal animation controllers.
   try {
-    player.playAnimation(FP_STOP, {
-      controller: FP_CTRL, nextState: "none", stopExpression: "1",
-      blendOutTime: 0, players: [player],
-    });
+    player.playAnimation(FP_STOP, { blendOutTime: 0.15, players: [player] });
   } catch { /* ignore */ }
 }
 function fpSetCamera(player, model) {
   try {
-    if (model) player.camera.setCamera(FP_CAMERA, { entityOffset: fpOffset.get(player.id) ?? FP_OFFSETS.default });
-    else player.camera.setCamera("minecraft:first_person");
-  } catch { /* ignore */ }
+    if (model) {
+      player.camera.setCamera(FP_CAMERA, { entityOffset: fpOffset.get(player.id) ?? FP_OFFSETS.default });
+    } else {
+      player.camera.setCamera("minecraft:first_person");
+    }
+    return true;
+  } catch { return false; }
 }
 function fpSync(player, force = false) {
   if (!player?.isValid) return;
@@ -125,11 +126,17 @@ function fpSync(player, force = false) {
   if (!force && prev === want) return;
   fpMode.set(player.id, want);
   if (want === "model") {
-    if (prev !== "model") {
-      fpOffset.set(player.id, { x: 0, y: 0, z: 0 });
-      fpPlayHide(player);
+    if (prev !== "model") fpOffset.set(player.id, { x: 0, y: 0, z: 0 });
+    // Never hide the head unless the custom camera actually took over: on an
+    // engine without the preset that would leave a headless body in 3rd person.
+    if (!fpSetCamera(player, true)) {
+      if (prev === "model") fpStopHide(player);
+      fpMode.set(player.id, "normal");
+      fpOffset.delete(player.id);
+      fpSetCamera(player, false);
+      return;
     }
-    fpSetCamera(player, true);
+    if (prev !== "model") fpPlayHide(player);
   } else if (want === "normal") {
     fpOffset.delete(player.id);
     if (prev === "model") fpStopHide(player);
@@ -141,9 +148,11 @@ function fpSync(player, force = false) {
   }
 }
 // Ease the pivot toward the state offset every 2 ticks so sprint/sneak changes
-// glide instead of snapping.
+// glide instead of snapping. It also re-checks riding/swimming so entering
+// water or a mount leaves the model camera within two ticks.
 function fpEaseTick() {
   for (const player of world.getAllPlayers()) {
+    fpSync(player);
     if (fpMode.get(player.id) !== "model") continue;
     const target = fpOffsetTarget(player);
     const cur = fpOffset.get(player.id) ?? { x: 0, y: 0, z: 0 };
@@ -559,7 +568,10 @@ export function wireGender() {
     for (const player of world.getAllPlayers()) {
       applyChest(player, getState(player), force);
       ensureBelly(player, force);
-      fpSync(player);
+      // Re-assert the camera once per second (the reference re-applies every
+      // tick); recovers from dimension changes / respawns even if the event
+      // listener is unavailable on this engine.
+      if (firstPersonOn(player)) fpSync(player, true);
     }
   }, 20);
 

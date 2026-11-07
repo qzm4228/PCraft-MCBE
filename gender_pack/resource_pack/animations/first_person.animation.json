@@ -32,7 +32,7 @@
     },
     "animation.pcraftrevorn_gender.fp_stop": {
       "loop": true,
-      "animation_length": 0.01,
+      "animation_length": 0.05,
       "bones": {
         "head": {
           "scale": 1.0
