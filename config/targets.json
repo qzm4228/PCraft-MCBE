@@ -1,9 +1,9 @@
 {
-  "_comment": "Build targets. Each target gets its own package; `dist.json` files select per-target file variants. min_engine_version + script module versions are applied to every manifest for that target. Module versions are the stable versions available at that engine version; a lower stable version is always safe on a newer engine.",
-  "default_target": "1.21.100",
+  "_comment": "Build targets. Two version ranges are shipped: one package runs on 1.21.80 through 1.26.20 (lowest stable script API), the other on 1.26.30 through 1.26.60. Each range is built for PC and Mobile, so the pipeline produces four .mcaddon files.",
+  "default_target": "1.26.30-1.26.60",
   "targets": [
     {
-      "id": "1.21.80",
+      "id": "1.21.80-1.26.20",
       "min_engine_version": [1, 21, 80],
       "modules": {
         "@minecraft/server": "1.19.0",
@@ -11,56 +11,8 @@
       }
     },
     {
-      "id": "1.21.100",
-      "min_engine_version": [1, 21, 100],
-      "modules": {
-        "@minecraft/server": "2.0.0",
-        "@minecraft/server-ui": "2.0.0"
-      }
-    },
-    {
-      "id": "1.26.0",
-      "min_engine_version": [1, 26, 0],
-      "modules": {
-        "@minecraft/server": "2.0.0",
-        "@minecraft/server-ui": "2.0.0"
-      }
-    },
-    {
-      "id": "1.26.10",
-      "min_engine_version": [1, 26, 10],
-      "modules": {
-        "@minecraft/server": "2.0.0",
-        "@minecraft/server-ui": "2.0.0"
-      }
-    },
-    {
-      "id": "1.26.20",
-      "min_engine_version": [1, 26, 20],
-      "modules": {
-        "@minecraft/server": "2.0.0",
-        "@minecraft/server-ui": "2.0.0"
-      }
-    },
-    {
-      "id": "1.26.30",
+      "id": "1.26.30-1.26.60",
       "min_engine_version": [1, 26, 30],
-      "modules": {
-        "@minecraft/server": "2.0.0",
-        "@minecraft/server-ui": "2.0.0"
-      }
-    },
-    {
-      "id": "1.26.40",
-      "min_engine_version": [1, 26, 40],
-      "modules": {
-        "@minecraft/server": "2.0.0",
-        "@minecraft/server-ui": "2.0.0"
-      }
-    },
-    {
-      "id": "1.26.50",
-      "min_engine_version": [1, 26, 50],
       "modules": {
         "@minecraft/server": "2.0.0",
         "@minecraft/server-ui": "2.0.0"

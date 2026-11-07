@@ -252,13 +252,8 @@ def build_target(config: dict, target: dict, platform: str | None = None) -> Pat
         for w in warns:
             print(f"   WARN {pack['output_name']}: {w}")
 
-    mcpacks = []
-    for key, pack in config.items():
-        out = DIST / f"{pack['output_name']}_{tid}{suffix}.mcpack"
-        new_zip(out, pack_entries(pack, target, platform=platform))
-        mcpacks.append(out)
-        print(f"   {out.name}")
-
+    # Only the bundled .mcaddon is shipped: it already contains all twelve
+    # packs, so the per-pack .mcpack intermediates are no longer written.
     entries: list[tuple[str, object]] = []
     for pack in config.values():
         entries.extend(pack_entries(pack, target, prefix=pack["folder_name"], platform=platform))
