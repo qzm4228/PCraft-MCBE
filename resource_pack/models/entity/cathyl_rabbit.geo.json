@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.cathyl_rabbit",
-        "texture_width": 2000,
-        "texture_height": 2000,
+        "texture_width": 561,
+        "texture_height": 458,
         "visible_bounds_width": 5,
         "visible_bounds_height": 4.5,
         "visible_bounds_offset": [
