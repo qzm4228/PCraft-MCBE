@@ -63,61 +63,87 @@ function playAnim(entity, anim) {
   try { entity.runCommand(`playanimation @s ${anim} none 999999 "0" pcraftrevorn:belly`); } catch { /* ignore */ }
 }
 const lastBelly = new Map();
-// Safety net: the very first /playanimation after a spawn/relog is sometimes
-// dropped by the client, which used to leave an empty belly visible forever
-// (applyBelly caches its state and never retries). Track when the level last
-// changed so bellyRefresh() can re-assert the settled state periodically.
-let bellyTick = 0;
-const bellySettle = new Map();
+// Bedrock has no "animation finished" callback, so the belly pump models it with
+// a busy window: 5 ticks for the 0.25 s tweens (grow/up/down/down0), 2 ticks for
+// a static pose. While busy no new animation is sent, which avoids the old
+// staircase fighting itself.
+const bellyBusy = new Map();
+const bellyIdle = new Map();
+
+function sendBelly(player, anim, busyTicks) {
+  playAnim(player, anim);
+  const now = system.currentTick;
+  bellyBusy.set(player.id, now + busyTicks);
+  bellyIdle.set(player.id, now);
+}
+
 function applyBelly(player, n, force) {
   const k = Math.max(0, Math.min(BELLY_MAX, n | 0));
   const prev = lastBelly.get(player.id);
   if (prev === k && !force) return;
   lastBelly.set(player.id, k);
-  bellySettle.set(player.id, bellyTick);
   // scoreboard mirrors the *displayed* level (not the target) so nothing else
   // tries to hide the belly while it is still shrinking.
   try { objective()?.setScore(player, k); } catch { /* ignore */ }
   let anim;
-  if (k <= 0) anim = prev === 1 ? "animation.vcraft.belly.down0" : BELLY_OFF; // shrink out, don't snap
-  else if (prev === undefined || prev === 0) anim = `animation.vcraft.belly.grow${k}`;
-  else if (k === prev + 1) anim = `animation.vcraft.belly.up${k}`;
-  else if (k === prev - 1) anim = `animation.vcraft.belly.down${k}`;
-  else anim = bellyPose(k); // multi-step jump: snap to the new pose
-  playAnim(player, anim);
+  let busy = 2;
+  if (k <= 0) {
+    anim = prev === 1 ? "animation.vcraft.belly.down0" : BELLY_OFF; // shrink out, don't snap
+    busy = prev === 1 ? 5 : 2;
+  } else if (prev === undefined || prev === 0) {
+    anim = `animation.vcraft.belly.grow${k}`;
+    busy = 5;
+  } else if (k === prev + 1) {
+    anim = `animation.vcraft.belly.up${k}`;
+    busy = 5;
+  } else if (k === prev - 1) {
+    anim = `animation.vcraft.belly.down${k}`;
+    busy = 5;
+  } else {
+    anim = bellyPose(k); // multi-step jump: snap to the new pose
+  }
+  sendBelly(player, anim, busy);
 }
 const bellyTarget = new Map();
 function setBelly(player, n) {
   const v = Math.max(0, Math.min(BELLY_MAX, n | 0));
   bellyTarget.set(player.id, v);
-  // First time we see this player, snap straight to the level. After that the
-  // ease interval walks the belly one step at a time (see bellyEase).
+  // First time we see this player, snap straight to the level.
   if (!lastBelly.has(player.id)) applyBelly(player, v);
 }
-// Walk the displayed belly level toward the target one step at a time, so a jump
-// of several levels (capacity change / several prey at once) still animates
-// instead of snapping.
-function bellyEase() {
+// One pump replaces the old 6-tick ease + 40-tick refresh:
+//   - when no animation is playing, poll every 2 ticks and apply the target;
+//   - while a clip is playing, wait for it (the "await" is a tick window);
+//   - a jump of several levels snaps to the target pose instead of climbing;
+//   - an idle re-assert every 20 ticks covers a dropped playAnimation.
+function bellyPump() {
+  const now = system.currentTick;
   for (const player of world.getAllPlayers()) {
     if (rubbing.has(player.id)) continue;
     const target = bellyTarget.get(player.id);
     if (target === undefined) continue;
+    if (now < (bellyBusy.get(player.id) ?? 0)) continue;
     const cur = lastBelly.get(player.id) ?? 0;
-    if (cur === target) continue;
-    applyBelly(player, cur + Math.sign(target - cur));
-  }
-}
-// Re-assert the settled belly state every couple of seconds (see bellySettle).
-// This is what guarantees an empty belly is actually hidden after joining.
-function bellyRefresh() {
-  for (const player of world.getAllPlayers()) {
-    if (rubbing.has(player.id)) continue;
-    const cur = lastBelly.get(player.id);
-    if (cur === undefined) continue;
-    if (cur !== (bellyTarget.get(player.id) ?? 0)) continue; // mid-ease
-    if (bellyTick - (bellySettle.get(player.id) ?? 0) < 40) continue; // last transition may still be running
-    playAnim(player, cur <= 0 ? BELLY_OFF : bellyPose(cur));
-    bellySettle.set(player.id, bellyTick);
+    if (cur === target) {
+      if (now - (bellyIdle.get(player.id) ?? 0) < 20) continue;
+      sendBelly(player, cur <= 0 ? BELLY_OFF : bellyPose(cur), 2);
+      continue;
+    }
+    lastBelly.set(player.id, target);
+    try { objective()?.setScore(player, target); } catch { /* ignore */ }
+    let anim;
+    let busy;
+    if (target <= 0) {
+      anim = cur === 1 ? "animation.vcraft.belly.down0" : BELLY_OFF;
+      busy = cur === 1 ? 5 : 2;
+    } else if (Math.abs(target - cur) === 1) {
+      anim = target > cur ? `animation.vcraft.belly.up${target}` : `animation.vcraft.belly.down${target}`;
+      busy = 5;
+    } else {
+      anim = bellyPose(target); // multi-level: snap
+      busy = 2;
+    }
+    sendBelly(player, anim, busy);
   }
 }
 // belly size comes from the total health of the prey: every HP_PER_STEP health
@@ -687,11 +713,12 @@ export function wireVcraft() {
   // and force a re-apply shortly after spawn once the client is likely ready.
   world.afterEvents.playerSpawn.subscribe((ev) => {
     lastBelly.delete(ev.player.id);
-    bellySettle.delete(ev.player.id);
+    bellyBusy.delete(ev.player.id);
+    bellyIdle.delete(ev.player.id);
     const p = ev.player;
     // The client sometimes drops the first /playanimation after a spawn/relog:
-    // the belly then sits at the default (full-size) bind pose until the next
-    // bellyRefresh. Re-assert the settled pose a few times instead of waiting.
+    // the belly then sits at the default (full-size) bind pose. Re-assert the
+    // settled pose a few times instead of waiting for the idle re-assert.
     for (const delay of [20, 40, 80, 140]) {
       system.runTimeout(() => {
         try {
@@ -703,7 +730,12 @@ export function wireVcraft() {
       }, delay);
     }
   });
-  world.afterEvents.playerLeave.subscribe((ev) => { lastBelly.delete(ev.playerId); bellySettle.delete(ev.playerId); });
+  world.afterEvents.playerLeave.subscribe((ev) => {
+    lastBelly.delete(ev.playerId);
+    bellyBusy.delete(ev.playerId);
+    bellyIdle.delete(ev.playerId);
+    bellyTarget.delete(ev.playerId);
+  });
   // Custom commands: /vcraft:swallow, /vcraft:release, /vcraft:prey
   // Wrapped so a missing custom-command API can't abort the chat handler below.
   try {
@@ -755,11 +787,9 @@ export function wireVcraft() {
 
   // Digestion: slowly digest one prey at a time.
   system.runInterval(digestTick, 20);
-  // Smooth belly level easing (one step every 0.3s).
-  system.runInterval(bellyEase, 6);
-  // Ticker + safety net that re-asserts the settled belly state.
-  system.runInterval(() => { bellyTick++; }, 1);
-  system.runInterval(bellyRefresh, 40);
+  // Belly pump: polls every 2 ticks, waits for the current clip, snaps
+  // multi-level jumps and re-asserts the settled pose while idle.
+  system.runInterval(bellyPump, 2);
   // Ambient: struggle sounds + wither pendant aura + escape attempts.
   system.runInterval(ambientTick, 40);
   // Overwhelmed debuffs.
