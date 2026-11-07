@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.predatopia",
-        "texture_width": 128,
-        "texture_height": 800,
+        "texture_width": 144,
+        "texture_height": 816,
         "visible_bounds_width": 10,
         "visible_bounds_height": 7,
         "visible_bounds_offset": [

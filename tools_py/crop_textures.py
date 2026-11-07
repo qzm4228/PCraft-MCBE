@@ -108,16 +108,18 @@ def png_size(p):
     return int.from_bytes(h[16:20], "big"), int.from_bytes(h[20:24], "big")
 
 
-def crop_png(p, box, nw, nh, tw, th):
-    """Crop to box; pad past the declared canvas with edge pixels (UV clamp)."""
+def crop_png(p, box, nw, nh, aw, ah, tw, th):
+    """Crop to box, clamp-pad UV overflow, then pad to a 16-aligned canvas.
+
+    Every source texture is a multiple of 16; odd crop sizes get padded by the
+    engine with an unknown alignment, which shifts the UVs.
+    """
     if Image is None:
         raise SystemExit("[crop] Pillow is required for fast texture cropping")
     with Image.open(p) as im:
+        im = im.convert("RGBA")
         part = im.crop((box[0], box[1], min(box[2], tw), min(box[3], th)))
-        if part.size == (nw, nh):
-            part.save(p)
-            return
-        canvas = Image.new(im.mode, (nw, nh))
+        canvas = Image.new("RGBA", (aw, ah), (0, 0, 0, 0))
         canvas.paste(part, (0, 0))
         pw, ph = part.size
         if pw < nw and ph > 0:
@@ -240,7 +242,9 @@ for root, nodes in components.items():
     if x1 <= x0 or y1 <= y0:
         continue
     nw, nh = x1 - x0, y1 - y0
-    if nw > 4096 or nh > 4096:
+    aw = (nw + 15) // 16 * 16
+    ah = (nh + 15) // 16 * 16
+    if aw > 4096 or ah > 4096:
         skipped.append((sorted(geos)[0], f"crop too large {nw}x{nh}"))
         continue
     if x1 <= tw and y1 <= th and nw * nh >= tw * th * 0.98:
@@ -262,10 +266,10 @@ for root, nodes in components.items():
 
     for t in texs:
         f = RP / (t if t.endswith(".png") else t + ".png")
-        crop_png(f, (x0, y0, x1, y1), nw, nh, tw, th)
+        crop_png(f, (x0, y0, x1, y1), nw, nh, aw, ah, tw, th)
         cropped_files += 1
         cropped_px_in += tw * th
-        cropped_px_out += nw * nh
+        cropped_px_out += aw * ah
 
     for g in geos:
         p = geo_files[g]
@@ -274,11 +278,11 @@ for root, nodes in components.items():
             if (gg.get("description") or {}).get("identifier") != g:
                 continue
             shift_uvs(gg, x0, y0)
-            gg["description"]["texture_width"] = nw
-            gg["description"]["texture_height"] = nh
+            gg["description"]["texture_width"] = aw
+            gg["description"]["texture_height"] = ah
             check = geo_rect(gg)
-            if check and (check[2] > nw + 0.01 or check[3] > nh + 0.01):
-                print(f"[crop][debug] {g}: rect={check} new={nw}x{nh} origin=({x0},{y0})")
+            if check and (check[2] > aw + 0.01 or check[3] > ah + 0.01):
+                print(f"[crop][debug] {g}: rect={check} new={aw}x{ah} origin=({x0},{y0})")
                 print(f"[crop][debug] geos={geos}")
                 print(f"[crop][debug] sizes={ {k: geo_sizes.get(k) for k in geos} }")
                 print(f"[crop][debug] rects={ {k: geo_rects.get(k) for k in geos} }")
