@@ -248,9 +248,9 @@
               }
             },
             {
-              "swallow@chat.pcraftrevorn_chat_button": {
-                "$command": "/vcraft:swallow",
-                "$text": "§dVore"
+              "vcraft@chat.pcraftrevorn_chat_button": {
+                "$command": "/vcraft:menu",
+                "$text": "§dVCraft选项"
               }
             }
           ]
