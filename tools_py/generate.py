@@ -919,6 +919,16 @@ EN_SUBTITLE = {
     "subtitles.swallow": "Swallow",
 }
 
+# The five potion items are not in the Java source lang (they are plain custom
+# items with a food component), so their names are listed explicitly here.
+POTION_NAMES = {
+    "fragrance_potion": ("Fragrance Potion", "香气药水"),
+    "stench_potion": ("Stench Potion", "恶臭药水"),
+    "fortitude_potion": ("Fortitude Potion", "坚韧药水"),
+    "pacifying_potion": ("Pacifying Potion", "平和药水"),
+    "rotten_stench_potion": ("Rotten Stench Potion", "腐臭药水"),
+}
+
 
 # The localised source occasionally carries a stray trailing quote; the zombie
 # and silverfish were renamed in-game (饿殍 / 蠹虫娘), so normalise those too.
@@ -984,6 +994,22 @@ def gen_lang() -> None:
         emit(bp_zh, f"item.pcraftrevorn:{n}", cv)
         emit(bp_en, f"item.pcraftrevorn:{n}.name", ev)
         emit(bp_zh, f"item.pcraftrevorn:{n}.name", cv)
+    for n, (ev, cv) in POTION_NAMES.items():
+        emit(bp_en, f"item.pcraftrevorn:{n}", ev)
+        emit(bp_zh, f"item.pcraftrevorn:{n}", cv)
+        emit(bp_en, f"item.pcraftrevorn:{n}.name", ev)
+        emit(bp_zh, f"item.pcraftrevorn:{n}.name", cv)
+    # 1.21.x clients resolve item/entity display names from the *resource* pack;
+    # behavior-pack lang is not read for these, so mirror every non-pack key
+    # into the RP lists (subtitles already live there).
+    for line in bp_en:
+        k = line.split("=", 1)[0]
+        if k not in ("pack.name", "pack.description"):
+            rp_en.append(line)
+    for line in bp_zh:
+        k = line.split("=", 1)[0]
+        if k not in ("pack.name", "pack.description"):
+            rp_zh.append(line)
     header = ""  # .lang has no comment syntax; a leading "#" breaks the parser
     write_text(BP / "texts" / "en_US.lang", header + "\n".join(sorted(bp_en)) + "\n")
     write_text(BP / "texts" / "zh_CN.lang", header + "\n".join(sorted(bp_zh)) + "\n")
