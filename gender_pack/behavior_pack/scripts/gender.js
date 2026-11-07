@@ -53,6 +53,65 @@ const HUD_FORCE_PROP = "pcraftrevorn:hud_force";
 const hudActive = new Set();
 const menuSession = new Set();
 
+// ---- true first person (tiny orbit camera + head-hide animation) ----------
+// A follow_orbit camera with radius 0.1 sits at the player's head, and a
+// server-played animation hides the head and shifts the waist/legs toward the
+// camera. The third-person render controller then draws the body, which reads
+// as a real first-person body. The animation lives in
+// resource_pack/animations/first_person.animation.json.
+const FP_PROP = "pcraftrevorn:first_person";
+const FP_CAMERA = "pcraftrevorn_gender:first_person";
+const FP_ANIM = "animation.pcraftrevorn_gender.fp_hide";
+const FP_STOP = "animation.pcraftrevorn_gender.fp_stop";
+const FP_CTRL = "pcraftrevorn_gender:first_person";
+const FP_BLEND = 999999;
+const fpMode = new Map(); // playerId -> "off" | "normal" | "model"
+
+function firstPersonOn(player) {
+  try { return player.getDynamicProperty(FP_PROP) === true; } catch { return false; }
+}
+function firstPersonBlocked(player) {
+  try { if (player.isGliding || player.isSwimming || player.isSleeping) return true; } catch { /* ignore */ }
+  try { if (player.getComponent("minecraft:riding")?.entityRidingOn) return true; } catch { /* ignore */ }
+  try {
+    const item = player.getComponent("minecraft:equippable")?.getEquipment("Mainhand");
+    if (item?.typeId === "minecraft:spyglass") return true;
+  } catch { /* ignore */ }
+  return false;
+}
+function fpPlayHide(player) {
+  try {
+    player.playAnimation(FP_ANIM, { controller: FP_CTRL, blendOutTime: FP_BLEND, players: [player] });
+  } catch { /* ignore */ }
+}
+function fpStopHide(player) {
+  // Reset a stacked /playanimation state: play a no-op animation on the same
+  // controller and transition it to "none", which restores every bone.
+  try {
+    player.playAnimation(FP_STOP, {
+      controller: FP_CTRL, nextState: "none", stopExpression: "1",
+      blendOutTime: 0, players: [player],
+    });
+  } catch { /* ignore */ }
+}
+function fpSync(player, force = false) {
+  if (!player?.isValid) return;
+  const want = !firstPersonOn(player) ? "off" : firstPersonBlocked(player) ? "normal" : "model";
+  const prev = fpMode.get(player.id);
+  if (!force && prev === want) return;
+  fpMode.set(player.id, want);
+  if (want === "model") {
+    if (prev !== "model") fpPlayHide(player);
+    try { player.camera.setCamera(FP_CAMERA, { entityOffset: { x: 0, y: 0, z: 0 } }); } catch { /* ignore */ }
+  } else if (want === "normal") {
+    if (prev === "model") fpStopHide(player);
+    try { player.camera.setCamera("minecraft:first_person"); } catch { /* ignore */ }
+  } else if (prev === "model" || prev === "normal") {
+    fpStopHide(player);
+    try { player.camera.clear(); } catch { /* ignore */ }
+  }
+}
+
 const sleep = (ticks) => new Promise((resolve) => system.runTimeout(resolve, Math.max(1, ticks | 0)));
 const isBusy = (r) => String(r?.cancelationReason ?? "").includes("Busy");
 function closeForms(player) {
@@ -232,6 +291,7 @@ function openGenderMenu(player) {
   const size = female ? sex - 1 : 0;
   const skin = skinOf(st);
   const soundsOn = !player.hasTag(SOUNDS_OFF_TAG);
+  const fpOn = firstPersonOn(player);
 
   const form = new ActionFormData().title(title(female));
   const actions = [];
@@ -241,6 +301,7 @@ function openGenderMenu(player) {
     form.button(`胸旋转 - §b${getRot(player)} / 4`); actions.push("rot");
     form.button(`女性受伤音效 - ${soundsOn ? "§a开" : "§c关"}`); actions.push("sounds");
   }
+  form.button(`第一人称模型 - ${fpOn ? "§a开" : "§c关"}`); actions.push("firstperson");
   form.button("§7关闭"); actions.push("close");
 
   form.show(player).then((r) => {
@@ -258,6 +319,11 @@ function openGenderMenu(player) {
         break;
       case "sounds":
         try { soundsOn ? player.addTag(SOUNDS_OFF_TAG) : player.removeTag(SOUNDS_OFF_TAG); } catch { /* ignore */ }
+        system.run(() => openGenderMenu(player));
+        break;
+      case "firstperson":
+        try { player.setDynamicProperty(FP_PROP, !fpOn); } catch { /* ignore */ }
+        fpSync(player, true);
         system.run(() => openGenderMenu(player));
         break;
       default:
@@ -417,12 +483,20 @@ export function wireGender() {
   // so re-apply on spawn and periodically as a safety net.
   world.afterEvents.playerSpawn.subscribe((ev) => {
     clearPose(ev.player.id);
+    fpMode.delete(ev.player.id);
     system.run(() => applyChest(ev.player, getState(ev.player), true));
+    system.runTimeout(() => { try { if (ev.player.isValid) fpSync(ev.player, true); } catch { /* ignore */ } }, 20);
     startHud(ev.player);
   });
   try {
-    world.afterEvents.playerLeave.subscribe((ev) => { clearPose(ev.playerId); stopHud(ev.playerId); });
+    world.afterEvents.playerLeave.subscribe((ev) => { clearPose(ev.playerId); stopHud(ev.playerId); fpMode.delete(ev.playerId); });
   } catch { /* older event shape */ }
+  try {
+    world.afterEvents.playerDimensionChange.subscribe((ev) => {
+      fpMode.delete(ev.player.id);
+      system.runTimeout(() => { try { fpSync(ev.player, true); } catch { /* ignore */ } }, 20);
+    });
+  } catch { /* event unavailable on this engine */ }
   system.runTimeout(() => { for (const p of world.getAllPlayers()) startHud(p); }, 60);
   // Safety net only: the pose cache means a normal tick sends nothing. The
   // forced refresh every POSE_REFRESH ticks covers respawn / dimension travel.
@@ -433,6 +507,7 @@ export function wireGender() {
     for (const player of world.getAllPlayers()) {
       applyChest(player, getState(player), force);
       ensureBelly(player, force);
+      fpSync(player);
     }
   }, 20);
 

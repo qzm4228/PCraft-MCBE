@@ -1,0 +1,43 @@
+{
+  "format_version": "1.10.0",
+  "animations": {
+    "animation.pcraftrevorn_gender.fp_hide": {
+      "loop": true,
+      "bones": {
+        "head": {
+          "scale": "q.is_in_ui ? 1.0 : 0.0"
+        },
+        "waist": {
+          "position": [
+            0,
+            "q.is_in_ui ? 0 : q.is_swimming ? 0 : (-2 + (q.head_x_rotation(0) < 0 ? (q.head_x_rotation(0) / 30) * 2 : 0) + (q.is_sneaking ? -3 : 0))",
+            "q.is_in_ui ? 0 : q.is_swimming ? 0 : 6"
+          ]
+        },
+        "leftLeg": {
+          "position": [
+            0,
+            "q.is_in_ui ? 0 : q.is_swimming ? 0 : (-2 + (q.head_x_rotation(0) < 0 ? (q.head_x_rotation(0) / 30) * 2 : 0) + (q.is_sneaking ? -3 : 0))",
+            "q.is_in_ui ? 0 : q.is_swimming ? 0 : 6"
+          ]
+        },
+        "rightLeg": {
+          "position": [
+            0,
+            "q.is_in_ui ? 0 : q.is_swimming ? 0 : (-2 + (q.head_x_rotation(0) < 0 ? (q.head_x_rotation(0) / 30) * 2 : 0) + (q.is_sneaking ? -3 : 0))",
+            "q.is_in_ui ? 0 : q.is_swimming ? 0 : 6"
+          ]
+        }
+      }
+    },
+    "animation.pcraftrevorn_gender.fp_stop": {
+      "loop": true,
+      "animation_length": 0.01,
+      "bones": {
+        "head": {
+          "scale": 1.0
+        }
+      }
+    }
+  }
+}
