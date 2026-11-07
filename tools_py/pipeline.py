@@ -71,7 +71,6 @@ def main() -> None:
 
     run("generate.py")
     run("generate_entities.py")
-    run("crop_textures.py")
     run("gen_tame_data.py")
     run("clean_anim_bones.py")
     run("prune_textures.py")
