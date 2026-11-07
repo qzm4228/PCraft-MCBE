@@ -73,6 +73,7 @@ def main() -> None:
     run("generate_entities.py")
     run("gen_tame_data.py")
     run("clean_anim_bones.py")
+    run("prune_textures.py")
     run("nbt_to_data.py")
     run("build_config.py")
 
