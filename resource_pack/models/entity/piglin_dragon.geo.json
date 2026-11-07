@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.piglin_dragon",
-        "texture_width": 257,
-        "texture_height": 241,
+        "texture_width": 256,
+        "texture_height": 256,
         "visible_bounds_width": 7,
         "visible_bounds_height": 8,
         "visible_bounds_offset": [

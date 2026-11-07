@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.eevee_scarecrow",
-        "texture_width": 131,
-        "texture_height": 199,
+        "texture_width": 128,
+        "texture_height": 800,
         "visible_bounds_width": 6,
         "visible_bounds_height": 3.5,
         "visible_bounds_offset": [

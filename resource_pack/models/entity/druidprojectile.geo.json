@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.pcraftrevorn.druidprojectile",
-        "texture_width": 21,
-        "texture_height": 21,
+        "texture_width": 32,
+        "texture_height": 32,
         "visible_bounds_width": 1,
         "visible_bounds_height": 1.5,
         "visible_bounds_offset": [

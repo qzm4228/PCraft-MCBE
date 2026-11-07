@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.shielding_ring",
-        "texture_width": 25,
-        "texture_height": 17,
+        "texture_width": 32,
+        "texture_height": 32,
         "visible_bounds_width": 2,
         "visible_bounds_height": 1.5,
         "visible_bounds_offset": [

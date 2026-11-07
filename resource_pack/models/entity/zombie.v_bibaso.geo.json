@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.zombie.v_bibaso",
-        "texture_width": 130,
-        "texture_height": 130,
+        "texture_width": 128,
+        "texture_height": 128,
         "visible_bounds_width": 3,
         "visible_bounds_height": 8,
         "visible_bounds_offset": [

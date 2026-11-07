@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.plant_maiden",
-        "texture_width": 290,
-        "texture_height": 515,
+        "texture_width": 2000,
+        "texture_height": 2000,
         "visible_bounds_width": 8,
         "visible_bounds_height": 5.5,
         "visible_bounds_offset": [
